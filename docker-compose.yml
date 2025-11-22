@@ -3,7 +3,7 @@ version: '3.9'
 services:
   db:
     image: mysql:8.0
-    container_name: mysql-hyuji
+    container_name: mysql-myvision88
     restart: always
     env_file: .env.production 
     environment: 
@@ -13,13 +13,13 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       TZ: "Asia/Tokyo"
     volumes:
-      - hyuji_yoyaku_mysql_data:/var/lib/mysql 
+      - myvision88_yoyaku_mysql_data:/var/lib/mysql 
     networks:
-      - hyuji_yoyaku-backend
+      - myvision88_yoyaku-backend
 
   backend:
     build: ./backend
-    container_name: hyuji-backend
+    container_name: myvision88-backend
     restart: always
     env_file: .env.production
     environment:
@@ -35,12 +35,12 @@ services:
     depends_on:
       - db
     networks:
-      - hyuji_yoyaku-backend
+      - myvision88_yoyaku-backend
       - beurre_mou_proxy-tier 
 
   frontend:
     build: ./frontend
-    container_name: hyuji-frontend
+    container_name: myvision88-frontend
     restart: always
     env_file: .env.production
     environment:
@@ -49,14 +49,14 @@ services:
       - LETSENCRYPT_HOST=${FRONTEND_DOMAIN}
       - VITE_API_URL=${BACKEND_DOMAIN}
     networks:
-      - hyuji_yoyaku-backend 
+      - myvision88_yoyaku-backend 
       - beurre_mou_proxy-tier 
 
 volumes:
-  hyuji_yoyaku_mysql_data:
+  myvision88_yoyaku_mysql_data:
 
 networks:
-  hyuji_yoyaku-backend:
+  myvision88_yoyaku-backend:
     driver: bridge
   beurre_mou_proxy-tier:
     external: true

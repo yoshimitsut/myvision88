@@ -1,0 +1,443 @@
+.cake-management {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.cake-management h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+/* Abas */
+.cake-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #ddd;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  border: none;
+  background: #f5f5f5;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  background: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+.tab-button:hover:not(.active) {
+  background: #e9ecef;
+}
+
+/* Lista de Bolos */
+.cakes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.cake-card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.cake-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.cake-image {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.cake-image img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.no-image {
+  background: #f8f9fa;
+  padding: 40px 20px;
+  border-radius: 8px;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.cake-info h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.cake-description {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.cake-sizes h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.cake-sizes ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cake-sizes li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cake-sizes li:last-child {
+  border-bottom: none;
+}
+
+.size-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.size-details {
+  color: #666;
+  font-size: 12px;
+}
+
+.no-sizes {
+  color: #999;
+  font-style: italic;
+  font-size: 14px;
+}
+
+.cake-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.edit-btn, .delete-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.edit-btn {
+  background: #28a745;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #218838;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #c82333;
+}
+
+.no-cakes {
+  text-align: center;
+  color: #666;
+  font-size: 18px;
+  padding: 40px;
+}
+
+/* Formulário */
+.cake-form-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.cake-form {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-group small {
+  color: #666;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+}
+
+/* Seção de Tamanhos */
+.sizes-section {
+  margin: 30px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.sizes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sizes-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.add-size-btn {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.add-size-btn:hover {
+  background: #138496;
+}
+
+.size-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.size-input-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #666;
+  font-weight: bold;
+}
+
+.size-input-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.remove-size-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  height: fit-content;
+}
+
+.remove-size-btn:hover {
+  background: #c82333;
+}
+
+/* Ações do Formulário */
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.submit-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.submit-btn:hover {
+  background: #218838;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.cancel-btn:hover {
+  background: #545b62;
+}
+
+/* Estados */
+.loading, .error {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+}
+
+.loading {
+  color: #007bff;
+}
+
+.error {
+  color: #dc3545;
+}
+
+/* 画像アップロードのスタイル */
+.image-upload-input {
+  display: none;
+}
+
+.image-upload-label {
+  display: inline-block;
+  padding: 10px 15px;
+  background: #007bff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  margin: 10px 0;
+  transition: background-color 0.3s;
+}
+
+.image-upload-label:hover {
+  background: #0056b3;
+}
+
+.image-preview {
+  margin: 15px 0;
+  text-align: center;
+}
+
+.image-preview img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+}
+
+.remove-image-btn {
+  display: block;
+  margin: 10px auto;
+  padding: 5px 10px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.remove-image-btn:hover {
+  background: #c82333;
+}
+
+.file-info {
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.file-info small {
+  display: block;
+  color: #666;
+}
+
+.help-text {
+  color: #6c757d;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+}
+
+/* ローディング状態 */
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .cakes-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .size-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .cake-tabs {
+    flex-direction: column;
+  }
+}
