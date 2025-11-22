@@ -684,6 +684,10 @@
   .timeslot-batch-creator__message--success{
     font-size: 14px;
   }
+
+  .timeslot-batch-creator__help-text {
+    text-align: end;
+  }
 }
 
 

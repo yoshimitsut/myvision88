@@ -634,26 +634,23 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
                         📋 {selectedDate} の時間帯設定
                       </h4>
                       <div className='timeslot-batch-selec-all-day'>
-                          <button
-                            type="button"
-                            className="timeslot-batch-creator__bulk-button timeslot-batch-creator__bulk-button--deselect-all"
-                            onClick={handleDeselectAllDays}
-                          >
-                            すべて選択解除
-                          </button>
-                          <button
-                            type="button"
-                            className="timeslot-batch-creator__bulk-button timeslot-batch-creator__bulk-button--reset-all"
-                            onClick={handleResetAllDays}
-                          >
-                            すべて選択
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          className="timeslot-batch-creator__bulk-button timeslot-batch-creator__bulk-button--deselect-all"
+                          onClick={handleDeselectAllDays}
+                        >
+                          すべて選択解除
+                        </button>
+                        <button
+                          type="button"
+                          className="timeslot-batch-creator__bulk-button timeslot-batch-creator__bulk-button--reset-all"
+                          onClick={handleResetAllDays}
+                        >
+                          すべて選択
+                        </button>
+                      </div>
                     </div>
                     
-                    <p className="timeslot-batch-creator__help-text">
-                      ※ チェックを外すと時間帯が削除されます
-                    </p>
                   </div>
 
                   {/* 時間選択 */}
@@ -713,6 +710,9 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
                       </>
                     )}
                   </div>
+                  <p className="timeslot-batch-creator__help-text">
+                    ※ チェックを外すと時間帯が削除されます。
+                  </p>
                 </div>
               </div>
 
