@@ -629,35 +629,11 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
 
                 <div className='timeslot-add-content'>
                   <div className="timeslot-batch-creator__current-slots">
-                    <h4 className="timeslot-batch-creator__subtitle">
-                      📋 {selectedDate} の時間帯設定
-                    </h4>
-                    <p className="timeslot-batch-creator__help-text">
-                      ※ チェックを外すと時間帯が削除されます
-                    </p>
-                    
-                    {/* Botões de ação em massa */}
-                    <div className="timeslot-batch-creator__bulk-actions">
-                      <div className='timeslot-batch-selec-all'>
-                        <div>
-                          <button
-                            type="button"
-                            className="timeslot-batch-creator__bulk-button timeslot-batch-creator__bulk-button--select"
-                            onClick={handleSelectAllTimes}
-                            disabled={timeSlots.length === 0 || currentSelectedTimes.length === timeSlots.length}
-                          >
-                            すべて選択
-                          </button>
-                          <button
-                            type="button"
-                            className="timeslot-batch-creator__bulk-button timeslot-batch-creator__bulk-button--deselect"
-                            onClick={handleDeselectAllTimes}
-                            disabled={currentSelectedTimes.length === 0}
-                          >
-                            すべて解除
-                          </button>
-                        </div>
-                        <div>
+                    <div>
+                      <h4 className="timeslot-batch-creator__subtitle">
+                        📋 {selectedDate} の時間帯設定
+                      </h4>
+                      <div className='timeslot-batch-selec-all-day'>
                           <button
                             type="button"
                             className="timeslot-batch-creator__bulk-button timeslot-batch-creator__bulk-button--deselect-all"
@@ -673,8 +649,11 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
                             すべて選択
                           </button>
                         </div>
-                      </div>
                     </div>
+                    
+                    <p className="timeslot-batch-creator__help-text">
+                      ※ チェックを外すと時間帯が削除されます
+                    </p>
                   </div>
 
                   {/* 時間選択 */}
@@ -706,6 +685,30 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
                               </div>
                             );
                           })}
+
+                          <div className="timeslot-batch-creator__bulk-actions">
+                            <div className='timeslot-batch-selec-all'>
+                              {/* <div> */}
+                                <button
+                                  type="button"
+                                  className="timeslot-batch-creator__bulk-button timeslot-batch-creator__bulk-button--select"
+                                  onClick={handleSelectAllTimes}
+                                  disabled={timeSlots.length === 0 || currentSelectedTimes.length === timeSlots.length}
+                                >
+                                  すべて選択
+                                </button>
+                                <button
+                                  type="button"
+                                  className="timeslot-batch-creator__bulk-button timeslot-batch-creator__bulk-button--deselect"
+                                  onClick={handleDeselectAllTimes}
+                                  disabled={currentSelectedTimes.length === 0}
+                                >
+                                  すべて解除
+                                </button>
+                              {/* </div> */}
+                            
+                            </div>
+                          </div>
                         </div>
                       </>
                     )}
