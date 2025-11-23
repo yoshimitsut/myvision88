@@ -23,7 +23,7 @@ export default function Hero() {
   const handleClick = (cake: Cake) => {
     // const totalStock = cake.sizes?.reduce((sum, s) => sum + (s.stock || 0), 0) || 0;
     // if (totalStock <= 0) return;
-    navigate(`/cakeinformation?cake=${encodeURIComponent(cake.name)}`);
+    navigate(`/cakeinformationSize?cake=${encodeURIComponent(cake.name)}`);
   };
 
   // const isDisabled = (cake: Cake) => {

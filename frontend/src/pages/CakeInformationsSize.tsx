@@ -1,98 +1,119 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import type { Cake } from "../types/types";
-import "./CakeInformations.css";
+import "./CakeInformationsSize.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-
-
-// 現在オンライン予約を一時的に停止しております。
-
-// 恐れ入りますが、直接お電話にてご予約をお願いいたします。
-
-// open 11:00 - 19:00
-// 休業日：カレンダーをご確認ください。
-// TEL: 080-9854-2849
-
-// お手数をお掛けしますがよろしくお願いいたします。
-// beurre mou
-
-
-
 export default function CakeInformations() {
   const [cakes, setCakes] = useState<Cake[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   const [searchParams] = useSearchParams();
-  const cakeName = searchParams.get("cake") ?? "";
   const navigate = useNavigate();
 
   useEffect(() => {
     fetch(`${API_URL}/api/cake`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Falha ao carregar os dados dos bolos.");
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((data) => {
-        setCakes(data.cakes || []);
-      })
-      .catch((err) => {
-        console.error("Erro ao carregar bolos:", err);
+        const list = data.cakes || [];
+        setCakes(list);
+
+        const initial = searchParams.get("cake");
+
+        if (initial) {
+          const idx = list.findIndex(
+            (c: Cake) => c.name.toLowerCase() === initial.toLowerCase()
+          );
+          if (idx >= 0) setCurrentIndex(idx);
+        }
       });
   }, []);
 
-  const selectedCake = cakes.find(
-    (cake) =>
-      cake.name.trim().toLowerCase() === cakeName.trim().toLowerCase()
-  );
+  const selectedCake = cakes[currentIndex];
+
+  const nextCake = () => {
+    setCurrentIndex((prev) => (prev + 1) % cakes.length);
+  };
 
   const handleReserve = () => {
     if (!selectedCake) return;
-    navigate(`/order?cake=${encodeURIComponent(selectedCake.name.trim())}`);
+    navigate(`/order?cake=${encodeURIComponent(selectedCake.name)}`);
   };
 
-  // 🔹 Se não encontrar o bolo, mostra mensagem
-  if (!selectedCake) {
-    return (
-      <div className="cake-screen"></div>
-    );
-  }
+  if (!selectedCake) return <div className="cake-screen" />;
 
-  // 🔹 TypeScript agora sabe que selectedCake existe
   return (
     <div className="cake-screen">
-      <div className="cake-wrapper">
-        <div className="cake-main">
-          
-          <div className="main-left">
-            <table
-              style={{
-                margin: "20px auto",
-                borderCollapse: "collapse",
-                fontSize: "1.3rem"
-              }}
-            >
-              <tbody>
-                {selectedCake.sizes?.map((size, index) => (
-                  <tr key={index}>
-                    <td style={{ padding: "8px" }}>
-                      {size.size}
-                    </td>
-                     <td style={{ padding: "8px" }}>
-                      ¥
-                      {/* {size.price.toLocaleString("ja-JP")} */}
-                      {size.price.toLocaleString("ja-JP")} 税込
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
 
-            <button onClick={handleReserve} style={{display: "none"}} className="reserve-btn">
-              予約
-            </button>
-          </div>
+      {/* ========== BOLO ATUAL (DESTAQUE) ========== */}
+      <div className="featured-cake">
+        <img
+          src={`${API_URL}/images/${selectedCake.image}`}
+          alt={selectedCake.name}
+        />
+
+        <div className="featured-info">
+          <h2>{selectedCake.name}</h2>
+          <p>{selectedCake.description}</p>
+
+          <table className="cake-inf-table">
+            <tbody>
+              {selectedCake.sizes?.map((s, i) => (
+                <tr key={i}>
+                  <td>{s.size}</td>
+                  <td>
+                    ¥{s.price.toLocaleString("ja-JP")}{" "}
+                    <span className="zeikin">税込</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <button onClick={handleReserve} className="reserve-btn">
+            予約
+          </button>
         </div>
+
+        {/* seta para próximo */}
+        <button className="next-btn" onClick={nextCake}>
+          ➤
+        </button>
       </div>
+
+      {/* ========== LISTA COMPLETA DE BOLOS ========== */}
+      <h3 className="all-title">すべてのケーキ</h3>
+
+      <div className="cake-list">
+  {cakes.map((cake, index) => (
+    <div
+      key={cake.id}
+      className="cake-card"
+      onClick={() => setCurrentIndex(index)}  // <<< trocar o bolo principal
+    >
+      <img src={`${API_URL}/images/${cake.image}`} alt={cake.name} />
+      <h4>{cake.name}</h4>
+      <p>{cake.description}</p>
+
+      <table className="cake-inf-table small-table">
+        <tbody>
+          {cake.sizes?.map((s, i) => (
+            <tr key={i}>
+              <td>{s.size}</td>
+              <td>
+                ¥{s.price.toLocaleString("ja-JP")}
+                <span className="zeikin">税込</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ))}
+</div>
+
+
     </div>
   );
 }
