@@ -753,3 +753,76 @@ input[type="submit"] {
     padding: 20px;
   }
 }
+/* Adicione ao seu TimeSlotsManagement.css */
+.date-picker-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background: white;
+  margin-bottom: 15px;
+}
+
+/* Sobrescreva estilos do react-datepicker */
+.react-datepicker {
+  border: none !important;
+  font-family: inherit !important;
+  width: 100% !important;
+}
+
+.react-datepicker__month-container {
+  float: none !important;
+  width: 100% !important;
+}
+
+.react-datepicker__header {
+  background: white !important;
+  border-bottom: 1px solid #eee !important;
+}
+
+.react-datepicker__day--selected {
+  background: #007bff !important;
+  border-radius: 50% !important;
+}
+
+.react-datepicker__day--keyboard-selected {
+  background: #e9ecef !important;
+  color: black !important;
+}
+
+.react-datepicker__day:hover {
+  border-radius: 50% !important;
+  background: #f8f9fa !important;
+}
+
+.selected-date-info {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.calendar-header button {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.calendar-header button:hover {
+  background: #f8f9fa;
+}
+
+.calendar-month {
+  font-weight: bold;
+  font-size: 16px;
+}

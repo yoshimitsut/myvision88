@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import './TimeSlotsManagement.css';
 import "react-datepicker/dist/react-datepicker.css";
-
-// import Header from '../components/Header';
-// import { useHeaderConfig } from '../hooks/useHeaderConfig'; 
-
-
+import DatePicker from "react-datepicker";
+import { ja } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 import { 
   format, 
   startOfMonth, 
   endOfMonth, 
-  eachDayOfInterval, 
-  addMonths,
-  subMonths,
-  getDay,
-  subDays,
-  addDays
+  eachDayOfInterval
 } from 'date-fns';
-import { ja } from 'date-fns/locale';
-import { useNavigate } from 'react-router-dom';
 
 // ----------------------------------------------------
 // FUNÇÕES DE DATA
@@ -77,7 +68,7 @@ type TabType = 'times' | 'days';
 
 const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslotsCreated }) => {
   const jstToday = getJSTDate();
-  const [selectedDate, setSelectedDate] = useState<string>(formatDateJST(jstToday));
+  const [selectedDate, setSelectedDate] = useState<Date>(jstToday);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [existingDayTimeSlots, setExistingDayTimeSlots] = useState<DayTimeSlot[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('days');
@@ -93,82 +84,6 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingTimes, setIsLoadingTimes] = useState<boolean>(true);
   const [isLoadingExisting, setIsLoadingExisting] = useState<boolean>(false);
-
-  // const { headerConfig } = useHeaderConfig({
-  //   buttons: [
-  //     { 
-  //       icon: "/icons/calendar_icon.ico", 
-  //       alt: "カレンダーアイコン",
-  //       path: "/admin/date",
-  //       className: "list-btn qrcode-btn"
-  //     },
-  //     { 
-  //       icon: "/icons/graph.ico", 
-  //       alt: "グラフアイコン",
-  //       path: "/ordertable",
-  //       className: "list-btn"
-  //     }
-  //   ]
-  // });
-
-
-  // 🔥 FUNÇÃO CORRIGIDA: Gerar dias do calendário com preenchimento
-  const generateCalendarDays = (month: Date) => {
-    const monthStart = startOfMonth(month);
-    const monthEnd = endOfMonth(month);
-    
-    // Dias do mês atual
-    const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
-    
-    // Dias do mês anterior para preencher o início
-    const startDayOfWeek = getDay(monthStart); // 0 = Domingo, 1 = Segunda, etc.
-    const daysFromPrevMonth = startDayOfWeek; // Número de dias do mês anterior para mostrar
-    
-    const prevMonthEnd = endOfMonth(subMonths(month, 1));
-    const prevMonthDays = eachDayOfInterval({
-      start: subDays(prevMonthEnd, daysFromPrevMonth - 1),
-      end: prevMonthEnd
-    }).slice(-daysFromPrevMonth || 0);
-
-    // Dias do próximo mês para completar (6 semanas no total)
-    const totalCells = 42; // 6 semanas * 7 dias
-    const nextMonthStart = startOfMonth(addMonths(month, 1));
-    const remainingDays = totalCells - (prevMonthDays.length + monthDays.length);
-    const nextMonthDays = eachDayOfInterval({
-      start: nextMonthStart,
-      end: addDays(nextMonthStart, Math.max(0, remainingDays - 1))
-    });
-
-    return [
-      ...prevMonthDays.map(day => ({ 
-        date: day, 
-        isCurrentMonth: false, 
-        isOtherMonth: true 
-      })),
-      ...monthDays.map(day => ({ 
-        date: day, 
-        isCurrentMonth: true, 
-        isOtherMonth: false 
-      })),
-      ...nextMonthDays.map(day => ({ 
-        date: day, 
-        isCurrentMonth: false, 
-        isOtherMonth: true 
-      }))
-    ];
-  };
-
-  // Calendário
-  const calendarDays = generateCalendarDays(currentMonth);
-
-  // 🔥 CORRIGIR: Funções de navegação do mês
-  const nextMonth = () => {
-    setCurrentMonth(prev => addMonths(prev, 1));
-  };
-
-  const prevMonth = () => {
-    setCurrentMonth(prev => subMonths(prev, 1));
-  };
 
   // 🔥 SIMPLIFICAR: Função para inicializar o schedule
   const initializeMonthSchedule = (month: Date = currentMonth) => {
@@ -186,23 +101,6 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
     setMonthSchedule(newSchedule);
   };
 
-  // Função para selecionar data
-  const handleDateSelect = (date: Date) => {
-    const dateKey = formatDateJST(date);
-    setSelectedDate(dateKey);
-  };
-
-  // Função para verificar se a data está selecionada
-  const isDateSelected = (date: Date) => {
-    if (!selectedDate) return false;
-    return formatDateJST(date) === selectedDate;
-  };
-
-  // Função para verificar se é hoje
-  const isToday = (date: Date) => {
-    return formatDateJST(date) === formatDateJST(jstToday);
-  };
-
   // 🔥 FUNÇÃO: Obter horários selecionados para a data atual
   const getSelectedTimesForDate = (date: string): string[] => {
     const daySchedule = monthSchedule.find(day => day.date === date);
@@ -218,26 +116,27 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
     );
   };
 
+
   // ----------------------------------------------------
   // MANIPULADORES DE TEMPO
   // ----------------------------------------------------
 
   const handleSelectAllTimes = (): void => {
     const allTimes = timeSlots.map(slot => slot.time_value);
-    updateSelectedTimesForDate(selectedDate, allTimes);
+    updateSelectedTimesForDate(formatDateJST(selectedDate), allTimes);
   }
 
   const handleDeselectAllTimes = (): void => {
-    updateSelectedTimesForDate(selectedDate, []);
+    updateSelectedTimesForDate(formatDateJST(selectedDate), []);
   }
 
   const handleTimeToggle = (time: string): void => {
-    const currentTimes = getSelectedTimesForDate(selectedDate);
+    const currentTimes = getSelectedTimesForDate(formatDateJST(selectedDate));
     const newTimes = currentTimes.includes(time) 
       ? currentTimes.filter(t => t !== time)
       : [...currentTimes, time].sort();
     
-    updateSelectedTimesForDate(selectedDate, newTimes);
+    updateSelectedTimesForDate(formatDateJST(selectedDate), newTimes);
   };
 
   // Aplicar a mesma configuração a todos os dias do mês
@@ -556,7 +455,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
   };
 
   // Horários selecionados para a data atual
-  const currentSelectedTimes = getSelectedTimesForDate(selectedDate);
+  const currentSelectedTimes = getSelectedTimesForDate(formatDateJST(selectedDate));
 
   const navigate = useNavigate();
 
@@ -622,58 +521,51 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
                             すべて選択
                           </button>
                         </div>
-                      <div className="month-calendar">
-                        <div className="calendar-header">
-                          <button type="button" onClick={prevMonth}>‹</button>
-                          <h3>{format(currentMonth, 'yyyy年MM月', { locale: ja })}</h3>
-                          <button type="button" onClick={nextMonth}>›</button>
-                        </div>
-                        
-                        <div className="calendar-grid">
-                          {['日', '月', '火', '水', '木', '金', '土'].map(day => (
-                            <div key={day} className="calendar-weekday">{day}</div>
-                          ))}
-                          
-                          {calendarDays.map(({ date, isCurrentMonth }) => {
-                            if (!isCurrentMonth) {
-                              // Dias de outros meses - mostrar vazios
-                              return (
-                                <div
-                                  key={date.toString()}
-                                  className="calendar-day calendar-day--other-month"
-                                >
-                                  {format(date, 'd')}
-                                </div>
-                              );
-                            }
 
-                            const dayDate = formatDateJST(date);
-                            const daySelectedTimes = getSelectedTimesForDate(dayDate);
-                            const isFullySelected = daySelectedTimes.length === timeSlots.length;
-                            const isPartiallySelected = daySelectedTimes.length > 0 && daySelectedTimes.length < timeSlots.length;
-                            
-                            return (
-                              <button
-                                key={date.toString()}
+                      {/* 🔥 CALENDÁRIO SUBSTITUÍDO POR DATEPICKER */}
+                      <div className="date-picker-container">
+                        <DatePicker
+                          selected={selectedDate}
+                          onChange={(date: Date | null) => {
+                            if (date) {
+                              setSelectedDate(date);
+                              setCurrentMonth(date); // Atualiza o mês atual também
+                            }
+                          }}
+                          inline
+                          locale={ja}
+                          renderCustomHeader={({
+                            date,
+                            decreaseMonth,
+                            increaseMonth,
+                            prevMonthButtonDisabled,
+                            nextMonthButtonDisabled,
+                          }) => (
+                            <div className="calendar-header">
+                              <button 
+                                onClick={decreaseMonth} 
+                                disabled={prevMonthButtonDisabled}
                                 type="button"
-                                className={`calendar-day ${
-                                  isDateSelected(date) ? 'selected' : ''
-                                } ${
-                                  isToday(date) ? 'today' : ''
-                                } ${
-                                  isFullySelected ? 'calendar-day--fully-selected' : 
-                                  isPartiallySelected ? 'calendar-day--partially-selected' : 
-                                  'calendar-day--none-selected'
-                                }`}
-                                onClick={() => handleDateSelect(date)}
-                                title={`${format(date, 'M月d日')} - ${daySelectedTimes.length}個の時間帯が選択中`}
                               >
-                                {format(date, 'd')}
-                                {isPartiallySelected && <span className="calendar-day-partial-indicator">•</span>}
+                                ‹
                               </button>
-                            );
-                          })}
-                        </div>
+                              <span className="calendar-month">
+                                {format(date, 'yyyy年MM月', { locale: ja })}
+                              </span>
+                              <button 
+                                onClick={increaseMonth} 
+                                disabled={nextMonthButtonDisabled}
+                                type="button"
+                              >
+                                ›
+                              </button>
+                            </div>
+                          )}
+                        />
+                      </div>
+
+                      <div className="selected-date-info">
+                        <strong>選択中の日付:</strong> {format(selectedDate, 'yyyy年MM月dd日', { locale: ja })}
                       </div>
                     </div>
                   </div>
@@ -682,7 +574,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
                     <div className="timeslot-batch-creator__current-slots">
                       <div>
                         <h4 className="timeslot-batch-creator__subtitle">
-                          📋 {selectedDate} の時間帯設定
+                          📋 {format(selectedDate, 'yyyy年MM月dd日', { locale: ja })} の時間帯設定
                         </h4>
                       </div>
                       
@@ -720,7 +612,6 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
 
                             <div className="timeslot-batch-creator__bulk-actions">
                               <div className='timeslot-batch-selec-all'>
-                                {/* <div> */}
                                   <button
                                     type="button"
                                     className="timeslot-batch-creator__bulk-button timeslot-batch-creator__bulk-button--select"
@@ -737,8 +628,6 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
                                   >
                                     すべて解除
                                   </button>
-                                {/* </div> */}
-                              
                               </div>
                             </div>
                           </div>
