@@ -14,7 +14,7 @@
   font-size: 24px;
   color: #333;
   margin-bottom: 20px;
-  border-bottom: 2px solid #eee;
+  /* border-bottom: 2px solid #eee; */
   padding-bottom: 10px;
 }
 
@@ -684,11 +684,16 @@
   .timeslot-batch-creator__message--success{
     font-size: 14px;
   }
-
-  .timeslot-batch-creator__help-text {
-    text-align: end;
-  }
 }
+
+.timeslot-batch-creator-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn-back {
+    border: 2px solid #000;
+  }
 
 
 @media (max-width: 680px) {
