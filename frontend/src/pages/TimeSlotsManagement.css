@@ -641,6 +641,51 @@
   min-height: 264px; /* 6 linhas * 44px */
 }
 
+/* Reset de estilos de foco para todos os botões */
+button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Para acessibilidade, mantenha um estilo de foco visível mas discreto */
+button:focus-visible {
+  outline: 2px solid #4f46e5 !important;
+  outline-offset: 2px !important;
+}
+
+/* Estilos específicos para os botões do calendário */
+.calendar-day:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.calendar-day:focus-visible {
+  outline: 2px solid #4f46e5 !important;
+  outline-offset: 1px !important;
+}
+
+/* Reset para botões das abas */
+.timeslot-batch-creator__tab:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.timeslot-batch-creator__tab:focus-visible {
+  outline: 2px solid #4f46e5 !important;
+  outline-offset: 2px !important;
+}
+
+/* Reset para botões de tempo */
+.timeslot-batch-creator__time-button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.timeslot-batch-creator__time-button:focus-visible {
+  outline: 2px solid #4f46e5 !important;
+  outline-offset: 1px !important;
+}
+
 /* Ajustes para responsividade */
 @media (max-width: 480px) {
   .calendar-grid {
