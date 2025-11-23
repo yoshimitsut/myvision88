@@ -746,7 +746,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
                       )}
                     </div>
                     <p className="timeslot-batch-creator__help-text">
-                      ※ チェックを外すと時間帯が削除されます。
+                      ※ 初期設定ではすべての時間帯が選択されています。
                     </p>
                   </div>
                 </div>
