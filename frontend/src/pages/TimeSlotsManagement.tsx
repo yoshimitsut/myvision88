@@ -71,11 +71,12 @@ type TabType = 'times' | 'days';
 const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslotsCreated }) => {
   const jstToday = getJSTDate();
   const [selectedDate, setSelectedDate] = useState<Date>(jstToday);
+  const [viewedMonth, setViewedMonth] = useState(jstToday);
   
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [existingDayTimeSlots, setExistingDayTimeSlots] = useState<DayTimeSlot[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('days');
-  const [currentMonth, ] = useState(jstToday);
+  const [currentMonth, setCurrentMonth] = useState(jstToday);
   
   const [monthSchedule, setMonthSchedule] = useState<DaySchedule[]>([]);
 
@@ -106,11 +107,12 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
     const monthEnd = endOfMonth(month);
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
     
-    const allTimeValues = timeSlots.map(slot => slot.time_value);
+    // const allTimeValues = timeSlots.map(slot => slot.time_value);
     
     const newSchedule: DaySchedule[] = days.map(day => ({
       date: formatDateJST(day),
-      selectedTimes: [...allTimeValues] // Todos os horários selecionados por padrão
+      // selectedTimes: [...allTimeValues] 
+      selectedTimes: [] 
     }));
     
     setMonthSchedule(newSchedule);
@@ -195,24 +197,34 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
   };
 
   // Aplicar a mesma configuração a todos os dias do mês
-  const handleDeselectAllDays = (): void => {
-    setMonthSchedule(prev => 
-      prev.map(day => ({ ...day, selectedTimes: [] }))
+  const handleSelectAllDays = (): void => {
+    // const allTimes = timeSlots.map(slot => slot.time_value);
+    setMonthSchedule(prev =>
+      prev.map(day => ({
+        ...day,
+        selectedTimes: [...timeSlots.map(t => t.time_value)]
+      }))
     );
-    setStatusMessage('すべての日の時間帯を解除しました。');
+    setStatusMessage(`${format(currentMonth, 'yyyy年MM月', { locale: ja })}のすべての日を選択しました。`);
     setIsError(false);
   };
 
   // Resetar todos os dias para todos os horários selecionados
-  const handleResetAllDays = (): void => {
-    const allTimes = timeSlots.map(slot => slot.time_value);
+  const handleDeselectAllDays = (): void => {
     setMonthSchedule(prev => 
-      prev.map(day => ({ ...day, selectedTimes: [...allTimes] }))
+      prev.map(day => ({ ...day, selectedTimes: []}))
     );
-    setStatusMessage('すべての日をリセットしました（すべての時間帯を選択）。');
-    setIsError(false);
+     setStatusMessage(`${format(currentMonth, 'yyyy年MM月', { locale: ja })}のすべての日の時間帯を解除しました。`);
+     setIsError(false);
   };
 
+  const handleMonthChange = (newMonth: Date) => {
+    setViewedMonth(newMonth);
+    setCurrentMonth(newMonth); 
+    setSelectedDate(startOfMonth(newMonth)); 
+
+    initializeMonthSchedule(newMonth);
+  };
   // ----------------------------------------------------
   // FUNÇÕES PARA SALVAMENTO
   // ----------------------------------------------------
@@ -236,175 +248,180 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
     }
   };
 
-  // 🔥 ATUALIZAR: Função para carregar dados existentes
-  const loadExistingData = async () => {
-    try {
-      setIsLoadingExisting(true);
-      const response = await fetch(`${API_BASE_URL}/`);
-      const data = await response.json();
+  // 🔥 ATUALIZAR: Função para carregar dados existentes do mês correto
+const loadExistingData = async () => {
+  try {
+    setIsLoadingExisting(true);
+    const response = await fetch(`${API_BASE_URL}/`);
+    const data = await response.json();
+    
+    console.log('Dados carregados da API:', data);
+    
+    if (data.success && data.timeslots) {
+      setExistingDayTimeSlots(data.timeslots);
       
-      console.log('Dados carregados da API:', data);
+      // 🔥 ATUALIZAR: Atualizar dias com slots
+      updateDaysWithSlots(data.timeslots);
       
-      if (data.success && data.timeslots) {
-        setExistingDayTimeSlots(data.timeslots);
-        
-        // 🔥 ATUALIZAR: Atualizar dias com slots
-        updateDaysWithSlots(data.timeslots);
-        
-        const currentMonthString = format(currentMonth, 'yyyy-MM');
-        const currentMonthSlots = data.timeslots.filter((slot: DayTimeSlot) => 
-          slot.date.startsWith(currentMonthString)
-        );
-
-        console.log(`Slots do mês atual (${currentMonthString}):`, currentMonthSlots.length);
-
-        // Se há dados para o mês atual, sincronizar
-        if (currentMonthSlots.length > 0) {
-          const monthStart = startOfMonth(currentMonth);
-          const monthEnd = endOfMonth(currentMonth);
-          const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
-          
-          const newSchedule: DaySchedule[] = monthDays.map(day => {
-            const dayDate = formatDateJST(day);
-            const existingTimesForDay = data.timeslots
-              .filter((slot: DayTimeSlot) => slot.date === dayDate)
-              .map((slot: DayTimeSlot) => slot.time);
-            
-            console.log(`Data ${dayDate}: ${existingTimesForDay.length} horários existentes`);
-            
-            return {
-              date: dayDate,
-              selectedTimes: existingTimesForDay
-            };
-          });
-          
-          setMonthSchedule(newSchedule);
-          console.log('Schedule sincronizado com dados existentes');
-        } else {
-          // Se não há dados, inicializar com padrão
-          console.log('Nenhum dado existente, inicializando com padrão');
-          initializeMonthSchedule();
-        }
-      } else {
-        // Se não há timeslots, inicializar com padrão
-        console.log('Resposta sem timeslots, inicializando com padrão');
-        initializeMonthSchedule();
-      }
-    } catch (error) {
-      console.error('既存データ読み込みエラー:', error);
-      // Em caso de erro, inicializar com padrão
-      initializeMonthSchedule();
-    } finally {
-      setIsLoadingExisting(false);
-    }
-  };
-
-  // Salvar todos os dias do mês
-  const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
-    setStatusMessage(null);
-    setIsError(false);
-    setIsLoading(true);
-
-    try {
-      let totalInserted = 0;
-      let totalDeleted = 0;
-
-      // 1. Primeiro deletar TODOS os slots existentes do mês
       const currentMonthString = format(currentMonth, 'yyyy-MM');
-      const slotsToDelete = existingDayTimeSlots.filter(slot => 
+      const currentMonthSlots = data.timeslots.filter((slot: DayTimeSlot) => 
         slot.date.startsWith(currentMonthString)
       );
 
-      console.log(`Deletando ${slotsToDelete.length} slots existentes do mês ${currentMonthString}`);
+      console.log(`Slots do mês atual (${currentMonthString}):`, currentMonthSlots.length);
 
-      // Deletar em paralelo para melhor performance
-      const deletePromises = slotsToDelete.map(slot => deleteTimeSlot(slot.id));
-      const deleteResults = await Promise.allSettled(deletePromises);
-      
-      totalDeleted = deleteResults.filter(result => 
-        result.status === 'fulfilled' && result.value === true
-      ).length;
+      // Se há dados para o mês atual, sincronizar
+      if (currentMonthSlots.length > 0) {
+        const monthStart = startOfMonth(currentMonth);
+        const monthEnd = endOfMonth(currentMonth);
+        const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+        
+        const newSchedule: DaySchedule[] = monthDays.map(day => {
+          const dayDate = formatDateJST(day);
+          const existingTimesForDay = data.timeslots
+            .filter((slot: DayTimeSlot) => slot.date === dayDate)
+            .map((slot: DayTimeSlot) => slot.time);
+          
+          console.log(`Data ${dayDate}: ${existingTimesForDay.length} horários existentes`);
+          
+          return {
+            date: dayDate,
+            selectedTimes: existingTimesForDay
+          };
+        });
+        
+        setMonthSchedule(newSchedule);
+        console.log('Schedule sincronizado com dados existentes');
+      } else {
+        // Se não há dados, inicializar com padrão
+        console.log('Nenhum dado existente, inicializando com padrão');
+        // initializeMonthSchedule();
+      }
+    } else {
+      // Se não há timeslots, inicializar com padrão
+      console.log('Resposta sem timeslots, inicializando com padrão');
+      initializeMonthSchedule();
+    }
+  } catch (error) {
+    console.error('既存データ読み込みエラー:', error);
+    // Em caso de erro, inicializar com padrão
+    initializeMonthSchedule();
+  } finally {
+    setIsLoadingExisting(false);
+  }
+};
 
-      console.log(`${totalDeleted} slots deletados com sucesso`);
+  // 🔥 ATUALIZAR: Função de salvamento para salvar o mês correto
+const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
+  e.preventDefault();
+  setStatusMessage(null);
+  setIsError(false);
+  setIsLoading(true);
 
-      // 2. Aguardar um pouco para garantir que as deleções foram processadas
-      await new Promise(resolve => setTimeout(resolve, 100));
+  try {
+    let totalInserted = 0;
+    let totalDeleted = 0;
 
-      // 3. Depois adicionar os novos slots baseados no monthSchedule atual
-      const timeConfigs = new Map<string, string[]>();
-      
-      monthSchedule.forEach(day => {
-        if (day.selectedTimes.length > 0) {
-          const timeKey = day.selectedTimes.join(',');
-          if (!timeConfigs.has(timeKey)) {
-            timeConfigs.set(timeKey, []);
-          }
-          timeConfigs.get(timeKey)!.push(day.date);
+    // 1. Primeiro deletar TODOS os slots existentes do mês ATUAL
+    const currentMonthString = format(currentMonth, 'yyyy-MM');
+    const slotsToDelete = existingDayTimeSlots.filter(slot => 
+      slot.date.startsWith(currentMonthString)
+    );
+
+    console.log(`Deletando ${slotsToDelete.length} slots existentes do mês ${currentMonthString}`);
+
+    // Deletar em paralelo para melhor performance
+    const deletePromises = slotsToDelete.map(slot => deleteTimeSlot(slot.id));
+    const deleteResults = await Promise.allSettled(deletePromises);
+    
+    totalDeleted = deleteResults.filter(result => 
+      result.status === 'fulfilled' && result.value === true
+    ).length;
+
+    console.log(`${totalDeleted} slots deletados com sucesso`);
+
+    // 2. Aguardar um pouco para garantir que as deleções foram processadas
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // 3. 🔥 CORRIGIR: Filtrar apenas dias que têm horários selecionados
+    const daysWithTimes = monthSchedule.filter(day => day.selectedTimes.length > 0);
+    
+    console.log(`Dias com horários para salvar no mês ${currentMonthString}: ${daysWithTimes.length} de ${monthSchedule.length}`);
+
+    // 4. Depois adicionar os novos slots baseados no monthSchedule atual
+    const timeConfigs = new Map<string, string[]>();
+    
+    daysWithTimes.forEach(day => {
+      if (day.selectedTimes.length > 0) {
+        const timeKey = day.selectedTimes.join(',');
+        if (!timeConfigs.has(timeKey)) {
+          timeConfigs.set(timeKey, []);
         }
+        timeConfigs.get(timeKey)!.push(day.date);
+      }
+    });
+
+    console.log(`Configurações únicas a serem enviadas: ${timeConfigs.size}`);
+
+    // Para cada configuração única de horários, enviar em lote
+    for (const [timeKey, dates] of timeConfigs) {
+      const times = timeKey.split(',');
+      
+      const payload = {
+        dates: dates,
+        times: times,
+        limit_slots: 10
+      };
+
+      console.log(`Enviando lote para datas: ${dates.join(', ')} com horários: ${times.join(', ')}`);
+
+      const response = await fetch(`${API_BASE_URL}/batch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
-      console.log(`Configurações únicas a serem enviadas: ${timeConfigs.size}`);
-
-      // Para cada configuração única de horários, enviar em lote
-      for (const [timeKey, dates] of timeConfigs) {
-        const times = timeKey.split(',');
-        
-        const payload = {
-          dates: dates,
-          times: times,
-          limit_slots: 10
-        };
-
-        console.log(`Enviando lote para datas: ${dates.join(', ')} com horários: ${times.join(', ')}`);
-
-        const response = await fetch(`${API_BASE_URL}/batch`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-
-        const data: ApiResponse = await response.json();
-        
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || `日付 ${dates[0]} などの登録に失敗しました。`);
-        }
-
-        totalInserted += data.inserted;
-        console.log(`Lote inserido: ${data.inserted}, ignorados: ${data.skipped}`);
-      }
-
-      // 4. Atualizar a lista de slots existentes
-      await loadExistingData();
-
-      // 5. Mensagem de resultado
-      let message = `成功！${format(currentMonth, 'yyyy年MM月', { locale: ja })}の時間帯を更新しました。`;
+      const data: ApiResponse = await response.json();
       
-      if (totalDeleted > 0) {
-        message += ` ${totalDeleted}個の古い時間帯を削除し、`;
-      }
-      
-      if (totalInserted > 0) {
-        message += ` ${totalInserted}個の新しい時間帯を追加しました。`;
-      } else {
-        message += ` すべての時間帯を削除しました。`;
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `日付 ${dates[0]} などの登録に失敗しました。`);
       }
 
-      setStatusMessage(message);
-      setIsError(false);
-
-      if (onTimeslotsCreated) {
-        onTimeslotsCreated();
-      }
-
-    } catch (error) {
-      console.error('データ送信エラー:', error);
-      setIsError(true);
-      setStatusMessage(`エラー: ${error instanceof Error ? error.message : '不明なエラー'}。API接続を確認してください。`);
-    } finally {
-      setIsLoading(false);
+      totalInserted += data.inserted;
+      console.log(`Lote inserido: ${data.inserted}, ignorados: ${data.skipped}`);
     }
-  };
+
+    // 5. Atualizar a lista de slots existentes
+    await loadExistingData();
+
+    // 6. 🔥 ATUALIZAR: Mensagem de resultado mais específica
+    let message = `成功！${format(currentMonth, 'yyyy年MM月', { locale: ja })}の時間帯を更新しました。`;
+    
+    if (totalDeleted > 0) {
+      message += ` ${totalDeleted}個の古い時間帯を削除し、`;
+    }
+    
+    if (totalInserted > 0) {
+      message += ` ${totalInserted}個の新しい時間帯を追加しました（${daysWithTimes.length}日分）。`;
+    } else {
+      message += ` すべての時間帯を削除しました。`;
+    }
+
+    setStatusMessage(message);
+    setIsError(false);
+
+    if (onTimeslotsCreated) {
+      onTimeslotsCreated();
+    }
+
+  } catch (error) {
+    console.error('データ送信エラー:', error);
+    setIsError(true);
+    setStatusMessage(`エラー: ${error instanceof Error ? error.message : '不明なエラー'}。API接続を確認してください。`);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // ----------------------------------------------------
   // FETCHERS E APIS
@@ -440,7 +457,7 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
       };
       loadData();
     }
-  }, [activeTab, currentMonth]);
+  }, [activeTab, currentMonth]); 
 
   // Função para adicionar novo tempo
   const handleAddTime = async (e: React.FormEvent) => {
@@ -573,7 +590,7 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
                           <button
                             type="button"
                             className="timeslot-batch-creator__bulk-button timeslot-batch-creator__bulk-button--reset-all"
-                            onClick={handleResetAllDays}
+                            onClick={handleSelectAllDays}
                           >
                             すべて選択
                           </button>
@@ -589,6 +606,7 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
                               // setCurrentMonth(date);
                             }
                           }}
+                          onMonthChange={handleMonthChange}
                           inline
                           locale={ja}
                           renderDayContents={renderDayContents}
@@ -601,7 +619,9 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
                           }) => (
                             <div className="calendar-header">
                               <button 
-                                onClick={decreaseMonth} 
+                                onClick={() => {decreaseMonth();
+                                  handleMonthChange(startOfMonth(new Date(date.getFullYear(), date.getMonth() -1, 1)))
+                                }} 
                                 disabled={prevMonthButtonDisabled}
                                 type="button"
                               >
@@ -611,7 +631,11 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
                                 {format(date, 'yyyy年MM月', { locale: ja })}
                               </span>
                               <button 
-                                onClick={increaseMonth} 
+                                onClick={() => {
+                                    increaseMonth();
+                                    // 🔥 AO CLICAR, ATUALIZA currentMonth para o mês PRÓXIMO
+                                    handleMonthChange(startOfMonth(new Date(date.getFullYear(), date.getMonth() + 1, 1))); 
+                                }}
                                 disabled={nextMonthButtonDisabled}
                                 type="button"
                               >
@@ -704,7 +728,7 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
                     className="timeslot-batch-creator__submit-button"
                     disabled={isLoading || isLoadingExisting}
                   >
-                    {isLoading ? '保存中...' : `${format(currentMonth, 'yyyy年MM月', { locale: ja })}の全${monthSchedule.length}日分を保存`}
+                    {isLoading ? '保存中...' : `${format(viewedMonth, 'yyyy年MM月', { locale: ja })}の全${monthSchedule.length}日分を保存`}                  
                   </button>
                 </div>
               </form>

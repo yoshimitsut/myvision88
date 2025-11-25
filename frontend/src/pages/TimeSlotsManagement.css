@@ -604,7 +604,7 @@ input[type="submit"] {
 }
 
 .date-picker-container .react-datepicker__day {
-  border-radius: 50%;
+  border-radius: 5px;
   margin: 0.166rem;
   padding: 0.1rem;
 }
