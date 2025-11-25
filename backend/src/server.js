@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-app.use('/images', express.static('images'))
+app.use('/image', express.static('image'))
 
 // Rota de Teste de Conexão (opcional, pode ser movida)
 const pool = require('./config/db'); // Se quiser manter o teste de conexão aqui

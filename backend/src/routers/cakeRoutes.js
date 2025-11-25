@@ -8,7 +8,7 @@ const fs = require('fs');
 // 🔹 画像アップロードのためのMULTER設定
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, '../../images');
+    const uploadPath = path.join(__dirname, '../../image');
     // ディレクトリが存在しない場合は作成
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });

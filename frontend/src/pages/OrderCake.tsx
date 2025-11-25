@@ -425,7 +425,7 @@ const isDateAllowed = (date: Date) => {
                     </div>
                   )}
                   {selectedCakeData && (
-                    <img className='img-cake-order' src={`${API_URL}/images/${selectedCakeData.image}`} alt={selectedCakeData.name} />
+                    <img className='img-cake-order' src={`image/${selectedCakeData.image}`} alt={selectedCakeData.name} />
                   )}
                   <div className='input-group'>
                     <Select<CustomOptionType>

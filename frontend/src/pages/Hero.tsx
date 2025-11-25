@@ -62,7 +62,7 @@ export default function Hero() {
           // style={{ cursor: disabled ? "not-allowed" : "pointer" }}
         >
           <img
-            src={`${API_URL}/images/${cake.image}`}
+            src={`${API_URL}/image/${cake.image}`}
             alt={cake.name}
             className="hero-img"
           />

@@ -59,7 +59,7 @@ export default function CakeInformations() {
           <div className="main-right">
             {selectedCake.image && (
               <img
-                src={`${API_URL}/images/${selectedCake.image}`}
+                src={`${API_URL}/image/${selectedCake.image}`}
                 alt={selectedCake.name}
               />
             )}
