@@ -106,9 +106,9 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
         <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 20px;">
             <p style="margin: 0; font-size: 14px;">上記の内容に相違がございましたら、お手数をお掛けしますが、</p>
             <p style="margin: 5px 0 0 0; font-size: 14px;">ご連絡をお願いいたします。</p>
-            <p style="margin: 10px 0 0 0;"><strong>Patisserie H.Yuji</strong></p>
+            <p style="margin: 10px 0 0 0;"><strong>Patisserie</strong></p>
             <p style="margin: 5px 0;">open 11:00 - 19:00</p>
-            <p style="margin: 5px 0;">TEL: <a href="tel:080-9854-2849" style="color: #007bff; text-decoration: none;">080-9854-2849</a></p>
+            <p style="margin: 5px 0;">TEL: <a href="tel:080-0000-0000" style="color: #007bff; text-decoration: none;">080-9854-2849</a></p>
         </div>
         <p style="text-align: center; margin-top: 20px; font-style: italic;">宜しくお願いいたします。</p>
     </div>
@@ -170,7 +170,7 @@ async function sendOrderUpdateNotification(orderData) {
     }, 0);
 
     const mailOptions = {
-        from: `"Patisserie H.Yuji" <${EMAIL_CONFIG.fromResend}>`,
+        from: `"Test" <${EMAIL_CONFIG.fromResend}>`,
         to: [
             orderData.email, 
             EMAIL_CONFIG.fromGmail
@@ -204,9 +204,9 @@ async function sendOrderUpdateNotification(orderData) {
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 20px;">
                     <p style="margin: 0; font-size: 14px;">上記の内容に相違がございましたら、お手数をお掛けしますが、</p>
                     <p style="margin: 5px 0 0 0; font-size: 14px;">ご連絡をお願いいたします。</p>
-                    <p style="margin: 10px 0 0 0;"><strong>Patisserie H.Yuji</strong></p>
+                    <p style="margin: 10px 0 0 0;"><strong>Patisserie</strong></p>
                     <p style="margin: 5px 0;">open 11:00 - 19:00</p>
-                    <p style="margin: 5px 0;">TEL: <a href="tel:080-9854-2849" style="color: #007bff; text-decoration: none;">080-9854-2849</a></p>
+                    <p style="margin: 5px 0;">TEL: <a href="tel:080-0000-0000" style="color: #007bff; text-decoration: none;">080-9854-2849</a></p>
                 </div>
                 
                 <p style="text-align: center; margin-top: 20px; font-style: italic;">宜しくお願いいたします。</p>
@@ -244,7 +244,7 @@ async function sendCancellationNotification(order, cakesDetails) {
     const formattedDate = formatDateJP(order.date);
 
     const mailOptions = {
-        from: `"Patisserie H.Yuji" <${EMAIL_CONFIG.fromResend}>`,
+        from: `"Patisserie" <${EMAIL_CONFIG.fromResend}>`,
         to: [
             order.email,
             EMAIL_CONFIG.fromGmail
@@ -291,7 +291,7 @@ async function sendCancellationNotification(order, cakesDetails) {
 
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
                     <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">
-                        Patisserie H.Yuji<br>
+                        Patisserie<br>
                         OPEN 11:00 - 19:00<br>
                         TEL: <a href="tel:080-9854-2849" style="color: #007bff;">080-9854-2849</a>
                     </p>
