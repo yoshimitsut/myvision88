@@ -237,7 +237,7 @@ const uploadImage = async (file: File): Promise<string> => {
       image: cake.image || ''
     });
     setNewSizes(cake.sizes.length > 0 ? cake.sizes : [{ size: '', stock: 0, price: 0 }]);
-    setImagePreview(cake.image ? `${API_URL}/images/${cake.image}` : null);
+    setImagePreview(cake.image ? `${API_URL}/image/${cake.image}` : null);
     setSelectedImage(null);
     setActiveTab('add');
   };
@@ -332,11 +332,11 @@ const uploadImage = async (file: File): Promise<string> => {
                     <div className="cake-image">
                       {cake.image ? (
                         <img 
-                          src={`${API_URL}/images/${cake.image}`} 
+                          src={`${API_URL}/image/${cake.image}`} 
                           alt={cake.name}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/images/default-cake.jpg';
-                          }}
+                          // onError={(e) => {
+                          //   (e.target as HTMLImageElement).src = '/image/default-cake.jpg';
+                          // }}
                         />
                       ) : (
                         <div className="no-image">📷 画像なし</div>
@@ -425,7 +425,7 @@ const uploadImage = async (file: File): Promise<string> => {
                 {(imagePreview || newCake.image) && (
                   <div className="image-preview">
                     <img 
-                      src={imagePreview || `${API_URL}/images/${newCake.image}`} 
+                      src={imagePreview || `${API_URL}/image/${newCake.image}`} 
                       alt="プレビュー" 
                     />
                     <button
