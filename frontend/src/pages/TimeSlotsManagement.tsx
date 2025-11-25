@@ -646,9 +646,9 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
                         />
                       </div>
 
-                      <div className="selected-date-info">
+                      {/* <div className="selected-date-info">
                         <strong>選択中の日付:</strong> {format(selectedDate, 'yyyy年MM月dd日', { locale: ja })}
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 
