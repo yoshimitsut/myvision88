@@ -663,21 +663,3 @@ input[type="submit"] {
     padding: 20px;
   }
 }
-
-.react-datepicker__day--main-selected {
-  border: 2px solid #ff5722 !important;
-  box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.3) !important;
-}
-
-.react-datepicker__day--selected {
-  background-color: #5f7082 !important;
-  color: white !important;
-}
-
-.react-datepicker__day--main-selected.react-datepicker__day--selected {
-  background-color: #ff5722 !important;
-  border-color: #ff5722 !important;
-}
-.legend-main-selected {
-  background-color: #ff5722;
-}
