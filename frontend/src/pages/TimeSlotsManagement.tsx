@@ -89,10 +89,10 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
   const [isLoadingTimes, setIsLoadingTimes] = useState<boolean>(true);
   const [isLoadingExisting, setIsLoadingExisting] = useState<boolean>(false);
 
-  // 🔥 NOVO: Dias com horários cadastrados
+  // Dias com horários cadastrados
   const [daysWithSlots, setDaysWithSlots] = useState<Set<string>>(new Set());
 
-  // 🔥 ATUALIZAR: Função para verificar dias com slots
+  // Função para verificar dias com slots
   const updateDaysWithSlots = (slots: DayTimeSlot[]) => {
     const daysSet = new Set<string>();
     slots.forEach(slot => {
@@ -101,17 +101,17 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
     setDaysWithSlots(daysSet);
   };
 
-  // 🔥 CORRIGIR: Inicializar schedule apenas com datas do mês atual
+  // Inicializar schedule apenas com datas do mês atual
   const initializeMonthSchedule = (month: Date = currentMonth) => {
     const monthStart = startOfMonth(month);
     const monthEnd = endOfMonth(month);
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
     
-    // 🔥 FILTRAR: Manter apenas dados do mês atual
+    //Manter apenas dados do mês atual
     const newSchedule: DaySchedule[] = days.map(day => {
       const dateString = formatDateJST(day);
       
-      // 🔥 MANTER dados existentes apenas se forem do mês atual
+      //MANTER dados existentes apenas se forem do mês atual
       const existingDay = monthSchedule.find(schedule => schedule.date === dateString);
       
       return {
@@ -121,16 +121,16 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
     });
     
     setMonthSchedule(newSchedule);
-    console.log(`Schedule inicializado para ${format(month, 'yyyy年MM月')}: ${newSchedule.length} dias`);
+    // console.log(`Schedule inicializado para ${format(month, 'yyyy年MM月')}: ${newSchedule.length} dias`);
   };
 
-  // 🔥 FUNÇÃO: Obter horários selecionados para a data atual
+  //FUNÇÃO: Obter horários selecionados para a data atual
   const getSelectedTimesForDate = (date: string): string[] => {
     const daySchedule = monthSchedule.find(day => day.date === date);
     return daySchedule ? daySchedule.selectedTimes : [];
   };
 
-  // 🔥 FUNÇÃO: Atualizar horários para uma data específica
+  // FUNÇÃO: Atualizar horários para uma data específica
   const updateSelectedTimesForDate = (date: string, times: string[]) => {
     setMonthSchedule(prev => 
       prev.map(day => 
@@ -139,7 +139,7 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
     );
   };
 
-  // 🔥 NOVO: Função para renderizar dias personalizados no calendário
+  // Função para renderizar dias personalizados no calendário
   const renderDayContents = (dayOfMonth: number, date: Date) => {
     const dateString = formatDateJST(date);
     const hasSlots = daysWithSlots.has(dateString);
@@ -203,7 +203,7 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
   };
 
   // Aplicar a mesma configuração a todos os dias do mês
-  // 🔥 CORRIGIR: Selecionar todos os dias do MÊS ATUAL
+  // Selecionar todos os dias do MÊS ATUAL
 const handleSelectAllDays = (): void => {
   const allTimes = timeSlots.map(slot => slot.time_value);
   
@@ -211,7 +211,7 @@ const handleSelectAllDays = (): void => {
     const currentMonthString = format(currentMonth, 'yyyy-MM');
     
     return prev.map(day => {
-      // 🔥 APLICAR apenas a dias do mês atual
+      // apenas a dias do mês atual
       if (day.date.startsWith(currentMonthString)) {
         return {
           ...day,
@@ -226,13 +226,13 @@ const handleSelectAllDays = (): void => {
   setIsError(false);
 };
 
-// 🔥 CORRIGIR: Deselecionar todos os dias do MÊS ATUAL
+// Deselecionar todos os dias do MÊS ATUAL
 const handleDeselectAllDays = (): void => {
   setMonthSchedule(prev => {
     const currentMonthString = format(currentMonth, 'yyyy-MM');
     
     return prev.map(day => {
-      // 🔥 APLICAR apenas a dias do mês atual
+      // APLICAR apenas a dias do mês atual
       if (day.date.startsWith(currentMonthString)) {
         return { ...day, selectedTimes: [] };
       }
@@ -249,7 +249,7 @@ const handleDeselectAllDays = (): void => {
     setCurrentMonth(newMonth); 
     setSelectedDate(startOfMonth(newMonth)); 
 
-    // 🔥 CORRIGIR: Limpar dados de meses anteriores e inicializar novo mês
+    // CORRIGIR: Limpar dados de meses anteriores e inicializar novo mês
     initializeMonthSchedule(newMonth);
   };
   // ----------------------------------------------------
@@ -282,7 +282,7 @@ const handleDeselectAllDays = (): void => {
       const response = await fetch(`${API_BASE_URL}/`);
       const data = await response.json();
       
-      console.log('Dados carregados da API:', data);
+      // console.log('Dados carregados da API:', data);
       
       if (data.success && data.timeslots) {
         setExistingDayTimeSlots(data.timeslots);
@@ -290,14 +290,14 @@ const handleDeselectAllDays = (): void => {
         
         const currentMonthString = format(currentMonth, 'yyyy-MM');
         
-        // 🔥 FILTRAR: Apenas slots do mês atual
+        // FILTRAR: Apenas slots do mês atual
         const currentMonthSlots = data.timeslots.filter((slot: DayTimeSlot) => 
           slot.date.startsWith(currentMonthString)
         );
 
-        console.log(`Slots do mês atual (${currentMonthString}):`, currentMonthSlots.length);
+        // console.log(`Slots do mês atual (${currentMonthString}):`, currentMonthSlots.length);
 
-        // 🔥 CORRIGIR: Sempre inicializar o schedule, mesmo com dados existentes
+        // CORRIGIR: Sempre inicializar o schedule, mesmo com dados existentes
         const monthStart = startOfMonth(currentMonth);
         const monthEnd = endOfMonth(currentMonth);
         const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
@@ -308,7 +308,7 @@ const handleDeselectAllDays = (): void => {
             .filter((slot: DayTimeSlot) => slot.date === dayDate)
             .map((slot: DayTimeSlot) => slot.time);
           
-          console.log(`Data ${dayDate}: ${existingTimesForDay.length} horários existentes`);
+          // console.log(`Data ${dayDate}: ${existingTimesForDay.length} horários existentes`);
           
           return {
             date: dayDate,
@@ -332,7 +332,7 @@ const handleDeselectAllDays = (): void => {
     }
   };
 
-  // 🔥 ATUALIZAR: Função de salvamento para salvar o mês correto
+  // Função de salvamento para salvar o mês correto
 const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
   e.preventDefault();
   setStatusMessage(null);
@@ -361,7 +361,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    // 2. 🔥 CORRIGIR: Filtrar apenas dias do MÊS ATUAL que têm horários
+    // 2 Filtrar apenas dias do MÊS ATUAL que têm horários
     const currentMonthSchedule = monthSchedule.filter(day => 
       day.date.startsWith(currentMonthString) && day.selectedTimes.length > 0
     );
@@ -460,7 +460,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
     }
   };
 
-  // 🔥 ATUALIZAR: useEffect principal
+  // useEffect principal
   useEffect(() => {
     if (activeTab === 'days') {
       const loadData = async () => {
@@ -520,14 +520,14 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
     setSelectedDate(date);
     const dateString = formatDateJST(date);
     
-    console.log(`Dia selecionado: ${dateString}`);
-    console.log(`Datas no monthSchedule:`, monthSchedule.map(d => d.date));
+    // console.log(`Dia selecionado: ${dateString}`);
+    // console.log(`Datas no monthSchedule:`, monthSchedule.map(d => d.date));
     
-    // 🔥 GARANTIR que a data existe no monthSchedule
+    // GARANTIR que a data existe no monthSchedule
     const existingDay = monthSchedule.find(day => day.date === dateString);
     
     if (!existingDay) {
-      console.log(`Data ${dateString} não encontrada, criando entrada...`);
+      // console.log(`Data ${dateString} não encontrada, criando entrada...`);
       setMonthSchedule(prev => [
         ...prev,
         {
@@ -536,7 +536,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
         }
       ]);
     } else {
-      console.log(`Data ${dateString} encontrada, horários:`, existingDay.selectedTimes);
+      // console.log(`Data ${dateString} encontrada, horários:`, existingDay.selectedTimes);
     }
   }
 };
@@ -636,7 +636,6 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
                           </button>
                         </div>
 
-                      {/* 🔥 SUBSTITUIR: DatePicker em vez do calendário customizado */}
                       <div className="date-picker-container">
                         <DatePicker
                           selected={selectedDate}
@@ -668,7 +667,6 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
                               <button 
                                 onClick={() => {
                                     increaseMonth();
-                                    // 🔥 AO CLICAR, ATUALIZA currentMonth para o mês PRÓXIMO
                                     handleMonthChange(startOfMonth(new Date(date.getFullYear(), date.getMonth() + 1, 1))); 
                                 }}
                                 disabled={nextMonthButtonDisabled}
