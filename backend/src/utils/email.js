@@ -3,7 +3,7 @@ const QRCode = require('qrcode');
 const nodemailer = require('nodemailer');
 
 // Certifique-se de que estas variáveis de ambiente estão sendo lidas
-const resend = new Resend(process.env.RESEND_API_KEY || "re_ecUCJmMg_9n5TprDshhvgTGMWrcf7NJdz");
+const resend = new Resend(process.env.RESEND_API_KEY || "re_c8hnBVtD_JX19Sk4HsVZ7kayHwWFG16ZG");
 
 const EMAIL_CONFIG = {
   fromName: process.env.EMAIL_FROM_NAME,
@@ -70,7 +70,7 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
                 <table style="width: 400px; margin-bottom: 20px; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
                     <tr>
                         <td style="width: 120px; padding: 15px 0px 15px 15px; vertical-align: top;">
-                            <img src="${process.env.EMAIL_USER_SITE}/image/${cake.name.toLowerCase().replace(/\s+/g, '-')}.jpg" 
+                            <img src="${process.env.EMAIL_USER_SITE}/image/${cake.image}" 
                                 alt="${cake.name}" 
                                 width="100" 
                                 style="border-radius: 6px; border: 1px solid #ddd;"
@@ -139,14 +139,14 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
 async function sendOrderUpdateNotification(orderData) {
     const qrCodeBuffer = await QRCode.toBuffer(String(orderData.id_order).padStart(4, "0"), { type: 'png', width: 400 });
     const qrCodeContentId = 'qrcode_order_id';
-
+console.table(orderData);
     const cakeListHtml = orderData.cakes.map(cake => {
         const cakeTotalPrice = (cake.price) * cake.amount;
         return `
             <table style="width: 400px; margin-bottom: 20px; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
                 <tr>
                     <td style="width: 120px; padding: 15px 0px 15px 15px; vertical-align: top;">
-                        <img src="${process.env.EMAIL_USER_SITE}/image/${cake.name.toLowerCase().replace(/\s+/g, '-')}.jpg" 
+                        <img src="${process.env.EMAIL_USER_SITE}/image/${cake.image}" 
                             alt="${cake.name}" 
                             width="100" 
                             style="border-radius: 6px; border: 1px solid #ddd;"
@@ -170,7 +170,7 @@ async function sendOrderUpdateNotification(orderData) {
     }, 0);
 
     const mailOptions = {
-        from: `"Test" <${EMAIL_CONFIG.fromResend}>`,
+        from: `"Patisserie Test" <${EMAIL_CONFIG.fromResend}>`,
         to: [
             orderData.email, 
             EMAIL_CONFIG.fromGmail

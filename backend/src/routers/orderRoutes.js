@@ -9,6 +9,7 @@ const {
 
 
 // POST /api/reservar - Criar Novo Pedido
+// POST /api/reservar - Criar Novo Pedido
 router.post('/reservar', async (req, res) => {
   const newOrder = req.body;
   const conn = await pool.getConnection();
@@ -25,10 +26,18 @@ router.post('/reservar', async (req, res) => {
     
     // 2️⃣ Inserir relação pedido <-> bolos e atualizar estoque
     for (const orderCake of newOrder.cakes) {
+      // Buscar o preço da tabela cake_sizes
+      const [priceResult] = await conn.query(
+        'SELECT price FROM cake_sizes WHERE cake_id=? AND size=?',
+        [orderCake.cake_id, orderCake.size]
+      );
+      
+      const price = priceResult[0]?.price;
+      
       // inserir na tabela order_cakes
       await conn.query(
         'INSERT INTO order_cakes (order_id, cake_id, size, amount, message_cake) VALUES (?,?,?,?,?)',
-        [orderId, orderCake.cake_id, orderCake.size, orderCake.amount, orderCake.message_cake]
+        [orderId, orderCake.cake_id, orderCake.size, orderCake.amount, orderCake.message_cake, price]
       );
       
       // atualizar estoque
@@ -38,8 +47,34 @@ router.post('/reservar', async (req, res) => {
       );
     }
     
-    // 3️⃣ Enviar Email de Confirmação (usando utilitário)
-    await sendNewOrderConfirmation(newOrder, orderId);
+    // 3️⃣ Buscar informações completas dos bolos para o email
+    const [cakesWithDetails] = await conn.query(
+      `SELECT oc.*, c.name, c.image, cs.price
+       FROM order_cakes oc 
+       JOIN cakes c ON oc.cake_id = c.id 
+       JOIN cake_sizes cs ON oc.cake_id = cs.cake_id AND oc.size = cs.size
+       WHERE oc.order_id = ?`,
+      [orderId]
+    );
+
+    // console.log('🍰 Bolos com detalhes (POST):', cakesWithDetails);
+
+    // 4️⃣ Preparar dados completos para o email
+    const orderDataForEmail = {
+      ...newOrder,
+      cakes: cakesWithDetails.map(cake => ({
+        cake_id: cake.cake_id,
+        name: cake.name,
+        image: cake.image,
+        amount: cake.amount,
+        size: cake.size,
+        message_cake: cake.message_cake,
+        price: cake.price
+      }))
+    };
+
+    // 5️⃣ Enviar Email de Confirmação (usando utilitário)
+    await sendNewOrderConfirmation(orderDataForEmail, orderId);
 
     await conn.commit();
     res.json({ success: true, id: orderId });
@@ -80,6 +115,14 @@ router.put('/orders/:id_order', async (req, res) => {
       [first_name, last_name, email, tel, date, pickupHour, message, status, id_order]
     );
 
+    const [existingCakes] = await conn.query(
+      `SELECT oc.*, c.name, c.image 
+       FROM order_cakes oc 
+       JOIN cakes c ON oc.cake_id = c.id 
+       WHERE oc.order_id = ?`,
+      [id_order]
+    );
+
     // 3. Remover cakes antigos e inserir novos (Simplificando a lógica complexa de estoque para apenas remoção/inserção)
     // O ideal seria implementar a função `adjustStock` para gerenciar as diferenças com precisão.
     // Por enquanto, usaremos a lógica de cancelamento/reativação baseada no status.
@@ -91,6 +134,15 @@ router.put('/orders/:id_order', async (req, res) => {
         [id_order, cake.cake_id, cake.amount, cake.size, cake.message_cake || '']
       );
     }
+
+    const [newCakesWithDetails] = await conn.query(
+       `SELECT oc.*, c.name, c.image, cs.price
+       FROM order_cakes oc 
+       JOIN cakes c ON oc.cake_id = c.id 
+       JOIN cake_sizes cs ON oc.cake_id = cs.cake_id AND oc.size = cs.size
+       WHERE oc.order_id = ?`,
+       [id_order]
+    );
 
     // 4. Lógica de estoque para cancelamento/reativação
     if (status === 'e' && previousStatus !== 'e') {
@@ -112,7 +164,21 @@ router.put('/orders/:id_order', async (req, res) => {
     }
 
     // 5. Enviar Email de Atualização (usando utilitário)
-    const orderDataForEmail = { id_order, first_name, last_name, email, date, pickupHour, message, cakes };
+    const orderDataForEmail = { 
+      id_order, first_name, last_name, email, date, pickupHour, message, 
+      cakes:  newCakesWithDetails.map(cake => ({
+        cake_id: cake.cake_id,
+        name: cake.name,
+        image: cake.image,
+        amount: cake.amount,
+        size: cake.size,
+        message_cake: cake.message_cake,
+        price: cake.price
+      }))
+    };
+
+    // console.log('📧 Dados para email:', orderDataForEmail);
+
     await sendOrderUpdateNotification(orderDataForEmail);
     
     await conn.commit();

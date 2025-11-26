@@ -167,8 +167,8 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
         }`}
       >
         {dayOfMonth}
-        {hasSlots && <div className="day-slot-indicator" title="Horários cadastrados"></div>}
-        {isPartiallySelected && <span className="calendar-day-partial-indicator">•</span>}
+        {/* {hasSlots && <div className="day-slot-indicator" title="Horários cadastrados"></div>} */}
+        {isPartiallySelected && <span className="day-slot-indicator"></span>}
       </div>
     );
   };
