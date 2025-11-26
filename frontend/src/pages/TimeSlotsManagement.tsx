@@ -101,21 +101,27 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
     setDaysWithSlots(daysSet);
   };
 
-  // 🔥 ATUALIZAR: Função para inicializar o schedule
+  // 🔥 CORRIGIR: Inicializar schedule apenas com datas do mês atual
   const initializeMonthSchedule = (month: Date = currentMonth) => {
     const monthStart = startOfMonth(month);
     const monthEnd = endOfMonth(month);
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
     
-    // const allTimeValues = timeSlots.map(slot => slot.time_value);
-    
-    const newSchedule: DaySchedule[] = days.map(day => ({
-      date: formatDateJST(day),
-      // selectedTimes: [...allTimeValues] 
-      selectedTimes: [] 
-    }));
+    // 🔥 FILTRAR: Manter apenas dados do mês atual
+    const newSchedule: DaySchedule[] = days.map(day => {
+      const dateString = formatDateJST(day);
+      
+      // 🔥 MANTER dados existentes apenas se forem do mês atual
+      const existingDay = monthSchedule.find(schedule => schedule.date === dateString);
+      
+      return {
+        date: dateString,
+        selectedTimes: existingDay?.selectedTimes || [] // Manter existentes ou array vazio
+      };
+    });
     
     setMonthSchedule(newSchedule);
+    console.log(`Schedule inicializado para ${format(month, 'yyyy年MM月')}: ${newSchedule.length} dias`);
   };
 
   // 🔥 FUNÇÃO: Obter horários selecionados para a data atual
@@ -197,32 +203,53 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
   };
 
   // Aplicar a mesma configuração a todos os dias do mês
-  const handleSelectAllDays = (): void => {
-    // const allTimes = timeSlots.map(slot => slot.time_value);
-    setMonthSchedule(prev =>
-      prev.map(day => ({
-        ...day,
-        selectedTimes: [...timeSlots.map(t => t.time_value)]
-      }))
-    );
-    setStatusMessage(`${format(currentMonth, 'yyyy年MM月', { locale: ja })}のすべての日を選択しました。`);
-    setIsError(false);
-  };
+  // 🔥 CORRIGIR: Selecionar todos os dias do MÊS ATUAL
+const handleSelectAllDays = (): void => {
+  const allTimes = timeSlots.map(slot => slot.time_value);
+  
+  setMonthSchedule(prev => {
+    const currentMonthString = format(currentMonth, 'yyyy-MM');
+    
+    return prev.map(day => {
+      // 🔥 APLICAR apenas a dias do mês atual
+      if (day.date.startsWith(currentMonthString)) {
+        return {
+          ...day,
+          selectedTimes: [...allTimes]
+        };
+      }
+      return day; // Manter outros meses inalterados
+    });
+  });
+  
+  setStatusMessage(`${format(currentMonth, 'yyyy年MM月', { locale: ja })}のすべての日を選択しました。`);
+  setIsError(false);
+};
 
-  // Resetar todos os dias para todos os horários selecionados
-  const handleDeselectAllDays = (): void => {
-    setMonthSchedule(prev => 
-      prev.map(day => ({ ...day, selectedTimes: []}))
-    );
-     setStatusMessage(`${format(currentMonth, 'yyyy年MM月', { locale: ja })}のすべての日の時間帯を解除しました。`);
-     setIsError(false);
-  };
+// 🔥 CORRIGIR: Deselecionar todos os dias do MÊS ATUAL
+const handleDeselectAllDays = (): void => {
+  setMonthSchedule(prev => {
+    const currentMonthString = format(currentMonth, 'yyyy-MM');
+    
+    return prev.map(day => {
+      // 🔥 APLICAR apenas a dias do mês atual
+      if (day.date.startsWith(currentMonthString)) {
+        return { ...day, selectedTimes: [] };
+      }
+      return day; // Manter outros meses inalterados
+    });
+  });
+  
+  setStatusMessage(`${format(currentMonth, 'yyyy年MM月', { locale: ja })}のすべての日の時間帯を解除しました。`);
+  setIsError(false);
+};
 
   const handleMonthChange = (newMonth: Date) => {
     setViewedMonth(newMonth);
     setCurrentMonth(newMonth); 
     setSelectedDate(startOfMonth(newMonth)); 
 
+    // 🔥 CORRIGIR: Limpar dados de meses anteriores e inicializar novo mês
     initializeMonthSchedule(newMonth);
   };
   // ----------------------------------------------------
@@ -248,37 +275,36 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
     }
   };
 
-  // 🔥 ATUALIZAR: Função para carregar dados existentes do mês correto
-const loadExistingData = async () => {
-  try {
-    setIsLoadingExisting(true);
-    const response = await fetch(`${API_BASE_URL}/`);
-    const data = await response.json();
-    
-    console.log('Dados carregados da API:', data);
-    
-    if (data.success && data.timeslots) {
-      setExistingDayTimeSlots(data.timeslots);
+  // 🔥 CORRIGIR: Carregar dados existentes apenas do mês atual
+  const loadExistingData = async () => {
+    try {
+      setIsLoadingExisting(true);
+      const response = await fetch(`${API_BASE_URL}/`);
+      const data = await response.json();
       
-      // 🔥 ATUALIZAR: Atualizar dias com slots
-      updateDaysWithSlots(data.timeslots);
+      console.log('Dados carregados da API:', data);
       
-      const currentMonthString = format(currentMonth, 'yyyy-MM');
-      const currentMonthSlots = data.timeslots.filter((slot: DayTimeSlot) => 
-        slot.date.startsWith(currentMonthString)
-      );
+      if (data.success && data.timeslots) {
+        setExistingDayTimeSlots(data.timeslots);
+        updateDaysWithSlots(data.timeslots);
+        
+        const currentMonthString = format(currentMonth, 'yyyy-MM');
+        
+        // 🔥 FILTRAR: Apenas slots do mês atual
+        const currentMonthSlots = data.timeslots.filter((slot: DayTimeSlot) => 
+          slot.date.startsWith(currentMonthString)
+        );
 
-      console.log(`Slots do mês atual (${currentMonthString}):`, currentMonthSlots.length);
+        console.log(`Slots do mês atual (${currentMonthString}):`, currentMonthSlots.length);
 
-      // Se há dados para o mês atual, sincronizar
-      if (currentMonthSlots.length > 0) {
+        // 🔥 CORRIGIR: Sempre inicializar o schedule, mesmo com dados existentes
         const monthStart = startOfMonth(currentMonth);
         const monthEnd = endOfMonth(currentMonth);
         const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
         
         const newSchedule: DaySchedule[] = monthDays.map(day => {
           const dayDate = formatDateJST(day);
-          const existingTimesForDay = data.timeslots
+          const existingTimesForDay = currentMonthSlots
             .filter((slot: DayTimeSlot) => slot.date === dayDate)
             .map((slot: DayTimeSlot) => slot.time);
           
@@ -291,25 +317,20 @@ const loadExistingData = async () => {
         });
         
         setMonthSchedule(newSchedule);
-        console.log('Schedule sincronizado com dados existentes');
+        console.log('Schedule sincronizado APENAS com dados do mês atual');
+        
       } else {
-        // Se não há dados, inicializar com padrão
-        console.log('Nenhum dado existente, inicializando com padrão');
-        // initializeMonthSchedule();
+        // Se não há timeslots, inicializar com padrão
+        console.log('Resposta sem timeslots, inicializando com padrão');
+        initializeMonthSchedule();
       }
-    } else {
-      // Se não há timeslots, inicializar com padrão
-      console.log('Resposta sem timeslots, inicializando com padrão');
+    } catch (error) {
+      console.error('既存データ読み込みエラー:', error);
       initializeMonthSchedule();
+    } finally {
+      setIsLoadingExisting(false);
     }
-  } catch (error) {
-    console.error('既存データ読み込みエラー:', error);
-    // Em caso de erro, inicializar com padrão
-    initializeMonthSchedule();
-  } finally {
-    setIsLoadingExisting(false);
-  }
-};
+  };
 
   // 🔥 ATUALIZAR: Função de salvamento para salvar o mês correto
 const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
@@ -319,10 +340,9 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
   setIsLoading(true);
 
   try {
-    // let totalInserted = 0;
     let totalDeleted = 0;
 
-    // 1. Primeiro deletar TODOS os slots existentes do mês ATUAL
+    // 1. Deletar apenas slots do mês ATUAL
     const currentMonthString = format(currentMonth, 'yyyy-MM');
     const slotsToDelete = existingDayTimeSlots.filter(slot => 
       slot.date.startsWith(currentMonthString)
@@ -330,7 +350,6 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
 
     console.log(`Deletando ${slotsToDelete.length} slots existentes do mês ${currentMonthString}`);
 
-    // Deletar em paralelo para melhor performance
     const deletePromises = slotsToDelete.map(slot => deleteTimeSlot(slot.id));
     const deleteResults = await Promise.allSettled(deletePromises);
     
@@ -340,18 +359,19 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
 
     console.log(`${totalDeleted} slots deletados com sucesso`);
 
-    // 2. Aguardar um pouco para garantir que as deleções foram processadas
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    // 3. 🔥 CORRIGIR: Filtrar apenas dias que têm horários selecionados
-    const daysWithTimes = monthSchedule.filter(day => day.selectedTimes.length > 0);
+    // 2. 🔥 CORRIGIR: Filtrar apenas dias do MÊS ATUAL que têm horários
+    const currentMonthSchedule = monthSchedule.filter(day => 
+      day.date.startsWith(currentMonthString) && day.selectedTimes.length > 0
+    );
     
-    console.log(`Dias com horários para salvar no mês ${currentMonthString}: ${daysWithTimes.length} de ${monthSchedule.length}`);
+    console.log(`Dias do mês ${currentMonthString} com horários: ${currentMonthSchedule.length}`);
 
-    // 4. Depois adicionar os novos slots baseados no monthSchedule atual
+    // 3. Processar apenas dias do mês atual
     const timeConfigs = new Map<string, string[]>();
     
-    daysWithTimes.forEach(day => {
+    currentMonthSchedule.forEach(day => {
       if (day.selectedTimes.length > 0) {
         const timeKey = day.selectedTimes.join(',');
         if (!timeConfigs.has(timeKey)) {
@@ -361,7 +381,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
       }
     });
 
-    console.log(`Configurações únicas a serem enviadas: ${timeConfigs.size}`);
+    console.log(`Configurações únicas do mês atual: ${timeConfigs.size}`);
 
     // Para cada configuração única de horários, enviar em lote
     for (const [timeKey, dates] of timeConfigs) {
@@ -387,25 +407,19 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
         throw new Error(data.error || `日付 ${dates[0]} などの登録に失敗しました。`);
       }
 
-      // totalInserted += data.inserted;
       console.log(`Lote inserido: ${data.inserted}, ignorados: ${data.skipped}`);
     }
 
-    // 5. Atualizar a lista de slots existentes
+    // 4. Atualizar a lista de slots existentes
     await loadExistingData();
 
-    // 6. 🔥 ATUALIZAR: Mensagem de resultado mais específica
-    let message = `時間帯を更新しました。`;
+    let message = `${format(currentMonth, 'yyyy年MM月', { locale: ja })}の時間帯を更新しました。`;
     
     if (totalDeleted > 0) {
-      message += ``;
+      message += ` ${totalDeleted}個の既存スロットを削除し、`;
     }
     
-    // if (totalInserted > 0) {
-    //   message += ` ${totalInserted}個の新しい時間帯を追加しました（${daysWithTimes.length}日分）。`;
-    // } else {
-    //   message += ` すべての時間帯を削除しました。`;
-    // }
+    message += ` ${currentMonthSchedule.length}日分の設定を保存しました。`;
 
     setStatusMessage(message);
     setIsError(false);
