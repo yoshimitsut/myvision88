@@ -220,6 +220,9 @@ body {
       .yassumi {
         color: transparent;
       }
+      .selectable {
+        display: none;
+      }
     }
     .day-content {
       color: transparent;
