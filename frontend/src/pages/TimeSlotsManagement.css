@@ -108,8 +108,14 @@ input[type="submit"] {
 }
 
 .timeslot-batch-creator__submit-button:disabled {
-  opacity: 0.6;
+  opacity: 0.8;
   cursor: not-allowed;
+}
+
+.calendar-day--none-selected {
+  background-color: #fff !important;
+  color: #383838 !important;
+  font-weight:normal !important;
 }
 
 .timeslot-batch-creator__submit-button:hover:not(:disabled) {
@@ -416,14 +422,14 @@ input[type="submit"] {
 }
 
 .timeslot-batch-creator__bulk-button--reset-all {
-  background: #6c757d;
+  background: #28a745;
   color: white;
-  border-color: #6c757d;
+  border-color: #28a745;
 }
 
 .timeslot-batch-creator__bulk-button--reset-all:hover:not(:disabled) {
-  background: #545b62;
-  border-color: #545b62;
+  background: #28a745;
+  border-color: #28a745;
 }
 
 .timeslot-batch-creator-header {
