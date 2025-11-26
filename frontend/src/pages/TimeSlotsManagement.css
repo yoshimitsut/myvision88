@@ -520,14 +520,15 @@ input[type="submit"] {
 }
 
 .react-datepicker__day--has-slots {
-  background-color: #e3f2fd;
+  background-color: #41a93bcd;
   border-radius: 5px;
   font-weight: bold;
+  color: #fff;
 }
 
-.react-datepicker__day--has-slots:hover {
-  background-color: #bbdefb;
-}
+/* .react-datepicker__day--has-slots:hover {
+  background-color: #58be52cd;
+} */
 
 .day-slot-indicator {
   position: absolute;
@@ -535,16 +536,14 @@ input[type="submit"] {
   right: 2px;
   width: 6px;
   height: 6px;
-  background-color: #000000a8;
+  background-color: #ff0000a8;
   border-radius: 5px;
 }
 
 .calendar-day--fully-selected {
   background-color: #0a9a02 !important;
   color: white !important;
-
 }
-
 
 .react-datepicker__day--today {
   background-color: #828282d9 !important;
@@ -586,7 +585,7 @@ input[type="submit"] {
 }
 
 .legend-has-slots {
-  background-color: #e3f2fd;
+  background-color: #e3fdeb;
 }
 
 .legend-today {

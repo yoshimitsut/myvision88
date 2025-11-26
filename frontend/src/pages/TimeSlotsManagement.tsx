@@ -319,7 +319,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
   setIsLoading(true);
 
   try {
-    let totalInserted = 0;
+    // let totalInserted = 0;
     let totalDeleted = 0;
 
     // 1. Primeiro deletar TODOS os slots existentes do mês ATUAL
@@ -387,7 +387,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
         throw new Error(data.error || `日付 ${dates[0]} などの登録に失敗しました。`);
       }
 
-      totalInserted += data.inserted;
+      // totalInserted += data.inserted;
       console.log(`Lote inserido: ${data.inserted}, ignorados: ${data.skipped}`);
     }
 
@@ -395,17 +395,17 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
     await loadExistingData();
 
     // 6. 🔥 ATUALIZAR: Mensagem de resultado mais específica
-    let message = `成功！${format(currentMonth, 'yyyy年MM月', { locale: ja })}の時間帯を更新しました。`;
+    let message = `時間帯を更新しました。`;
     
     if (totalDeleted > 0) {
-      message += ` ${totalDeleted}個の古い時間帯を削除し、`;
+      message += ``;
     }
     
-    if (totalInserted > 0) {
-      message += ` ${totalInserted}個の新しい時間帯を追加しました（${daysWithTimes.length}日分）。`;
-    } else {
-      message += ` すべての時間帯を削除しました。`;
-    }
+    // if (totalInserted > 0) {
+    //   message += ` ${totalInserted}個の新しい時間帯を追加しました（${daysWithTimes.length}日分）。`;
+    // } else {
+    //   message += ` すべての時間帯を削除しました。`;
+    // }
 
     setStatusMessage(message);
     setIsError(false);

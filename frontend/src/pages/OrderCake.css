@@ -193,8 +193,9 @@ body {
 
   .react-datepicker-wrapper{
     width: 100%;
+    border: 1px solid #c0bfbf;
+    border-radius: 5px;
   }
-
 
   .react-datepicker__input-container input {
     /* padding: 12px 16px; */
