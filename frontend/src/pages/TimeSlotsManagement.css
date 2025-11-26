@@ -535,24 +535,24 @@ input[type="submit"] {
   right: 2px;
   width: 6px;
   height: 6px;
-  background-color: #00f7ffa8;
+  background-color: #000000a8;
   border-radius: 5px;
 }
 
 .calendar-day--fully-selected {
-  background-color: #1842bf !important;
+  background-color: #0a9a02 !important;
   color: white !important;
 
 }
 
 
 .react-datepicker__day--today {
-  background-color: #3a2a95d9 !important;
+  background-color: #828282d9 !important;
   border-radius: 5px;
 }
 
 .react-datepicker__day--selected {
-  background-color: #399586 !important;
+  background-color: #1026cc !important;
   color: white !important;
 }
 
