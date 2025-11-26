@@ -638,12 +638,24 @@ input[type="submit"] {
 }
 
 @media (max-width: 680px) {
+  .timeslot-batch-creator {
+    padding: 1rem;
+  }
+  
+  .timeslot-batch-creator__tab-content {
+    padding: 0.5rem !important;
+  }
+
+  .react-datepicker__day--outside-month {
+    height: 1px !important;
+  }
+
   .react-datepicker__day-name, 
   .react-datepicker__day, 
   .react-datepicker__time-name {
     font-size: 0.9rem;
-    width: 7vw;
-    /* height: 2.3rem; */
+    width: 9vw;
+    height: 2.5rem;
     /* border: 1px solid #000; */
   }
 }
