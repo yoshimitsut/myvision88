@@ -446,6 +446,43 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
     }
   };
 
+  // 🔥 DEBUG: Adicione este useEffect temporariamente para identificar o problema
+useEffect(() => {
+  const checkClickableElements = () => {
+    console.log('=== VERIFICANDO ELEMENTOS CLICÁVEIS ===');
+    
+    // Verificar botões de seleção em massa
+    const bulkButtons = document.querySelectorAll('.timeslot-batch-creator__bulk-button');
+    console.log(`Botões de seleção em massa: ${bulkButtons.length}`);
+    
+    bulkButtons.forEach((button, index) => {
+      const rect = button.getBoundingClientRect();
+      const isVisible = rect.width > 0 && rect.height > 0;
+      const style = window.getComputedStyle(button);
+      const isClickable = style.pointerEvents !== 'none' && 
+                         style.cursor !== 'not-allowed';
+      
+      console.log(`Botão ${index + 1}:`, {
+        texto: button.textContent,
+        visível: isVisible,
+        clicável: isClickable,
+        pointerEvents: style.pointerEvents,
+        cursor: style.cursor,
+        zIndex: style.zIndex
+      });
+    });
+
+    // Verificar botões do calendário
+    const calendarButtons = document.querySelectorAll('.calendar-header button');
+    console.log(`Botões do calendário: ${calendarButtons.length}`);
+  };
+
+  // Executar a verificação após um pequeno delay
+  const timer = setTimeout(checkClickableElements, 1000);
+  
+  return () => clearTimeout(timer);
+}, [activeTab, currentMonth, selectedDate]);
+
   // 🔥 ATUALIZAR: useEffect principal
   useEffect(() => {
     if (activeTab === 'days') {

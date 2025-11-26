@@ -1,4 +1,128 @@
-/* TimeslotBatchCreator.css */
+/* 🔥 CORREÇÃO PARA BUG DE CLIQUE */
+.timeslot-batch-creator {
+  position: relative;
+  z-index: 1;
+}
+
+/* Garantir que os botões fiquem acima de outros elementos */
+.timeslot-batch-creator__bulk-button,
+.timeslot-batch-creator__submit-button,
+.timeslot-batch-creator__add-button,
+.timeslot-batch-creator__delete-time-button,
+.timeslot-batch-creator__time-button {
+  position: relative;
+  z-index: 10;
+  cursor: pointer !important;
+}
+
+/* Corrigir sobreposição do DatePicker */
+.react-datepicker {
+  position: relative;
+  z-index: 5 !important;
+}
+
+.react-datepicker__month-container {
+  position: relative;
+  z-index: 6 !important;
+}
+
+/* Garantir que os dias do calendário sejam clicáveis */
+.react-datepicker__day {
+  position: relative;
+  z-index: 7 !important;
+  cursor: pointer !important;
+}
+
+.react-datepicker__day-content {
+  position: relative;
+  z-index: 8 !important;
+}
+
+/* Corrigir header do calendário */
+.calendar-header {
+  position: relative;
+  z-index: 9 !important;
+}
+
+.calendar-header button {
+  position: relative;
+  z-index: 10 !important;
+  cursor: pointer !important;
+}
+
+/* 🔥 CORREÇÃO ESPECÍFICA PARA OS BOTÕES DE SELEÇÃO EM MASSA */
+.timeslot-batch-selec-all-day {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.timeslot-batch-selec-all-day button {
+  position: relative;
+  z-index: 21 !important;
+  cursor: pointer !important;
+}
+
+.timeslot-batch-selec-all {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.timeslot-batch-selec-all button {
+  position: relative;
+  z-index: 21 !important;
+  cursor: pointer !important;
+}
+
+/* 🔥 CORREÇÃO PARA O CONTEÚDO PRINCIPAL */
+.timeslot-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.timeslot-add-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* 🔥 CORREÇÃO PARA BOTÕES DESABILITADOS */
+.timeslot-batch-creator__bulk-button:disabled,
+.timeslot-batch-creator__submit-button:disabled,
+.timeslot-batch-creator__add-button:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+/* 🔥 CORREÇÃO ESPECÍFICA PARA O BOTÃO DE SALVAR */
+.timeslot-batch-creator__submit-div {
+  position: relative;
+  z-index: 25;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+/* 🔥 GARANTIR QUE OS FORMULÁRIOS NÃO TENHAM OVERFLOW ESCONDIDO */
+.timeslot-batch-creator__day-management,
+.timeslot-batch-creator__time-management {
+  position: relative;
+  z-index: 1;
+  overflow: visible !important;
+}
+
+.timeslot-batch-creator__form-group {
+  position: relative;
+  z-index: 2;
+  overflow: visible !important;
+}
 
 /* RESET MAIS AGRESSIVO - Use apenas se necessário */
 * {
