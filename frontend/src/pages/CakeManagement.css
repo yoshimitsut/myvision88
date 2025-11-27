@@ -39,6 +39,12 @@
   background: #e9ecef;
 }
 
+.cake-list-admin {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+}
+
 /* Lista de Bolos */
 .cakes-grid {
   display: grid;
@@ -53,6 +59,10 @@
   background: white;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   transition: transform 0.2s ease;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .cake-card:hover {

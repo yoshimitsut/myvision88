@@ -38,6 +38,57 @@ const formatDateJP = (dateString) => {
   return `${year}年${month}月${day}日`;
 };
 
+async function testResend() {
+    try {
+        console.log('🧪 Testando Resend...');
+        
+        const result = await resend.emails.send({
+            from: 'onboarding@resend.dev',
+            to: 'delivered@resend.dev',
+            subject: 'Teste Resend - ' + new Date().toISOString(),
+            html: '<strong>Teste funcionando! 🎉</strong>'
+        });
+
+        console.log('✅ Teste Resend OK:', result);
+        return result;
+    } catch (error) {
+        console.error('❌ Teste Resend FALHOU:', error);
+        return null;
+    }
+}
+
+// 🔥 ADICIONAR: Teste com e-mail real
+async function testResendRealEmail() {
+    try {
+        console.log('🧪 Testando Resend com e-mail real...');
+        
+        const result = await resend.emails.send({
+            from: 'onboarding@resend.dev',
+            to: 'shimitsutanaka@gmail.com',
+            subject: 'Teste Resend - E-mail Real',
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: green;">✅ Resend Funcionando!</h2>
+                    <p>Este é um teste de envio para e-mail real.</p>
+                    <p><strong>Data:</strong> ${new Date().toLocaleString()}</p>
+                </div>
+            `
+        });
+
+        console.log('✅ Teste e-mail real OK:', result);
+        return result;
+    } catch (error) {
+        console.error('❌ Teste e-mail real FALHOU:', error);
+        
+        // Detalhes do erro
+        if (error.message) {
+            console.log('Mensagem de erro:', error.message);
+        }
+        return null;
+    }
+}
+
+
 /**
  * Envia o email de confirmação de novo pedido.
  * @param {object} newOrder - Dados do novo pedido.
@@ -115,7 +166,7 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
     `;
 
     await resend.emails.send({
-      from: `"${EMAIL_CONFIG.fromName}" <${EMAIL_CONFIG.fromResend}>`,
+      from: `"${EMAIL_CONFIG.fromName}" <onboarding@resend.dev>`,
       to: [
         newOrder.email, 
         EMAIL_CONFIG.fromGmail
@@ -310,5 +361,7 @@ async function sendCancellationNotification(order, cakesDetails) {
 module.exports = {
     sendNewOrderConfirmation,
     sendOrderUpdateNotification,
-    sendCancellationNotification
+    sendCancellationNotification,
+    testResend, // 🔥 EXPORTAR função de teste
+    testResendRealEmail // 🔥 EXPORTAR função de teste real
 };

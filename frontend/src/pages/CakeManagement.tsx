@@ -320,7 +320,7 @@ const uploadImage = async (file: File): Promise<string> => {
       {/* タブの内容 */}
       <div className="tab-content">
         {activeTab === 'list' && (
-          <div className="cake-list">
+          <div className="cake-list-admin">
             <h2>登録済みケーキ一覧</h2>
             
             {cakes.length === 0 ? (
