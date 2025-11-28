@@ -53,8 +53,7 @@ services:
     expose:
       - "80"
     networks:
-      - myvision88_yoyaku-backend 
-      - proxy-tier
+      - beurre_mou_proxy-tier
 
 volumes:
   myvision88_yoyaku_mysql_data:
