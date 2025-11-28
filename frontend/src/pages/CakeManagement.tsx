@@ -343,44 +343,46 @@ const uploadImage = async (file: File): Promise<string> => {
                       )}
                     </div>
                     
-                    <div className="cake-info">
-                      <h3>{cake.name}</h3>
-                      {cake.description && (
-                        <p className="cake-description">{cake.description}</p>
-                      )}
-                      
-                      <div className="cake-sizes">
-                        <h4>サイズ:</h4>
-                        {cake.sizes.length === 0 ? (
-                          <p className="no-sizes">登録されているサイズがありません</p>
-                        ) : (
-                          <ul>
-                            {cake.sizes.map(size => (
-                              <li key={size.id}>
-                                <span className="size-name">{size.size}</span>
-                                <span className="size-details">
-                                  在庫: {size.stock} | ¥{size.price.toLocaleString('ja-JP')}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
+                    <div className='cake-info-actions'>
+                      <div className="cake-info">
+                        <h3>{cake.name}</h3>
+                        {cake.description && (
+                          <p className="cake-description">{cake.description}</p>
                         )}
+                        
+                        <div className="cake-sizes">
+                          <h4>サイズ:</h4>
+                          {cake.sizes.length === 0 ? (
+                            <p className="no-sizes">登録されているサイズがありません</p>
+                          ) : (
+                            <ul>
+                              {cake.sizes.map(size => (
+                                <li key={size.id}>
+                                  <span className="size-name">{size.size}</span>
+                                  <span className="size-details">
+                                    在庫: {size.stock} | ¥{size.price.toLocaleString('ja-JP')}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="cake-actions">
-                      <button 
-                        className="edit-btn"
-                        onClick={() => handleEditCake(cake)}
-                      >
-                        ✏️ 編集
-                      </button>
-                      <button 
-                        className="delete-btn"
-                        onClick={() => handleDeleteCake(cake.id)}
-                      >
-                        🗑️ 削除
-                      </button>
+                      <div className="cake-actions">
+                        <button 
+                          className="edit-btn"
+                          onClick={() => handleEditCake(cake)}
+                        >
+                          ✏️ 編集
+                        </button>
+                        <button 
+                          className="delete-btn"
+                          onClick={() => handleDeleteCake(cake.id)}
+                        >
+                          🗑️ 削除
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
