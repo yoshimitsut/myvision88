@@ -38,7 +38,7 @@ services:
       - db
     networks:
       - myvision88_yoyaku-backend
-      - beurre_mou_proxy-tier 
+      - proxy-tier 
 
   frontend:
     build: ./frontend
@@ -54,13 +54,11 @@ services:
       - "80"
     networks:
       - myvision88_yoyaku-backend 
-      - beurre_mou_proxy-tier 
+      - proxy-tier
 
 volumes:
   myvision88_yoyaku_mysql_data:
 
 networks:
-  myvision88_yoyaku-backend:
-    driver: bridge
-  beurre_mou_proxy-tier:
+  proxy-tier:
     external: true
