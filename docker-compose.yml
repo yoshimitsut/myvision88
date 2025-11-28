@@ -32,6 +32,8 @@ services:
       - VIRTUAL_HOST=${API_DOMAIN}
       - VIRTUAL_PORT=3001
       - LETSENCRYPT_HOST=${API_DOMAIN}
+    expose:
+      - "3001"
     depends_on:
       - db
     networks:
@@ -48,6 +50,8 @@ services:
       - VIRTUAL_PORT=80
       - LETSENCRYPT_HOST=${FRONTEND_DOMAIN}
       - VITE_API_URL=${BACKEND_DOMAIN}
+    expose:
+      - "80"
     networks:
       - myvision88_yoyaku-backend 
       - beurre_mou_proxy-tier 
