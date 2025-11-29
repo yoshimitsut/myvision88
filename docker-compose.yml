@@ -1,6 +1,9 @@
 version: '3.9'
 
 services:
+  # ===========================
+  # DATABASE (somente rede interna)
+  # ===========================
   db:
     image: mysql:8.0
     container_name: mysql-myvision88
@@ -15,8 +18,11 @@ services:
     volumes:
       - myvision88_yoyaku_mysql_data:/var/lib/mysql 
     networks:
-      - beurre_mou_proxy-tier
+      - myvision88_yoyaku-backend   # rede interna apenas
 
+  # ===========================
+  # BACKEND (rede interna + proxy)
+  # ===========================
   backend:
     build: ./backend
     container_name: myvision88-backend
@@ -37,9 +43,12 @@ services:
     depends_on:
       - db
     networks:
-      - myvision88_yoyaku-backend
-      - beurre_mou_proxy-tier
+      - myvision88_yoyaku-backend   # comunicação com o banco
+      - beurre_mou_proxy-tier       # conexão com nginx-proxy existente
 
+  # ===========================
+  # FRONTEND (somente no proxy)
+  # ===========================
   frontend:
     build: ./frontend
     container_name: myvision88-frontend
@@ -53,12 +62,17 @@ services:
     expose:
       - "80"
     networks:
-      - myvision88_yoyaku-backend
       - beurre_mou_proxy-tier
 
+# ===========================
+# VOLUMES
+# ===========================
 volumes:
   myvision88_yoyaku_mysql_data:
 
+# ===========================
+# NETWORKS
+# ===========================
 networks:
   myvision88_yoyaku-backend:
     driver: bridge
