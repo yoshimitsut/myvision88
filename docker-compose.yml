@@ -15,7 +15,7 @@ services:
     volumes:
       - myvision88_yoyaku_mysql_data:/var/lib/mysql 
     networks:
-      - myvision88_yoyaku-backend
+      - beurre_mou_proxy-tier
 
   backend:
     build: ./backend
