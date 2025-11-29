@@ -14,8 +14,8 @@ services:
       TZ: "Asia/Tokyo"
     volumes:
       - myvision88_yoyaku_mysql_data:/var/lib/mysql 
-    # Remove a rede myvision88_yoyaku-backend
-    # O Docker criará uma rede default automaticamente
+    networks:
+      - myvision88_yoyaku-backend
 
   backend:
     build: ./backend
@@ -37,8 +37,8 @@ services:
     depends_on:
       - db
     networks:
-      # Mantém apenas proxy-tier
-      - proxy-tier 
+      - myvision88_yoyaku-backend
+      - beurre_mou_proxy-tier
 
   frontend:
     build: ./frontend
@@ -53,12 +53,15 @@ services:
     expose:
       - "80"
     networks:
-      - proxy-tier
+      - myvision88_yoyaku-backend
+      - beurre_mou_proxy-tier
 
 volumes:
   myvision88_yoyaku_mysql_data:
 
 networks:
-  # Remove myvision88_yoyaku-backend, mantém apenas proxy-tier
-  proxy-tier:
+  myvision88_yoyaku-backend:
+    driver: bridge
+
+  beurre_mou_proxy-tier:
     external: true
