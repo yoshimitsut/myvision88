@@ -146,6 +146,8 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
             <p style="font-size: 24px; font-weight: bold; margin: 10px 0 0 0;">
                 ¥${Math.trunc(totalGeral).toLocaleString("ja-JP")}
                 <span style="font-size: 14px; font-weight: normal;">(税込)</span>
+                <br/>
+                <p><strong style="color: red;">事前にお支払い（ご来店）頂く事で、<br />受け取り当日スムーズにお渡しができます。</strong><p>
             </p>
         </div>
         
@@ -243,7 +245,8 @@ console.table(orderData);
                     <p style="font-size: 24px; font-weight: bold; margin: 10px 0 0 0;">
                         ¥${Math.trunc(totalGeral).toLocaleString("ja-JP")}
                         <span style="font-size: 14px; font-weight: normal;">(税込)</span>
-                    </p>
+                        <br/>
+                        <p><strong style="color: red;">事前にお支払い（ご来店）頂く事で、<br />受け取り当日スムーズにお渡しができます。</strong><p>
                 </div>
 
                 <div style="text-align: center; margin: 20px 0;">
