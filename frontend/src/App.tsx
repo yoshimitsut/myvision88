@@ -14,7 +14,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import TimeSlotsManagement from './pages/TimeSlotsManagement';
 import CakeManagement from './pages/CakeManagement';
 import StoreManagement from './pages/StoreManagement';
-import NewsletterManagement from './pages/NewslleterManagement';
+import NewsletterManagement from './pages/NewsletterManagement';
 
 function App() {
   return (

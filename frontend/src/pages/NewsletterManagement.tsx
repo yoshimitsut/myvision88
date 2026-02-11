@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Newsletter } from "../types/types";
-import "./NewslleterManagement.css";
+import "./NewsletterManagement.css";
 
 import { formatDateJP } from "../utils/formatDateJP";
 
