@@ -111,3 +111,12 @@ export const STATUS_OPTIONS: StatusOption[] = [
   { value: "d", label: "お渡し済" },
   { value: "e", label: "キャンセル" },
 ];
+
+export type Newsletter = {
+  id?: number;
+  title: string;
+  content: string;
+  source: "site" | "instagram";
+  link?: string;
+  updated_at: string;
+};

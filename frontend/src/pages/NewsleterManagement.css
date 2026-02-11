@@ -1,0 +1,133 @@
+.newsletter-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.newsletter-container h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  text-align: center;
+}
+
+/* 🔹 FORM */
+.newsletter-form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.newsletter-form input,
+.newsletter-form textarea,
+.newsletter-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.newsletter-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.newsletter-form button {
+  align-self: flex-start;
+  padding: 10px 20px;
+  background: rgb(110, 149, 185);
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  color: #fff;
+}
+
+.newsletter-form button:hover {
+  background: rgb(47, 69, 89);
+}
+
+/* 🔹 LISTA */
+.newsletter-content {
+  display: flex;
+  align-items: center;
+  /* gap: 5px; */
+}
+
+.newsletter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.newsletter-item {
+  padding: 14px;
+  border-radius: 8px;
+  background: #fafafa;
+  border: 1px solid #eee;
+  display: flex; 
+  justify-content: space-between
+}
+
+.newsletter-edit {
+  display: flex;
+  flex-direction: column;
+}
+
+.newsletter-item strong {
+  font-size: 14px;
+}
+
+.newsletter-item span {
+  font-size: 16px;
+  color: #666;
+}
+
+.newsletter-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+}
+
+.newsletter-actions button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.newsletter-actions button.edit {
+  background: #4caf50;
+  color: #fff;
+}
+
+.newsletter-actions button.delete {
+  background: #e53935;
+  color: #fff;
+}
+
+.newsletter-actions button:hover {
+  opacity: 0.9;
+}
+
+.newsletter-source {
+  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.instagram-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.newsletter-title {
+  line-height: 1.2;
+}
+

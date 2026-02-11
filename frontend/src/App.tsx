@@ -13,6 +13,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import TimeSlotsManagement from './pages/TimeSlotsManagement';
 import CakeManagement from './pages/CakeManagement';
+import StoreManagement from './pages/StoreManagement';
+import NewsletterManagement from './pages/NewslleterManagement';
 
 function App() {
   return (
@@ -50,6 +52,18 @@ function App() {
         <Route path="/admin/cake" element={
           <ProtectedRoute>
             <CakeManagement />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/store" element={
+          <ProtectedRoute>
+            <StoreManagement />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/newsletter" element={
+          <ProtectedRoute>
+            <NewsletterManagement />
           </ProtectedRoute>
         } />
 

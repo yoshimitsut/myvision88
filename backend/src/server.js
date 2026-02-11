@@ -6,6 +6,7 @@ require('dotenv').config();
 const cakeRoutes = require('./routers/cakeRoutes');
 const orderRoutes = require('./routers/orderRoutes');
 const timeslotRoutes = require('./routers/timeslotRoutes');
+const newsletterRoutes = require('./routers/newsletter.js');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -35,6 +36,7 @@ app.use('/api/cake', cakeRoutes);
 app.use('/api/timeslots', timeslotRoutes);
 // Rotas de pedido (reservar, orders/list)
 app.use('/api/', orderRoutes); 
+app.use("/api/newsletters", newsletterRoutes);
 
 
 app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));
