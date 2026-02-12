@@ -15,6 +15,7 @@ import TimeSlotsManagement from './pages/TimeSlotsManagement';
 import CakeManagement from './pages/CakeManagement';
 import StoreManagement from './pages/StoreManagement';
 import NewsletterManagement from './pages/NewsletterManagement';
+import Newsletter from './pages/Newsletter';
 
 function App() {
   return (
@@ -65,6 +66,10 @@ function App() {
           <ProtectedRoute>
             <NewsletterManagement />
           </ProtectedRoute>
+        } />
+
+        <Route path="/newsletter" element={
+            <Newsletter />
         } />
 
         <Route path="/store-login" element={<StoreLogin />} />

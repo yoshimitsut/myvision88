@@ -14,7 +14,7 @@ router.get("/", async (_, res) => {
         source,
         link,
         DATE_FORMAT(updated_at, '%Y-%m-%d') AS updated_at
-       FROM newsletters ORDER BY updated_at DESC`
+       FROM newsletters ORDER BY updated_at DESC, id DESC`
     );
     res.json(rows);
   } catch (err) {

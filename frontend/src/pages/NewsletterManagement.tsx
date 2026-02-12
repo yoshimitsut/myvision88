@@ -81,7 +81,14 @@ export default function NewsletterPage() {
   }
 
   return (
-    <div className="newsletter-container">
+    <div className="newsletter-container"
+    style={
+        { 
+          maxWidth: '800px',
+          margin: '40px auto',
+          padding: '24px'
+        }}
+    >
       <h2>ニュースレター管理</h2>
 
       <div className="newsletter-form">

@@ -1,7 +1,7 @@
 .newsletter-container {
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 24px;
+  /* max-width: 800px; */
+  /* margin: 40px auto; */
+  /* padding: 24px; */
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -61,14 +61,14 @@
 .newsletter-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  /* gap: 12px; */
 }
 
 .newsletter-item {
   padding: 14px;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   background: #fafafa;
-  border: 1px solid #eee;
+  border-bottom: 1px solid #3d3d3d;
   display: flex; 
   justify-content: space-between
 }
