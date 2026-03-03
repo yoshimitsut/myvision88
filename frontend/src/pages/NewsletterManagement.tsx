@@ -151,7 +151,7 @@ export default function NewsletterPage() {
                     href={normalizeLink(item.link)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="newsletter-tetle"
+                    className="newsletter-title"
                   >
                     {item.title}
                   </a> 

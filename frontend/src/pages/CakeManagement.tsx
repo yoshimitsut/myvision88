@@ -88,65 +88,6 @@ export default function CakeManagement() {
     }
   };
 
-const uploadImage = async (file: File): Promise<string> => {
-  const formData = new FormData();
-  formData.append("image", file);
-
-  try {
-    const response = await fetch(`${API_URL}/api/cake/upload`, {
-      method: "POST",
-      body: formData,
-    });
-
-    // Lê o body apenas UMA vez
-    const responseText = await response.text();
-
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (err) {
-      console.error("JSON Parse Error:", err);
-      console.error("Server Raw Response:", responseText);
-
-      throw new Error(`サーバーエラー: ${response.status} ${responseText}`);
-    }
-
-    if (!response.ok) {
-      throw new Error(data.error || `HTTP error! status: ${response.status}`);
-    }
-
-    if (data.success && data.filename) {
-      return data.filename;
-    }
-
-    throw new Error(data.error || "画像のアップロードエラー");
-  } catch (error) {
-    console.error("Upload Error:", error);
-    throw error;
-  }
-};
-
-  // 🔹 新しいサイズを追加
-  const addNewSize = () => {
-    setNewSizes(prev => [...prev, { size: '', stock: 0, price: 0 }]);
-  };
-
-  // 🔹 サイズを削除
-  const removeSize = (index: number) => {
-    if (newSizes.length > 1) {
-      setNewSizes(prev => prev.filter((_, i) => i !== index));
-    }
-  };
-
-  // 🔹 サイズを更新
-  const updateSize = (index: number, field: keyof CakeSize, value: string | number) => {
-    setNewSizes(prev => 
-      prev.map((size, i) => 
-        i === index ? { ...size, [field]: value } : size
-      )
-    );
-  };
-
   // 🔹 フォームをクリア
   const clearForm = () => {
     setNewCake({ name: '', description: '', image: '' });
@@ -165,28 +106,34 @@ const uploadImage = async (file: File): Promise<string> => {
       // データを検証
       if (!newCake.name.trim()) {
         alert('ケーキ名は必須です');
+        setUploading(false);
         return;
       }
 
-      let imageFilename = newCake.image;
-
-      // 新しい画像が選択された場合はアップロード
+      // FormDataを使用してマルチパートデータとして送信
+      const formData = new FormData();
+      
+      // テキストフィールドを追加
+      formData.append('name', newCake.name.trim());
+      formData.append('description', newCake.description?.trim() || '');
+      
+      // サイズをJSON文字列として追加
+      const validSizes = newSizes.filter(size => size.size.trim() !== '');
+      formData.append('sizes', JSON.stringify(validSizes));
+      
+      // 画像があれば追加
       if (selectedImage) {
-        imageFilename = await uploadImage(selectedImage);
+        formData.append('image', selectedImage);
       }
 
-      const payload = {
-        ...newCake,
-        image: imageFilename,
-        sizes: newSizes.filter(size => size.size.trim() !== '')
-      };
+      console.log('📦 Enviando FormData:');
+      console.log('📦 name:', newCake.name);
+      console.log('📦 sizes:', JSON.stringify(validSizes));
+      console.log('📦 image:', selectedImage?.name);
 
       const response = await fetch(`${API_URL}/api/cake`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+        body: formData, // Não usar Content-Type header! O browser vai setar automaticamente com boundary
       });
 
       const data = await response.json();
@@ -200,10 +147,89 @@ const uploadImage = async (file: File): Promise<string> => {
         throw new Error(data.error || 'ケーキの追加に失敗しました');
       }
     } catch (err) {
+      console.error('❌ Erro:', err);
       alert(err instanceof Error ? err.message : 'ケーキの追加に失敗しました');
     } finally {
       setUploading(false);
     }
+  };
+
+  // 🔹 ケーキを更新
+  const handleUpdateCake = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!editingCake) return;
+
+    try {
+      setUploading(true);
+
+      // FormDataを使用
+      const formData = new FormData();
+      
+      formData.append('name', newCake.name.trim());
+      formData.append('description', newCake.description?.trim() || '');
+      
+      const validSizes = newSizes.filter(size => size.size.trim() !== '');
+      formData.append('sizes', JSON.stringify(validSizes));
+      
+      // 既存の画像ファイル名を送信
+      if (newCake.image && !selectedImage) {
+        formData.append('existingImage', newCake.image);
+      }
+      
+      // 新しい画像があれば追加
+      if (selectedImage) {
+        formData.append('image', selectedImage);
+      }
+
+      console.log('📦 Update FormData:');
+      console.log('📦 name:', newCake.name);
+      console.log('📦 sizes:', JSON.stringify(validSizes));
+      console.log('📦 new image:', selectedImage?.name);
+
+      const response = await fetch(`${API_URL}/api/cake/${editingCake.id}`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('ケーキが正常に更新されました！');
+        setEditingCake(null);
+        clearForm();
+        setActiveTab('list');
+        fetchCakes();
+      } else {
+        throw new Error(data.error || 'ケーキの更新に失敗しました');
+      }
+    } catch (err) {
+      console.error('❌ Erro:', err);
+      alert(err instanceof Error ? err.message : 'ケーキの更新に失敗しました');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // 🔹 新しいサイズを追加
+  const addNewSize = () => {
+    setNewSizes(prev => [...prev, { size: '', stock: 0, price: 0 }]);
+  };
+
+  // 🔹 サイズを削除
+  const removeSize = (index: number) => {
+    if (newSizes.length > 1) {
+      setNewSizes(prev => prev.filter((_, i) => i !== index));
+    }
+  };
+
+  // 🔹 サイズを更新
+  const updateSize = (index: number, field: keyof Omit<CakeSize, 'id'>, value: string | number) => {
+    setNewSizes(prev => 
+      prev.map((size, i) => 
+        i === index ? { ...size, [field]: field === 'size' ? value : Number(value) || 0 } : size
+      )
+    );
   };
 
   // 🔹 ケーキを削除
@@ -240,54 +266,6 @@ const uploadImage = async (file: File): Promise<string> => {
     setImagePreview(cake.image ? `${API_URL}/image/${cake.image}` : null);
     setSelectedImage(null);
     setActiveTab('add');
-  };
-
-  // 🔹 ケーキを更新
-  const handleUpdateCake = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!editingCake) return;
-
-    try {
-      setUploading(true);
-
-      let imageFilename = newCake.image;
-
-      // 新しい画像が選択された場合はアップロード
-      if (selectedImage) {
-        imageFilename = await uploadImage(selectedImage);
-      }
-
-      const payload = {
-        ...newCake,
-        image: imageFilename,
-        sizes: newSizes.filter(size => size.size.trim() !== '')
-      };
-
-      const response = await fetch(`${API_URL}/api/cake/${editingCake.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        alert('ケーキが正常に更新されました！');
-        setEditingCake(null);
-        clearForm();
-        setActiveTab('list');
-        fetchCakes();
-      } else {
-        throw new Error(data.error || 'ケーキの更新に失敗しました');
-      }
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'ケーキの更新に失敗しました');
-    } finally {
-      setUploading(false);
-    }
   };
 
   if (loading) return <div className="loading">ケーキを読み込み中...</div>;
@@ -334,9 +312,9 @@ const uploadImage = async (file: File): Promise<string> => {
                         <img 
                           src={`${API_URL}/image/${cake.image}`} 
                           alt={cake.name}
-                          // onError={(e) => {
-                          //   (e.target as HTMLImageElement).src = '/image/default-cake.jpg';
-                          // }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/default-cake.jpg';
+                          }}
                         />
                       ) : (
                         <div className="no-image">📷 画像なし</div>
@@ -395,7 +373,7 @@ const uploadImage = async (file: File): Promise<string> => {
           <div className="cake-form-container">
             <h2>{editingCake ? 'ケーキを編集' : '新しいケーキを追加'}</h2>
             
-            <form onSubmit={editingCake ? handleUpdateCake : handleAddCake} className="cake-form">
+            <form onSubmit={editingCake ? handleUpdateCake : handleAddCake} className="cake-form" encType="multipart/form-data">
               <div className="form-group">
                 <label htmlFor="name">ケーキ名 *</label>
                 <input
@@ -419,12 +397,12 @@ const uploadImage = async (file: File): Promise<string> => {
                 />
               </div>
 
-              {/* 🔹 更新された画像セクション */}
+              {/* 🔹 画像セクション */}
               <div className="form-group">
                 <label htmlFor="image">ケーキ画像</label>
                 
                 {/* 画像プレビュー */}
-                {(imagePreview || newCake.image) && (
+                {(imagePreview || (editingCake && newCake.image && !selectedImage)) && (
                   <div className="image-preview">
                     <img 
                       src={imagePreview || `${API_URL}/image/${newCake.image}`} 
@@ -463,18 +441,6 @@ const uploadImage = async (file: File): Promise<string> => {
                   </div>
                 )}
 
-                {/* 画像名のテキスト入力（フォールバック用） */}
-                {/* <div style={{ marginTop: '10px' }}>
-                  <small>またはファイル名を入力:</small>
-                  <input
-                    type="text"
-                    value={newCake.image}
-                    onChange={(e) => setNewCake(prev => ({ ...prev, image: e.target.value }))}
-                    placeholder="例: chocolate-cake.jpg"
-                    style={{ marginTop: '5px' }}
-                  />
-                </div> */}
-
                 <small className="help-text">
                   対応形式: JPG, PNG, GIF。最大サイズ: 5MB
                 </small>
@@ -497,7 +463,7 @@ const uploadImage = async (file: File): Promise<string> => {
                         type="text"
                         value={size.size}
                         onChange={(e) => updateSize(index, 'size', e.target.value)}
-                        // placeholder="例: P, M, G, 1kg, 2kg"
+                        placeholder="例: P, M, G, 1kg"
                         required
                       />
                     </div>
@@ -507,7 +473,7 @@ const uploadImage = async (file: File): Promise<string> => {
                       <input
                         type="number"
                         value={size.stock}
-                        onChange={(e) => updateSize(index, 'stock', parseInt(e.target.value) || 0)}
+                        onChange={(e) => updateSize(index, 'stock', e.target.value)}
                         min="0"
                         required
                       />
@@ -516,9 +482,9 @@ const uploadImage = async (file: File): Promise<string> => {
                     <div className="size-input-group">
                       <label>価格 (¥)</label>
                       <input
-                        type="text"
+                        type="number"
                         value={size.price}
-                        onChange={(e) => updateSize(index, 'price', parseInt(e.target.value) || 0)}
+                        onChange={(e) => updateSize(index, 'price', e.target.value)}
                         min="0"
                         required
                       />
