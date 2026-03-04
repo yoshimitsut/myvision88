@@ -18,7 +18,7 @@ services:
     volumes:
       - myvision88_yoyaku_mysql_data:/var/lib/mysql 
     networks:
-      - myvision88_yoyaku-backend   # rede interna apenas
+      - myvision88_yoyaku-backend   # rede interna apena s
 
   # ===========================
   # BACKEND (rede interna + proxy)
