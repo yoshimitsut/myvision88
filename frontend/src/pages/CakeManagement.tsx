@@ -17,7 +17,7 @@ interface Cake {
 }
 
 const API_URL = import.meta.env.VITE_API_URL;
-const FOLDER_URL = import.meta.env.FOLDER_URL;
+const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
 
 export default function CakeManagement() {
   const [cakes, setCakes] = useState<Cake[]>([]);

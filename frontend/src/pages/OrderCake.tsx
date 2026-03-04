@@ -10,7 +10,7 @@ import type { Cake, OrderCake, OptionType, MyContainerProps, SizeOption, TimeOpt
 import "./OrderCake.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
-const FOLDER_URL = import.meta.env.FOLDER_URL;
+const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
 
 type CustomOptionType = OptionType & {
   isDisabled?: boolean;
