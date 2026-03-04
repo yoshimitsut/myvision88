@@ -311,7 +311,7 @@ export default function CakeManagement() {
                     <div className="cake-image">
                       {cake.image ? (
                         <img 
-                          src={`${API_URL}/image/${cake.image}`} 
+                          src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`} 
                           alt={cake.name}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = '/default-cake.jpg';
@@ -406,7 +406,7 @@ export default function CakeManagement() {
                 {(imagePreview || (editingCake && newCake.image && !selectedImage)) && (
                   <div className="image-preview">
                     <img 
-                      src={imagePreview || `${API_URL}/image/${newCake.image}`} 
+                      src={imagePreview || `${API_URL}/image/${FOLDER_URL}/${newCake.image}`} 
                       alt="プレビュー" 
                     />
                     <button
