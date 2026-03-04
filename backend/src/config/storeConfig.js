@@ -20,11 +20,11 @@ async function loadStoreConfig(forceReload = false) {
         
         // Retorna cache se válido
         if (!forceReload && storeConfigCache && lastLoadTime && (now - lastLoadTime < CACHE_DURATION)) {
-            console.log('📦 Usando cache das configurações da loja');
+            // console.log('📦 Usando cache das configurações da loja');
             return storeConfigCache;
         }
 
-        console.log('📦 Carregando configurações da loja do banco...');
+        // console.log('📦 Carregando configurações da loja do banco...');
         
         // Verifica se a tabela existe e busca os dados
         const [rows] = await db.query('SELECT * FROM store_info WHERE id = 1 LIMIT 1');
@@ -36,7 +36,7 @@ async function loadStoreConfig(forceReload = false) {
         storeConfigCache = rows[0];
         lastLoadTime = now;
         
-        console.log('✅ Configurações da loja carregadas com sucesso');
+        // console.log('✅ Configurações da loja carregadas com sucesso');
         return storeConfigCache;
         
     } catch (error) {
@@ -74,7 +74,7 @@ async function getStoreConfig(key) {
 function clearStoreCache() {
     storeConfigCache = null;
     lastLoadTime = null;
-    console.log('🧹 Cache das configurações limpo');
+    // console.log('🧹 Cache das configurações limpo');
 }
 
 /**
