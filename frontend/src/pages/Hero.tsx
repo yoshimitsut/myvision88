@@ -4,7 +4,7 @@ import './Hero.css'
 import type { Cake } from '../types/types'
 
 const API_URL = import.meta.env.VITE_API_URL;
-const FOLDER_URL = import.meta.env.VITE_API_URL;
+const FOLDER_URL = import.meta.env.FOLDER_URL;
 
 
 
