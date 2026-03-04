@@ -61,7 +61,8 @@ const storage = multer.diskStorage({
       let fileName = sanitizedName + ext;
       // console.log(`📸 Tentando salvar como: ${fileName}`);
       
-      const uploadPath = path.join(__dirname, '../../image');
+      // const uploadPath = path.join(__dirname, '../../image');
+      const uploadPath = UPLOAD_DIR;
       const fullPath = path.join(uploadPath, fileName);
       
       // Se já existe, adiciona timestamp
@@ -260,7 +261,8 @@ router.put('/:id', (req, res, next) => {
       
       // Deleta imagem antiga
       if (existingCakes[0].image && existingCakes[0].image !== imageFilename) {
-        const oldImagePath = path.join(__dirname, '../../image', existingCakes[0].image);
+        // const oldImagePath = path.join(__dirname, '../../image', existingCakes[0].image);
+        const oldImagePath = path.join(UPLOAD_DIR, existingCakes[0].image);
         if (fs.existsSync(oldImagePath)) {
           fs.unlinkSync(oldImagePath);
           // console.log(`🗑️ Imagem antiga deletada: ${existingCakes[0].image}`);
@@ -420,7 +422,8 @@ router.delete('/:id', async (req, res) => {
 
     // Deleta imagem
     if (existingCakes[0].image) {
-      const imagePath = path.join(__dirname, '../../image', existingCakes[0].image);
+      // const imagePath = path.join(__dirname, '../../image', existingCakes[0].image);
+      const imagePath = path.join(UPLOAD_DIR, existingCakes[0].image);
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
         // console.log(`🗑️ Imagem deletada: ${existingCakes[0].image}`);

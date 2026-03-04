@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+const path = require('path');
+
 // Importar Routers - CORRIGIDO para usar a pasta 'routers' em todas as importações
 const cakeRoutes = require('./routers/cakeRoutes');
 const orderRoutes = require('./routers/orderRoutes');
