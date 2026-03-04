@@ -5,6 +5,9 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+
+const UPLOAD_DIR = path.join(process.cwd(), 'uploads/myvision88');
+
 // Função para sanitizar nome do arquivo
 function sanitizeFileName(name) {
   if (!name) return 'produto';
@@ -28,9 +31,7 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // const uploadPath = path.join(__dirname, '../../image');
     
-    
-    const uploadPath = path.join(process.cwd(), 'uploads/myvision88');//trocar de acordo com o site!
-
+    const uploadPath = UPLOAD_DIR;
 
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
