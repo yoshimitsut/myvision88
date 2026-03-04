@@ -42,6 +42,8 @@ services:
       - "3001"
     depends_on:
       - db
+    volumes:
+      -/var/www/uploads:/app/uploads
     networks:
       - myvision88_yoyaku-backend   # comunicação com o banco
       - beurre_mou_proxy-tier       # conexão com nginx-proxy existente

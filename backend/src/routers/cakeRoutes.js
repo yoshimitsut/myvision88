@@ -26,7 +26,12 @@ function sanitizeFileName(name) {
 // Configuração do multer para arquivos
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, '../../image');
+    // const uploadPath = path.join(__dirname, '../../image');
+    
+    
+    const uploadPath = path.join(process.cwd(), 'uploads/myvision88');//trocar de acordo com o site!
+
+
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
