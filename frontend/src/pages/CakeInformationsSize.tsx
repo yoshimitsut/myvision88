@@ -4,6 +4,7 @@ import type { Cake } from "../types/types";
 import "./CakeInformationsSize.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
+const FOLDER_URL = import.meta.env.FOLDER_URL;
 
 export default function CakeInformations() {
   const [cakes, setCakes] = useState<Cake[]>([]);
@@ -49,7 +50,7 @@ export default function CakeInformations() {
       {/* ========== BOLO ATUAL (DESTAQUE) ========== */}
       <div className="featured-cake">
         <img
-          src={`${API_URL}/image/${selectedCake.image}`}
+          src={`${API_URL}/image/${FOLDER_URL}/${selectedCake.image}`}
           alt={selectedCake.name}
         />
 
@@ -92,7 +93,7 @@ export default function CakeInformations() {
       className="cake-card"
       onClick={() => setCurrentIndex(index)}  // <<< trocar o bolo principal
     >
-      <img src={`${API_URL}/image/${cake.image}`} alt={cake.name} />
+      <img src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`} alt={cake.name} />
       <h4>{cake.name}</h4>
       <p>{cake.description}</p>
 

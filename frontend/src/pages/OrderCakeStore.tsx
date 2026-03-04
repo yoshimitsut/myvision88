@@ -10,6 +10,7 @@ import type { Cake, OrderCake, OptionType, MyContainerProps, SizeOption, TimeOpt
 import "./OrderCake.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
+const FOLDER_URL = import.meta.env.FOLDER_URL;
 
 type CustomOptionType = OptionType & {
   isDisabled?: boolean;
@@ -425,7 +426,7 @@ const isDateAllowed = (date: Date) => {
                     </div>
                   )}
                   {selectedCakeData && (
-                    <img className='img-cake-order' src={`image/${selectedCakeData.image}`} alt={selectedCakeData.name} />
+                    <img className='img-cake-order' src={`image/${FOLDER_URL}/${selectedCakeData.image}`} alt={selectedCakeData.name} />
                   )}
                   <div className='input-group'>
                     <Select<CustomOptionType>

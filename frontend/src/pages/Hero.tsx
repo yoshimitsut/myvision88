@@ -4,6 +4,7 @@ import './Hero.css'
 import type { Cake } from '../types/types'
 
 const API_URL = import.meta.env.VITE_API_URL;
+const FOLDER_URL = import.meta.env.VITE_API_URL;
 
 
 
@@ -62,7 +63,7 @@ export default function Hero() {
           // style={{ cursor: disabled ? "not-allowed" : "pointer" }}
         >
           <img
-            src={`${API_URL}/image/${cake.image}`}
+            src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`}
             alt={cake.name}
             className="hero-img"
           />

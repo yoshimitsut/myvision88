@@ -17,6 +17,7 @@ interface Cake {
 }
 
 const API_URL = import.meta.env.VITE_API_URL;
+const FOLDER_URL = import.meta.env.FOLDER_URL;
 
 export default function CakeManagement() {
   const [cakes, setCakes] = useState<Cake[]>([]);
@@ -263,7 +264,7 @@ export default function CakeManagement() {
       image: cake.image || ''
     });
     setNewSizes(cake.sizes.length > 0 ? cake.sizes : [{ size: '', stock: 0, price: 0 }]);
-    setImagePreview(cake.image ? `${API_URL}/image/${cake.image}` : null);
+    setImagePreview(cake.image ? `${API_URL}/image/${FOLDER_URL}/${cake.image}` : null);
     setSelectedImage(null);
     setActiveTab('add');
   };
