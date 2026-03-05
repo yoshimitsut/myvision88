@@ -91,6 +91,44 @@ async function testResendRealEmail() {
     }
 }
 
+
+// const cakeAttachments = await Promise.all(
+//     orderData.cakes.map(async (cake, index) => {
+//         const imageUrl = `${config.site_back}/image/${config.folder_img}/${cake.image}`;
+//         try {
+//             const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+//             const base64 = Buffer.from(response.data).toString('base64');
+//             const contentType = response.headers['content-type'] || 'image/jpeg';
+//             return {
+//                 index,
+//                 base64Url: `data:${contentType};base64,${base64}`
+//             };
+//         } catch (err) {
+//             console.error('❌ Erro ao buscar imagem:', err.message);
+//             return { index, base64Url: null };
+//         }
+//     })
+// );
+
+
+// //No HTML, troque o cid: por base64 dinâmico:
+
+// // Montar um map para acessar por index facilmente
+// const imageMap = Object.fromEntries(cakeAttachments.map(c => [c.index, c.base64Url]));
+
+// // No .map dos cakes:
+// orderData.cakes.map((cake, index) => {
+//     return `
+//         <img src="${imageMap[index] || ''}" 
+//             alt="${cake.name}" 
+//             width="100"
+//             style="border-radius: 6px; border: 1px solid #ddd; ${!imageMap[index] ? 'display:none' : ''}">
+//     `;
+// })
+
+
+
+
 /**
  * Envia confirmação de novo pedido
  */
