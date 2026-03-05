@@ -50,7 +50,7 @@ export default function CakeInformations() {
       {/* ========== BOLO ATUAL (DESTAQUE) ========== */}
       <div className="featured-cake">
         <img
-          src={`${API_URL}/image/${FOLDER_URL}/${selectedCake.image}`}
+          src={`${API_URL}/images/${FOLDER_URL}/${selectedCake.image}`}
           alt={selectedCake.name}
         />
 
@@ -93,7 +93,7 @@ export default function CakeInformations() {
       className="cake-card"
       onClick={() => setCurrentIndex(index)}  // <<< trocar o bolo principal
     >
-      <img src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`} alt={cake.name} />
+      <img src={`${API_URL}/images/${FOLDER_URL}/${cake.image}`} alt={cake.name} />
       <h4>{cake.name}</h4>
       <p>{cake.description}</p>
 
