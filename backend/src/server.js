@@ -19,7 +19,7 @@ app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
 // app.use('/image', express.static('image'));
-app.use('/images', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/image', express.static(path.join(process.cwd(), 'uploads')));
 
 // Rota de Teste de Conexão (opcional, pode ser movida)
 const pool = require('./config/db'); // Se quiser manter o teste de conexão aqui
