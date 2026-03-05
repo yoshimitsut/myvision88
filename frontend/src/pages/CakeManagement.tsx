@@ -264,7 +264,7 @@ export default function CakeManagement() {
       image: cake.image || ''
     });
     setNewSizes(cake.sizes.length > 0 ? cake.sizes : [{ size: '', stock: 0, price: 0 }]);
-    setImagePreview(cake.image ? `${API_URL}/images/myvision88/${cake.image}` : null);
+    setImagePreview(cake.image ? `${API_URL}/image/myvision88/${cake.image}` : null);
     setSelectedImage(null);
     setActiveTab('add');
   };
