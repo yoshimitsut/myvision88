@@ -50,7 +50,7 @@ export default function CakeInformations() {
       {/* ========== BOLO ATUAL (DESTAQUE) ========== */}
       <div className="featured-cake">
         <img
-          src={`${API_URL}/images/${FOLDER_URL}/${selectedCake.image}`}
+          src={`${API_URL}/image/${FOLDER_URL}/${selectedCake.image}`}
           alt={selectedCake.name}
         />
 
@@ -71,16 +71,18 @@ export default function CakeInformations() {
               ))}
             </tbody>
           </table>
-
-          <button onClick={handleReserve} className="reserve-btn">
-            予約
-          </button>
+          
+            <button onClick={handleReserve} className="reserve-btn-inf">
+              予約
+            </button>
         </div>
 
         {/* seta para próximo */}
-        <button className="next-btn" onClick={nextCake}>
-          ➤
-        </button>
+        <div className="button-next">
+          <button className="next-btn" onClick={nextCake}>
+            ➤
+          </button>
+        </div>
       </div>
 
       {/* ========== LISTA COMPLETA DE BOLOS ========== */}

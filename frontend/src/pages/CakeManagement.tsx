@@ -472,7 +472,7 @@ export default function CakeManagement() {
                     <div className="size-input-group">
                       <label>在庫</label>
                       <input
-                        type="number"
+                        type="text"
                         value={size.stock}
                         onChange={(e) => updateSize(index, 'stock', e.target.value)}
                         min="0"
@@ -483,7 +483,7 @@ export default function CakeManagement() {
                     <div className="size-input-group">
                       <label>価格 (¥)</label>
                       <input
-                        type="number"
+                        type="text"
                         value={size.price}
                         onChange={(e) => updateSize(index, 'price', e.target.value)}
                         min="0"

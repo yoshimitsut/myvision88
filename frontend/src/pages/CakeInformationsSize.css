@@ -5,6 +5,8 @@
   padding: 2rem;
   /* min-height: 100vh; */
   background: #f0f0f0;
+  justify-content: flex-start;
+  height: auto;
 }
 
 /* ============================
@@ -51,6 +53,7 @@
   border: none;
   cursor: pointer;
   transition: 0.2s;
+  margin: 0 5px;
 }
 
 .next-btn:hover {
@@ -80,10 +83,10 @@
    BOTÃO
 ============================ */
 
-.reserve-btn {
+.reserve-btn-inf {
   padding: 0.7rem;
   font-size: 1.2rem;
-  border-radius: 30px;
+  border-radius: 10px;
   background: #333;
   color: white;
   border: none;
@@ -91,7 +94,7 @@
   transition: 0.2s;
 }
 
-.reserve-btn:hover {
+.reserve-btn-inf:hover {
   background: #555;
 }
 
