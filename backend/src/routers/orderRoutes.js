@@ -4,11 +4,11 @@ const pool = require('../config/db'); // Certifique-se de que o caminho está co
 const { 
     sendNewOrderConfirmation, 
     sendOrderUpdateNotification, 
-    sendCancellationNotification 
+    sendCancellationNotification,
+    sendOrderCompletedNotification
 } = require('../utils/email'); 
 
 
-// POST /api/reservar - Criar Novo Pedido
 // POST /api/reservar - Criar Novo Pedido
 router.post('/reservar', async (req, res) => {
   const newOrder = req.body;
@@ -229,6 +229,10 @@ router.put('/reservar/:id_order', async (req, res) => {
       `, [id_order]);
       
       await sendCancellationNotification(order, cakesDetails);
+    }
+
+    if(status === 'd') {
+      await sendOrderCompletedNotification(order);
     }
     
     // 3. Se for reativação, remover estoque

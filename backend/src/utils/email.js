@@ -92,43 +92,6 @@ async function testResendRealEmail() {
 }
 
 
-// const cakeAttachments = await Promise.all(
-//     orderData.cakes.map(async (cake, index) => {
-//         const imageUrl = `${config.site_back}/image/${config.folder_img}/${cake.image}`;
-//         try {
-//             const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-//             const base64 = Buffer.from(response.data).toString('base64');
-//             const contentType = response.headers['content-type'] || 'image/jpeg';
-//             return {
-//                 index,
-//                 base64Url: `data:${contentType};base64,${base64}`
-//             };
-//         } catch (err) {
-//             console.error('❌ Erro ao buscar imagem:', err.message);
-//             return { index, base64Url: null };
-//         }
-//     })
-// );
-
-
-// //No HTML, troque o cid: por base64 dinâmico:
-
-// // Montar um map para acessar por index facilmente
-// const imageMap = Object.fromEntries(cakeAttachments.map(c => [c.index, c.base64Url]));
-
-// // No .map dos cakes:
-// orderData.cakes.map((cake, index) => {
-//     return `
-//         <img src="${imageMap[index] || ''}" 
-//             alt="${cake.name}" 
-//             width="100"
-//             style="border-radius: 6px; border: 1px solid #ddd; ${!imageMap[index] ? 'display:none' : ''}">
-//     `;
-// })
-
-
-
-
 /**
  * Envia confirmação de novo pedido
  */
@@ -411,10 +374,66 @@ async function sendCancellationNotification(order, cakesDetails) {
     }
 }
 
+async function sendOrderCompletedNotification(order) {
+    try {
+        const config = await loadStoreConfig();
+        const transporter = await getTransporter();
+
+        const formattedDate = formatDateJP(order.date);
+
+        const mailOptions = {
+            from: `"${config.store_name}" <${config.mail_store}>`,
+            to: order.email,
+            subject: `ご注文お渡し完了 - 受付番号 ${String(order.id_order).padStart(4, "0")}`,
+            html: `
+                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #2e7d32;">✅ ご注文のお渡しが完了しました</h2>
+                        <p style="color: #666;">ご利用ありがとうございました</p>
+                    </div>
+
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="margin: 0 0 10px 0; color: #333;">注文詳細</h3>
+                        <p><strong>受付番号：</strong> ${String(order.id_order).padStart(4, "0")}</p>
+                        <p><strong>お名前：</strong> ${order.first_name} ${order.last_name}様</p>
+                        <p><strong>受取日：</strong> ${formattedDate}</p>
+                        <p><strong>受取時間：</strong> ${order.pickupHour}</p>
+                    </div>
+
+                    <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border: 1px solid #c8e6c9; margin-bottom: 20px; text-align: center;">
+                        <p style="color: #2e7d32; margin: 0; font-size: 16px;">
+                            またのご利用を心よりお待ちしております。🎂
+                        </p>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                        <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">
+                            <strong style="font-size: large;">${config.store_name}</strong><br>
+                            OPEN ${config.open_hour}<br>
+                            TEL: <a href="tel:${config.tel}" style="color: #007bff;">${config.tel}</a>
+                        </p>
+                        <p style="margin: 0; font-size: 12px; color: #999;">
+                            このメールは自動送信されています
+                        </p>
+                    </div>
+                </div>
+            `
+        };
+
+        const result = await transporter.sendMail(mailOptions);
+        return { success: true, result };
+    } catch (error) {
+        console.error('Error em sendOrderCompletedNotification:', error);
+        throw error;
+    }
+}
+
+
 module.exports = {
     sendNewOrderConfirmation,
     sendOrderUpdateNotification,
     sendCancellationNotification,
+    sendOrderCompletedNotification,
     testResend,
     testResendRealEmail
 };
