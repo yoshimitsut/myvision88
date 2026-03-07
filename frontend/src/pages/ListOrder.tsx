@@ -498,7 +498,7 @@ useEffect(() => {
                     </div>
                   </th>
                   <th>個数</th>
-                  <th>フルーツ盛り</th>
+                  {/* <th>フルーツ盛り</th> */}
                   <th className='message-cell'>メッセージプレート</th>
                   <th className='message-cell'>その他メッセージ</th>
                   <th>電話番号</th>
@@ -887,7 +887,7 @@ useEffect(() => {
                   <th>受取希望日時</th>
                   <th>ご注文のケーキ</th>
                   <th>個数</th>
-                  <th>フルーツ盛り</th>
+                  {/* <th>フルーツ盛り</th> */}
                   <th className='message-cell'>メッセージプレート</th>
                   <th className='message-cell'>その他メッセージ</th>
                   <th>電話番号</th>
@@ -997,7 +997,7 @@ useEffect(() => {
                   <th>受取希望日時</th>
                   <th>ご注文のケーキ</th>
                   <th>個数</th>
-                  <th>フルーツ盛り</th>
+                  {/* <th>フルーツ盛り</th> */}
                   <th>メッセージプレート</th>
                   <th>その他メッセージ</th>
                   <th>電話番号</th>
@@ -1077,7 +1077,7 @@ useEffect(() => {
                   <th>受取希望日時</th>
                   <th>ご注文のケーキ</th>
                   <th>個数</th>
-                  <th>フルーツ盛り</th>
+                  {/* <th>フルーツ盛り</th> */}
                   <th>メッセージプレート</th>
                   <th>その他メッセージ</th>
                   <th>電話番号</th>
@@ -1136,8 +1136,11 @@ useEffect(() => {
         />
 
         <div className='btn-actions'>
+          <button onClick={() => navigate("/admin/cake")} className='list-btn cake-btn'>
+            <img src="/icons/cake7.png" alt="ケーキアイコン" />
+          </button>
           <button onClick={() => navigate("/admin/date")} className='list-btn qrcode-btn'>
-            <img src="/icons/calendar_icon.png" alt="QRコードアイコン" />
+            <img src="/icons/calendar_icon.png" alt="カレンダーアイコン" />
           </button>
           <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
           <button onClick={() => setShowScanner(true)} className='list-btn qrcode-btn'>
