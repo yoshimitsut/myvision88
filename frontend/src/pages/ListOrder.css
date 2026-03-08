@@ -49,6 +49,12 @@ ul {
   display: flex;
 }
 
+.cake-btn{
+  img {
+    padding: 2px;
+  }
+}
+
 .cake-list li {
   list-style: none;
 }
