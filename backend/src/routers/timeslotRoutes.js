@@ -95,7 +95,7 @@ router.post('/batch', async (req, res) => {
 // --------------------------------------------------------------------------------
 router.get('/', async (req, res) => {
   try {
-    const query = `
+    const query = `            
       SELECT
         dt.id,
         d.day_date AS date,

@@ -1,56 +1,24 @@
 // components/DateTimePicker.tsx
-import { useState } from "react";
-import DatePicker  from "react-datepicker";
+import { useState, useEffect, useMemo } from "react";
+import DatePicker from "react-datepicker";
 import Select from "react-select";
 import { ja } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
-import type { 
-  TimeOptionType, 
-  // TimeslotSQL 
-} from "../types/types";
-import { addDays, isAfter, isSameDay, endOfMonth, getDay } from "date-fns";
+import type { TimeOptionType } from "../types/types";
+import { addDays, isSameDay, endOfMonth, getDay, format } from "date-fns";
 
 export type DateTimePickerProps = {
   selectedDate: Date | null;
   setSelectedDate: (date: Date | null) => void;
   selectedTime: string;
   setSelectedTime: (time: string) => void;
-  // allowedDates: Date[];
-  // timeSlotsData?: TimeslotSQL[]; // ← opcional, caso venha do backend
   placeholderDate?: string;
   placeholderTime?: string;
 };
 
-// type MyContainerProps = {
-//   className?: string;
-//   children: ReactNode;
-// };
-
 const today = new Date();
 const diasABloquear = 3;
 const maxDate = endOfMonth(addDays(today, 90));
-
-const diasEspecificosPorMes = [
-  { day: 1, month: 11 }, 
-  { day: 7, month: 11 }, 
-  { day: 8, month: 11 },
-  { day: 9, month: 11 }, 
-  { day: 13, month: 11 }, 
-  { day: 18, month: 11 }, 
-  { day: 19, month: 11 },
-  { day: 25, month: 12 }, 
-  { day: 26, month: 12 }, 
-  { day: 4, month: 12 }, 
-  { day: 5, month: 12 },
-  { day: 7, month: 12 }, 
-  { day: 8, month: 12 }, 
-  { day: 9, month: 12 }, 
-  { day: 13, month: 12 },
-  { day: 18, month: 12 }, 
-  { day: 19, month: 12 }, 
-  { day: 25, month: 12 }, 
-  { day: 26, month: 12 },
-];
 
 const gerarDiasBloqueadosInicio = () => {
   const datas = [];
@@ -62,71 +30,67 @@ const gerarDiasBloqueadosInicio = () => {
   return datas;
 };
 
-const gerarDatasEspecificasComMes = () => {
-  const datas: Date[] = [];
-  diasEspecificosPorMes.forEach(({ day, month }) => {
-    const date = new Date(today.getFullYear(), month, day);
-    if (isAfter(date, today)) datas.push(date);
-  });
-  return datas;
-};
-
-const excludedDates = [
-  ...gerarDiasBloqueadosInicio(),
-  ...gerarDatasEspecificasComMes(),
-];
-
-const defaultTimeSlots: TimeOptionType[] = [
-  { id: 1, value: "11:00〜12:00", label: "11:00〜12:00" },
-  { id: 2, value: "12:00〜13:00", label: "12:00〜13:00" },
-  { id: 3, value: "13:00〜14:00", label: "13:00〜14:00" },
-  { id: 4, value: "14:00〜15:00", label: "14:00〜15:00" },
-  { id: 5, value: "15:00〜16:00", label: "15:00〜16:00" },
-  { id: 6, value: "16:00〜17:00", label: "16:00〜17:00" },
-  { id: 7, value: "17:00〜18:00", label: "17:00〜18:00" },
-  { id: 8, value: "18:00〜19:00", label: "18:00〜19:00" },
-];
-
-
-  const isDateAllowed = (date: Date) => !excludedDates.some((d) => isSameDay(d, date));
+const excludedDatesBase = gerarDiasBloqueadosInicio();
 
 export default function DateTimePicker({
   selectedDate,
   setSelectedDate,
   selectedTime,
   setSelectedTime,
-  // allowedDates,
-  // timeSlotsData,
 }: DateTimePickerProps) {
   const [pickupHour, setPickupHour] = useState(selectedTime || "");
+  const [allTimeslots, setAllTimeslots] = useState<{ id: number; date: string; time: string }[]>([]);
+  const [availableDates, setAvailableDates] = useState<Set<string>>(new Set());
+
+  // Fetch único de todos os timeslots
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/api/timeslots`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setAllTimeslots(data.timeslots);
+          // Monta set de datas disponíveis para filtrar o calendário
+          const dates = new Set<string>(data.timeslots.map((t: { date: string }) => t.date));
+          setAvailableDates(dates);
+        }
+      })
+      .catch((err) => console.error("Erro ao buscar timeslots:", err));
+  }, []);
+
+  const handleDateChange = (date: Date | null) => {
+    setPickupHour("");
+    setSelectedTime("");
+    setSelectedDate(date);
+  }
+  
+  const timeOptions = useMemo(() => {
+    if (!selectedDate) return [];
+    const dateStr = format(selectedDate, "yyyy-MM-dd");
+    return allTimeslots
+      .filter((t) => t.date === dateStr)
+      .map((t) => ({ id: t.id, value: t.time, label: t.time }));
+  }, [selectedDate, allTimeslots]);
+
+  // Data só é selecionável se existir no banco
+  const isDateAllowed = (date: Date) => {
+    if (excludedDatesBase.some((d) => isSameDay(d, date))) return false;
+    const dateStr = format(date, "yyyy-MM-dd");
+    return availableDates.has(dateStr);
+  };
 
   const renderDayContents = (day: number, date: Date) => {
-  const today = new Date();
-  const isBlocked = excludedDates.some((d) => isSameDay(d, date));
-  const isSunday = getDay(date) === 0;
+    const todayNow = new Date();
+    const isBlocked = !isDateAllowed(date);
+    const isSunday = getDay(date) === 0;
+    const isPast = date.getTime() < new Date(todayNow.setHours(0, 0, 0, 0)).getTime();
+    const isGraySunday = isSunday && (isBlocked || isPast);
 
-  // normaliza o horário de "hoje" e compara timestamps
-  const isPast = date.getTime() < new Date(today.setHours(0, 0, 0, 0)).getTime();
-
-  const isGraySunday = isSunday && (isBlocked || isPast);
-
-  return (
-    <div className={`day-cell ${isGraySunday ? "domingo-cinza" : ""}`}>
-      <span>{day}</span>
-    </div>
-  );
-};
-
-
-  // const isDateAllowed = (date: Date) =>
-  //   allowedDates.some((d) => isSameDay(d, date));
-
-  // const timeOptions: TimeOptionType[] = timeSlotsData?.map((slot) => ({
-  //   id: slot.id,
-  //   value: slot.time,
-  //   label: slot.time,
-  //   isDisabled: slot.limit_slots <= 0,
-  // })) || defaultTimeSlots;
+    return (
+      <div className={`day-cell ${isGraySunday ? "domingo-cinza" : ""}`}>
+        <span>{day}</span>
+      </div>
+    );
+  };
 
   return (
     <div className="datetime-picker">
@@ -134,10 +98,9 @@ export default function DateTimePicker({
         <label style={{ paddingLeft: "2px" }}>受け取り希望日</label>
         <DatePicker
           selected={selectedDate}
-          onChange={(date) => setSelectedDate(date)}
+          onChange={handleDateChange}
           minDate={today}
           maxDate={maxDate}
-          excludeDates={excludedDates}
           filterDate={isDateAllowed}
           dateFormat="yyyy年MM月dd日"
           locale={ja}
@@ -149,7 +112,6 @@ export default function DateTimePicker({
           }}
           className="react-datepicker"
           calendarClassName="datepicker-calendar"
-          // calendarContainer={MyContainer}
           required
           renderDayContents={renderDayContents}
         />
@@ -158,18 +120,20 @@ export default function DateTimePicker({
       <div className="input-group-edit">
         <label>受け取り希望時間</label>
         <Select<TimeOptionType>
-          options={defaultTimeSlots}
-          value={defaultTimeSlots.find(h => h.value === pickupHour) || null}
+          options={timeOptions}
+          value={timeOptions.find((h) => h.value === pickupHour) || null}
           onChange={(selected) => {
             const newTime = selected?.value || "";
             setPickupHour(newTime);
             setSelectedTime(newTime);
           }}
           classNamePrefix="react-select"
-          placeholder="時間を選択"
+          placeholder={selectedDate ? "時間を選択" : "先に日付を選択してください"}
           isSearchable={false}
+          isDisabled={!selectedDate}
           required
           isOptionDisabled={(opt) => !!opt.isDisabled}
+          noOptionsMessage={() => "この日は空きがありません"}
         />
       </div>
     </div>

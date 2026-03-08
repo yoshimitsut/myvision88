@@ -8,7 +8,7 @@ const path = require('path');
 const cakeRoutes = require('./routers/cakeRoutes');
 const orderRoutes = require('./routers/orderRoutes');
 const timeslotRoutes = require('./routers/timeslotRoutes');
-const newsletterRoutes = require('./routers/newsletter.js');
+const newsletterRoutes = require('./routers/newsletter');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
