@@ -22,7 +22,7 @@ export default function OrderCake() {
 
   const [cakesData, setCakesData] = useState<Cake[]>([]);
   const [cakes, setCakes] = useState<OrderCake[]>([
-    { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "" }
+    { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "", fruit_option: "無し" }
   ]);
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -181,7 +181,8 @@ const isDateAllowed = (date: Date) => {
           amount: 1,
           size: "",
           price: 1,
-          message_cake: ""
+          message_cake: "",
+          fruit_option: "無し"
         }]);
       }
     }
@@ -208,7 +209,7 @@ const isDateAllowed = (date: Date) => {
   const addCake = () => {
     setCakes(prev => [
       ...prev,
-      { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "" }
+      { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "", fruit_option: "無し" }
     ]);
   };
 
@@ -373,7 +374,8 @@ const isDateAllowed = (date: Date) => {
             amount: 1,
             size: "",
             price: 1,
-            message_cake: ""
+            message_cake: "", 
+            fruit_option: "無し"
           }]);
         }
         setSelectedDate(null);
