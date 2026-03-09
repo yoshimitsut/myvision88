@@ -22,7 +22,7 @@ export default function OrderCake() {
 
   const [cakesData, setCakesData] = useState<Cake[]>([]);
   const [cakes, setCakes] = useState<OrderCake[]>([
-    { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "" }
+    { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "", fruit_option: "無し" }
   ]);
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -181,7 +181,8 @@ const isDateAllowed = (date: Date) => {
           amount: 1,
           size: "",
           price: 1,
-          message_cake: ""
+          message_cake: "",
+          fruit_option: "無し"
         }]);
       }
     }
@@ -208,7 +209,7 @@ const isDateAllowed = (date: Date) => {
   const addCake = () => {
     setCakes(prev => [
       ...prev,
-      { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "" }
+      { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "", fruit_option: "無し" }
     ]);
   };
 
@@ -351,7 +352,8 @@ const isDateAllowed = (date: Date) => {
           amount: c.amount,
           price: c.price,
           size: c.size,
-          message_cake: c.message_cake || ""
+          message_cake: c.message_cake || "",
+          fruit_option: c.fruit_option
         };
       })
     }; 
@@ -373,7 +375,8 @@ const isDateAllowed = (date: Date) => {
             amount: 1,
             size: "",
             price: 1,
-            message_cake: ""
+            message_cake: "",
+            fruit_option: "無し"
           }]);
         }
         setSelectedDate(null);
@@ -482,6 +485,32 @@ const isDateAllowed = (date: Date) => {
                     </div>
                   )}
                   
+                  <div className="input-group-radio">
+                    <div className="pill-group">
+                      <label className={`pill ${item.fruit_option === "無し" ? "active" : ""}`}>
+                        <input
+                          type="radio"
+                          name={`fruit-option-${index}`}  
+                          value="無し"
+                          checked={item.fruit_option === "無し"}
+                          onChange={() => updateCake(index, "fruit_option", "無し")}
+                        />
+                        <span style={{width:"120px", textAlign: "start"}}>通常盛り</span><span style={{width:"5rem", textAlign: "end"}}>+0円</span> 
+                      </label>
+                      <label className={`pill ${item.fruit_option === "有り" ? "active" : ""}`}>
+                        <input
+                          type="radio"
+                          name={`fruit-option-${index}`} 
+                          value="有り"
+                          checked={item.fruit_option === "有り"}
+                          onChange={() => updateCake(index, "fruit_option", "有り")}
+                        />
+                        <span style={{width:"125px", textAlign: "start"}}>フルーツ増し</span><span style={{width:"5rem", textAlign: "end"}}>+648円</span>      
+                      </label>
+                    </div>
+                    <label className='select-group-radio'>*フルーツ盛り</label>
+                  </div>
+
                   <div className='input-group'>
                     <Select<OptionType>
                       options={Array.from({ length: 10 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }))}

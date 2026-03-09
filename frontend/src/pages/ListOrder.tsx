@@ -603,7 +603,7 @@ useEffect(() => {
                     </div>
                   </th>
                   <th>個数</th>
-                  {/* <th>フルーツ盛り</th> */}
+                  <th>フルーツ盛り</th>
                   <th className='message-cell'>メッセージプレート</th>
                   <th className='message-cell'>その他メッセージ</th>
                   <th>電話番号</th>
@@ -652,6 +652,15 @@ useEffect(() => {
                           {order.cakes.map((cake, index) => (
                             <li key={`${order.id_order}-${cake.cake_id}-${index}`}>
                               {cake.amount}
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td style={{ textAlign: "left" }}>
+                        <ul>
+                          {order.cakes.map((cake, index) => (
+                            <li key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                              {cake.fruit_option}
                             </li>
                           ))}
                         </ul>
@@ -797,6 +806,7 @@ useEffect(() => {
                           </div>
                         </th>
                         <th>個数</th>
+                        <th>フルーツ盛り</th>
                         <th className='message-cell'>プレートメッセージ</th>
                         <th className='message-cell'>その他メッセージ</th>
                         <th>電話番号</th>
@@ -860,6 +870,15 @@ useEffect(() => {
                                 {order.cakes.map((cake, index) => (
                                   <li key={`${order.id_order}-${cake.cake_id}-${index}`}>
                                     {cake.amount}
+                                  </li>
+                                ))}
+                              </ul>
+                            </td>
+                            <td style={{ textAlign: "left" }}>
+                              <ul>
+                                {order.cakes.map((cake, index) => (
+                                  <li key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                                    {cake.fruit_option}
                                   </li>
                                 ))}
                               </ul>
@@ -933,6 +952,13 @@ useEffect(() => {
                       </li>
                     ))}
                   </ul>
+                   <ul>
+                    {order.cakes.map((cake, index) => (
+                      <li key={`${cake.cake_id}-${index}`}>
+                        {cake.name} - フルーツ盛り: {cake.fruit_option}
+                      </li>
+                    ))}
+                  </ul>
                   <p>電話番号: {order.tel}</p>
                   <p>メッセージ: {order.message || " "}</p>
                 </details>
@@ -992,7 +1018,7 @@ useEffect(() => {
                   <th>受取希望日時</th>
                   <th>ご注文のケーキ</th>
                   <th>個数</th>
-                  {/* <th>フルーツ盛り</th> */}
+                  <th>フルーツ盛り</th>
                   <th className='message-cell'>メッセージプレート</th>
                   <th className='message-cell'>その他メッセージ</th>
                   <th>電話番号</th>
@@ -1030,6 +1056,13 @@ useEffect(() => {
                       <ul>
                         {order.cakes.map((cake, i) => (
                           <li key={i}>{cake.amount}</li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td>
+                      <ul>
+                        {order.cakes.map((cake, i) => (
+                          <li key={i}>{cake.fruit_option}</li>
                         ))}
                       </ul>
                     </td>
@@ -1102,7 +1135,7 @@ useEffect(() => {
                   <th>受取希望日時</th>
                   <th>ご注文のケーキ</th>
                   <th>個数</th>
-                  {/* <th>フルーツ盛り</th> */}
+                  <th>フルーツ盛り</th>
                   <th>メッセージプレート</th>
                   <th>その他メッセージ</th>
                   <th>電話番号</th>
@@ -1126,6 +1159,13 @@ useEffect(() => {
                       <ul>
                         {order.cakes.map((cake, i) => (
                           <li key={i}>{cake.amount}</li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td>
+                      <ul>
+                        {order.cakes.map((cake, i) => (
+                          <li key={i}>{cake.fruit_option}</li>
                         ))}
                       </ul>
                     </td>
@@ -1182,7 +1222,7 @@ useEffect(() => {
                   <th>受取希望日時</th>
                   <th>ご注文のケーキ</th>
                   <th>個数</th>
-                  {/* <th>フルーツ盛り</th> */}
+                  <th>フルーツ盛り</th>
                   <th>メッセージプレート</th>
                   <th>その他メッセージ</th>
                   <th>電話番号</th>
@@ -1206,6 +1246,13 @@ useEffect(() => {
                       <ul>
                         {order.cakes.map((cake, i) => (
                           <li key={i}>{cake.amount}</li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td>
+                      <ul>
+                        {order.cakes.map((cake, i) => (
+                          <li key={i}>{cake.fruit_option}</li>
                         ))}
                       </ul>
                     </td>
@@ -1312,6 +1359,7 @@ useEffect(() => {
                 <span className='cake-amount'>¥{cake.price.toLocaleString()}</span>
                 <span className='cake-size'>サイズ: {cake.size}</span>
                 <span className='cake-quantity'>個数: {cake.amount}</span>
+                <span className='cake-fruitop'>フルーツ盛り: {cake.fruit_option}</span>
               </li>
             ))}
           </ul>

@@ -1,4 +1,3 @@
-// components/EditOrderModal.tsx
 import { useState, useEffect } from "react";
 import Select, { type SingleValue, type StylesConfig } from "react-select";
 import type { CSSObjectWithLabel, GroupBase } from "react-select";
@@ -6,12 +5,13 @@ import DateTimePicker from "./DateTimePicker";
 import type { Order, Cake, OrderCake, SizeOption } from "../types/types";
 import './EditOrderModal.css';
 import { formatDateForBackend } from "../utils/dateUtils";
+import FruitOptionRadio from "./FruitOptionRadio";
 
 type Props = {
   editingOrder: Order;
   setEditingOrder: (order: Order | null) => void;
   handleSaveEdit: (updatedOrder: Order) => void;
-  isSaving: boolean; // 🔹 ADICIONE ESTA LINHA
+  isSaving: boolean; 
 };
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -20,11 +20,10 @@ export default function EditOrderModal({
   editingOrder, 
   setEditingOrder, 
   handleSaveEdit,
-  isSaving // 🔹 RECEBA A PROP
+  isSaving
 }: Props) {
   const [cakesData, setCakesData] = useState<Cake[]>([]);
   const [cakes, setCakes] = useState<OrderCake[]>(editingOrder.cakes ? [...editingOrder.cakes] : []);
-  // 🔹 REMOVA o estado local isSaving: const [isSaving, setIsSaving] = useState(false);
   
   const [selectedTime, setSelectedTime] = useState(editingOrder.pickupHour || "");
   
@@ -60,7 +59,8 @@ export default function EditOrderModal({
         amount: 1,
         size: firstSize?.size || "",
         price: firstSize?.price || 0,
-        message_cake: ""
+        message_cake: "",
+        fruit_option: "無し"
       };
       
       setCakes(prev => [...prev, newCake]);
@@ -363,6 +363,15 @@ export default function EditOrderModal({
                         />
                       </div>
                     </div>
+
+                    <FruitOptionRadio
+                      value={cake.fruit_option}
+                      onChange={(val) => !isSaving && updateCake(index, "fruit_option", val)} // 🔹 Não permite mudar durante salvamento
+                      name={`fruit-option-${index}`}
+                      label="フルーツ盛り"
+                      required
+                    />
+
                     {/* 数量 */}
                     <div style={{ width: "49%" }}>
                       <label>数量:</label>

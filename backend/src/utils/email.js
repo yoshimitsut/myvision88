@@ -42,57 +42,6 @@ const formatDateJP = (dateString) => {
 };
 
 /**
- * Teste Resend
- */
-async function testResend() {
-    try {
-        const resend = await getResendInstance();
-        const mailStore = await getStoreConfig('mail_store');
-        
-        const result = await resend.emails.send({
-            from: 'onboarding@resend.dev',
-            to: mailStore,
-            subject: 'Teste Resend - ' + new Date().toISOString(),
-            html: '<strong>Teste funcionando! 🎉</strong>'
-        });
-
-        return { success: true, result };
-    } catch (error) {
-        console.error('Erro no testResend:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-/**
- * Teste com email real
- */
-async function testResendRealEmail() {
-    try {
-        const resend = await getResendInstance();
-        const mailStore = await getStoreConfig('mail_store');
-        
-        const result = await resend.emails.send({
-            from: 'onboarding@resend.dev',
-            to: mailStore,
-            subject: 'Teste Resend - E-mail Real',
-            html: `
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h2 style="color: green;">✅ Resend Funcionando!</h2>
-                    <p>Este é um teste de envio para e-mail real.</p>
-                    <p><strong>Data:</strong> ${new Date().toLocaleString()}</p>
-                </div>
-            `
-        });
-
-        return { success: true, result };
-    } catch (error) {
-        console.error('Erro no testResendRealEmail:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-
-/**
  * Envia confirmação de novo pedido
  */
 async function sendNewOrderConfirmation(newOrder, orderId) {
@@ -119,8 +68,10 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
 
             <h3 style="border-bottom: 2px solid #333; padding-bottom: 5px;">ご注文商品</h3>
                     
-            ${newOrder.cakes.map(cake => { 
-                const cakeTotalPrice = (cake.price) * cake.amount;
+            ${newOrder.cakes.map(cake => {
+                const fruitPrice = cake.fruit_option === '有り' ? 648 : 0;
+                const cakeTotalPrice = (cake.price + fruitPrice) * cake.amount;
+
                 return `
                     <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
                         <tr>
@@ -137,6 +88,7 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
                                 <p style="margin: 5px 0;"><strong>個数:</strong> ${cake.amount}個</p>
                                 <p style="margin: 5px 0;"><strong>価格:</strong> ¥${Math.trunc(cake.price).toLocaleString("ja-JP")}</p>
                                 ${cake.message_cake ? `<p style="margin: 5px 0;"><strong>メッセージプレート:</strong> ${cake.message_cake}</p>` : ''}
+                                <p style="margin: 5px 0;"><strong>フルーツ盛り:</strong> ${cake.fruit_option === '有り' ? '有り ＋648円' : '無し'}
                                 <hr/>
                                 <strong>小計 ¥${Math.trunc(cakeTotalPrice).toLocaleString("ja-JP")}</strong>
                             </td>
@@ -147,7 +99,11 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
             <div style="max-width: 400px; background: #ddd; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
                 <h3 style="margin: 0; color: #000;">合計金額</h3>
                 <p style="font-size: 24px; font-weight: bold; margin: 10px 0 0 0;">
-                    ¥${Math.trunc(totalGeral).toLocaleString("ja-JP")}
+                    ¥${Math.trunc(newOrder.cakes.reduce((total, cake) => {
+                        const fruitPrice = cake.fruit_option === '有り' ? 648 : 0;
+                        return total + ((cake.price + fruitPrice) * cake.amount)
+                        }, 0)).toLocaleString("ja-JP")
+                    }
                     <span style="font-size: 14px; font-weight: normal;">(税込)</span>
                 </p>
                 <p><strong style="color: red;">事前にお支払いで受け取りスムーズ</strong></p>
@@ -203,7 +159,8 @@ async function sendOrderUpdateNotification(orderData) {
         const transporter = await getTransporter();
         
         const cakeListHtml = orderData.cakes.map(cake => {
-            const cakeTotalPrice = (cake.price) * cake.amount;
+            const fruitPrice = cake.fruit_option === '有り' ? 648 : 0;
+            const cakeTotalPrice = (cake.price + fruitPrice) * cake.amount;
             return `
                 <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
                     <tr>
@@ -219,6 +176,7 @@ async function sendOrderUpdateNotification(orderData) {
                             <p style="margin: 5px 0;"><strong>サイズ:</strong> ${cake.size}</p>
                             <p style="margin: 5px 0;"><strong>個数:</strong> ${cake.amount}個</p>
                             <p style="margin: 5px 0;"><strong>価格:</strong> ¥${Math.trunc(cake.price).toLocaleString()}</p>
+                            <p style="margin: 5px 0;"><strong>フルーツ盛り:</strong> ${cake.fruit_option === '有り' ? '有り ＋648円' : '無し'}
                             ${cake.message_cake ? `<p style="margin: 5px 0;"><strong>メッセージ:</strong> ${cake.message_cake}</p>` : ''}
                             <hr/>
                             <strong>小計: ¥${Math.trunc(cakeTotalPrice).toLocaleString("ja-JP")}</strong>
@@ -229,7 +187,8 @@ async function sendOrderUpdateNotification(orderData) {
         }).join('');
 
         const totalGeral = orderData.cakes.reduce((total, cake) => {
-            return total + ((cake.price) * cake.amount);
+            const fruitPrice = cake.fruit_option === '有り' ? 648 : 0;
+            return total + ((cake.price + fruitPrice) * cake.amount);
         }, 0);
 
         const mailOptions = {
@@ -433,7 +392,5 @@ module.exports = {
     sendNewOrderConfirmation,
     sendOrderUpdateNotification,
     sendCancellationNotification,
-    sendOrderCompletedNotification,
-    testResend,
-    testResendRealEmail
+    sendOrderCompletedNotification
 };

@@ -27,17 +27,17 @@ router.post('/reservar', async (req, res) => {
     // 2️⃣ Inserir relação pedido <-> bolos e atualizar estoque
     for (const orderCake of newOrder.cakes) {
       // Buscar o preço da tabela cake_sizes
-      const [priceResult] = await conn.query(
-        'SELECT price FROM cake_sizes WHERE cake_id=? AND size=?',
-        [orderCake.cake_id, orderCake.size]
-      );
+      // const [priceResult] = await conn.query(
+      //   'SELECT price FROM cake_sizes WHERE cake_id=? AND size=?',
+      //   [orderCake.cake_id, orderCake.size]
+      // );
       
-      const price = priceResult[0]?.price;
+      // const price = priceResult[0]?.price;
       
       // inserir na tabela order_cakes
       await conn.query(
-        'INSERT INTO order_cakes (order_id, cake_id, size, amount, message_cake) VALUES (?,?,?,?,?)',
-        [orderId, orderCake.cake_id, orderCake.size, orderCake.amount, orderCake.message_cake, price]
+        'INSERT INTO order_cakes (order_id, cake_id, size, amount, message_cake, fruit_option) VALUES (?,?,?,?,?,?)',
+        [orderId, orderCake.cake_id, orderCake.size, orderCake.amount, orderCake.message_cake, orderCake.fruit_option]
       );
       
       // atualizar estoque
@@ -69,7 +69,8 @@ router.post('/reservar', async (req, res) => {
         amount: cake.amount,
         size: cake.size,
         message_cake: cake.message_cake,
-        price: cake.price
+        price: cake.price,
+        fruit_option: cake.fruit_option
       }))
     };
 
@@ -129,9 +130,9 @@ router.put('/orders/:id_order', async (req, res) => {
     await conn.query('DELETE FROM order_cakes WHERE order_id = ?', [id_order]);
     for (const cake of cakes) {
       await conn.query(
-        `INSERT INTO order_cakes (order_id, cake_id, amount, size, message_cake)
-        VALUES (?, ?, ?, ?, ?)`,
-        [id_order, cake.cake_id, cake.amount, cake.size, cake.message_cake || '']
+        `INSERT INTO order_cakes (order_id, cake_id, amount, size, message_cake, fruit_option)
+        VALUES (?, ?, ?, ?, ?, ?)`,
+        [id_order, cake.cake_id, cake.amount, cake.size, cake.message_cake || '', cake.fruit_option]
       );
     }
 
@@ -173,7 +174,8 @@ router.put('/orders/:id_order', async (req, res) => {
         amount: cake.amount,
         size: cake.size,
         message_cake: cake.message_cake,
-        price: cake.price
+        price: cake.price,
+        fruit_option: cake.fruit_option
       }))
     };
 
@@ -268,6 +270,7 @@ router.get('/list', async (req, res) => {
         oc.size,
         oc.amount,
         oc.message_cake,
+        oc.fruit_option,
         cs.price AS price,
         cs.stock AS stock
       FROM orders o
@@ -320,6 +323,7 @@ router.get('/list', async (req, res) => {
           size: row.size,
           amount: row.amount,
           message_cake: row.message_cake,
+          fruit_option: row.fruit_option,
           price: row.price,
           stock: row.stock
         });
