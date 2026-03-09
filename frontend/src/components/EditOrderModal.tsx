@@ -125,7 +125,43 @@ export default function EditOrderModal({
     menu: (base: CSSObjectWithLabel) => ({ ...base, zIndex: 9999 }),
     valueContainer: (base: CSSObjectWithLabel) => ({ ...base, padding: "4px 8px" }),
     placeholder: (base: CSSObjectWithLabel) => ({ ...base, color: "#aaa" }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isSelected
+        ? "#007bff"
+        : state.isFocused
+        ? "#e8f0fe"
+        : "white",
+      color: state.isSelected ? "white" : "black",
+      cursor: "pointer",
+  }),
   };
+
+  const sizeStyles: StylesConfig<SizeOption, false, GroupBase<SizeOption>> = {
+  control: (base: CSSObjectWithLabel) => ({
+      ...base,
+      minWidth: "200px",
+      width: "100%",
+      borderRadius: "6px",
+      borderColor: "#ccc",
+      boxShadow: "none",
+      "&:hover": { borderColor: "#007bff" },
+    }),
+    menu: (base: CSSObjectWithLabel) => ({ ...base, zIndex: 9999 }),
+    valueContainer: (base: CSSObjectWithLabel) => ({ ...base, padding: "4px 8px" }),
+    placeholder: (base: CSSObjectWithLabel) => ({ ...base, color: "#aaa" }),
+      option: (base, state) => ({
+    ...base,
+    backgroundColor: state.isSelected
+      ? "#000"
+      : state.isFocused
+      ? "#e8f0fe"
+      : "white",
+    color: state.isSelected ? "white" : "black",
+    cursor: "pointer",
+      "&:hover": { borderColor: "#007bff" },
+  }),
+};
 
   return (
     <div className="modal-overlay">
@@ -289,35 +325,44 @@ export default function EditOrderModal({
                     </div>
 
                     {/* サイズ */}
-                    <div style={{ flex: 1, minWidth: "200px" }}>
-                      <label>サイズを選択:</label>
-                      <Select<SizeOption, false, GroupBase<SizeOption>>
-                        options={getSizeOptions(cake.cake_id)}
-                        value={
-                          getSizeOptions(cake.cake_id).find(
-                            s => s.size === cake.size
-                          ) || null
-                        }
-                        onChange={selected => {
-                          if (selected && !isSaving) { // 🔹 Não permite mudar durante salvamento
-                            setCakes(prev =>
-                              prev.map((c, i) =>
-                                i === index ? { ...c, size: selected.size, price: selected.price } : c
-                              )
-                            );
+                      <div style={{ flex: 1, minWidth: "200px" }}>
+                        <label>サイズを選択:</label>
+                        <Select<SizeOption, false, GroupBase<SizeOption>>
+                          key={`size-${index}-${cake.size}-${cake.cake_id}`} 
+                          options={getSizeOptions(cake.cake_id)}
+                          styles={sizeStyles}
+                          getOptionValue={(option) => `${option.cake_id}-${option.size}`} 
+                          classNamePrefix="size-select"
+                          // 🔹 SIMPLIFICADO: usa diretamente cake.size
+                          value={getSizeOptions(cake.cake_id).find(s => s.size === cake.size) || null}
+                          onChange={selected => {
+                            console.log("Mudando tamanho:", {
+                              de: cake.size,
+                              para: selected?.size,
+                              preço: selected?.price
+                            });
+                            
+                            if (selected && !isSaving) {
+                              // 🔹 Atualiza APENAS este cake específico
+                              const updatedCakes = [...cakes];
+                              updatedCakes[index] = {
+                                ...updatedCakes[index],
+                                size: selected.size,
+                                price: selected.price
+                              };
+                              setCakes(updatedCakes);
+                            }
+                          }}
+                          placeholder="サイズを選択"
+                          isSearchable={false}
+                          required
+                          isDisabled={isSaving}
+                          formatOptionLabel={option =>
+                            `${option.size} ￥${option.price.toLocaleString()}`
                           }
-                        }}
-                        placeholder="サイズを選択"
-                        isSearchable={false}
-                        classNamePrefix="react-select-edit"
-                        required
-                        isDisabled={isSaving} // 🔹 Desabilita durante salvamento
-                        formatOptionLabel={option =>
-                          `${option.size} ￥${option.price.toLocaleString()}`
-                        }
-                      />
+                        />
+                      </div>
                     </div>
-
                     {/* 数量 */}
                     <div style={{ width: "49%" }}>
                       <label>数量:</label>
@@ -330,7 +375,6 @@ export default function EditOrderModal({
                         style={{ width: "100%" }}
                         disabled={isSaving} // 🔹 Desabilita durante salvamento
                       />
-                    </div>
                   </div>
 
                   {/* メッセージ */}
@@ -374,7 +418,7 @@ export default function EditOrderModal({
         </div>
 
         <div className="modal-buttons" style={{ marginTop: "1rem", display: "flex", gap: "1rem", flexDirection: "row-reverse" }}>
-          <button 
+          <button
             onClick={handleSave}
             disabled={isSaving} // 🔹 Use a prop isSaving
             style={{

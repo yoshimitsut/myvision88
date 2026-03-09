@@ -1,3 +1,30 @@
+/* EditOrderModal.css */
+.size-select__option {
+  background-color: white !important;
+  color: black !important;
+}
+
+.size-select__option--is-focused {
+  background-color: #e8f0fe !important;
+  color: black !important;
+}
+
+.size-select__option--is-selected {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+/* Sobrescrever especificamente a classe gerada */
+.size-select__option.css-1otlwde-option {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* .size-select__option--is-selected.css-1otlwde-option {
+  background-color: #007bff !important;
+  color: white !important;
+} */
+
 .modal-overlay {
   position: fixed;
   top: 0;
