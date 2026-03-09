@@ -171,7 +171,7 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
         `;
 
         const result = await resend.emails.send({
-            from: `"${config.store_name}" <${config.mail_resend}>`,
+            from: `"${config.store_name}" <order@yoyaku.myvision88.com>`,
             to: [newOrder.email, config.mail_store],
             subject: `🎂 ご注文確認 - 受付番号 ${String(orderId).padStart(4, "0")}`,
             html: htmlContent,
