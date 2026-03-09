@@ -260,16 +260,31 @@ ul {
 }
 
 /* Esconde tabela no mobile */
-.table-wrapper table{
+.table-wrapper {
   display: block;
   width: 100%;
-  max-height:79vh;
+  max-height: 79vh;
   overflow-x: auto;
   overflow-y: auto;
   white-space: nowrap;
   scrollbar-gutter: stable both-edges;
   padding-bottom: 190px;
   padding-right: 2rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-wrapper table {
+  width: 100%;
+}
+
+/* Cursor quando espaço está pressionado */
+.table-wrapper.space-drag {
+  cursor: grab;
+}
+
+.table-wrapper.space-drag.dragging {
+  cursor: grabbing;
+  user-select: none;
 }
 
 .table-wrapper::-webkit-scrollbar {

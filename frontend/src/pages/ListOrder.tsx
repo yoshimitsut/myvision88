@@ -38,6 +38,8 @@ export default function ListOrder() {
 
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
+  const isSpacePressed = useRef(false);
+
   type FilterOption = {
     value: string;
     label: string;
@@ -78,7 +80,6 @@ export default function ListOrder() {
         .then((data) => {
           const normalized = Array.isArray(data) ? data : (data.orders || []);
           setOrders(normalized);
-          console.log("---"+normalized);
         })
         .catch((error) => {
           console.error('注文の読み込みエラー:', error);
@@ -127,7 +128,7 @@ useEffect(() => {
         qrbox: { width: 250, height: 250 } // 🔹 Corrigido formato
       },
       (decodedText) => {
-        console.log("QR Code lido:", decodedText);
+        // console.log("QR Code lido:", decodedText);
         setShowScanner(false);
         
         const orderId = Number(decodedText);
@@ -165,6 +166,90 @@ useEffect(() => {
     }
   };
 }, [showScanner, orders]);
+useEffect(() => {
+  const down = (e: KeyboardEvent) => { if (e.code === "Space") isSpacePressed.current = true; };
+  const up = (e: KeyboardEvent) => { if (e.code === "Space") isSpacePressed.current = false; };
+  window.addEventListener("keydown", down);
+  window.addEventListener("keyup", up);
+  return () => {
+    window.removeEventListener("keydown", down);
+    window.removeEventListener("keyup", up);
+  };
+}, []);
+
+useEffect(() => {
+  let active = false;
+  let currentEl: HTMLElement | null = null;
+  let startXVal = 0;
+  let scrollLeftVal = 0;
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.code === "Space") {
+      e.preventDefault();
+      document.querySelectorAll<HTMLElement>(".table-wrapper").forEach(el => {
+        el.style.cursor = "grab";
+      });
+    }
+  };
+
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (e.code === "Space") {
+      active = false;
+      currentEl = null;
+      document.querySelectorAll<HTMLElement>(".table-wrapper").forEach(el => {
+        el.style.cursor = "";
+      });
+    }
+  };
+
+  const onMouseDown = (e: MouseEvent) => {
+    if (!isSpacePressed.current) return;
+    const el = e.currentTarget as HTMLElement;
+    active = true;
+    currentEl = el;
+    startXVal = e.pageX - el.offsetLeft;
+    scrollLeftVal = el.scrollLeft;
+    el.style.cursor = "grabbing";
+  };
+
+  const onMouseMove = (e: MouseEvent) => {
+    if (!active || !currentEl || !isSpacePressed.current) return;
+    e.preventDefault();
+    const x = e.pageX - currentEl.offsetLeft;
+    const walk = (x - startXVal) * 1.5;
+    currentEl.scrollLeft = scrollLeftVal - walk;
+  };
+
+  const onMouseUp = () => {
+    active = false;
+    if (currentEl) currentEl.style.cursor = "grab";
+    currentEl = null;
+  };
+
+  const applyToWrappers = () => {
+    document.querySelectorAll<HTMLElement>(".table-wrapper").forEach(el => {
+      el.removeEventListener("mousedown", onMouseDown);
+      el.addEventListener("mousedown", onMouseDown);
+    });
+  };
+
+  const observer = new MutationObserver(applyToWrappers);
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keyup", onKeyUp);
+  window.addEventListener("mousemove", onMouseMove);
+  window.addEventListener("mouseup", onMouseUp);
+  applyToWrappers();
+
+  return () => {
+    observer.disconnect();
+    window.removeEventListener("keydown", onKeyDown);
+    window.removeEventListener("keyup", onKeyUp);
+    window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("mouseup", onMouseUp);
+  };
+}, []);
 
   // Ordenar pedidos agrupados
   const sortedGroupedOrders = useMemo(() => {
@@ -437,7 +522,9 @@ useEffect(() => {
         {sortedTodayOrders.length === 0 ? (
           <p>本日の注文はありません。</p>
         ) : (
-          <div className="table-wrapper scroll-cell table-order-container">
+          <div className="table-wrapper scroll-cell table-order-container"
+ 
+  >
             <table className="list-order-table table-order">
               <thead>
                 <tr>
