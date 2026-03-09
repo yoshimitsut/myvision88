@@ -1,3 +1,5 @@
+
+
 /* Scanner QR Code */
 #reader {
   border: 2px solid #007bff !important;
@@ -150,7 +152,7 @@ ul {
   width: 100%;
   height: 1.2em;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+  /* background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1)); */
 }
 
 .ellipsis-text {
@@ -258,8 +260,6 @@ ul {
   display: flex;
   flex-direction: column;
 }
-
-/* Esconde tabela no mobile */
 .table-wrapper {
   display: block;
   width: 100%;
@@ -267,10 +267,14 @@ ul {
   overflow-x: auto;
   overflow-y: auto;
   white-space: nowrap;
-  scrollbar-gutter: stable both-edges;
-  padding-bottom: 190px;
-  padding-right: 2rem;
+  /* Remova ou ajuste esses paddings problemáticos */
+  padding-bottom: 0;  /* Já está ok, mas... */
+  padding-right: 0;   /* Mude de 2rem para 0 */
   -webkit-overflow-scrolling: touch;
+  height: fit-content;
+  scrollbar-width: none;
+  /* Adicione margin-bottom negativo para compensar o ::after */
+  margin-bottom: -24px; /* Ajuste conforme necessário */
 }
 
 .table-wrapper table {
@@ -288,8 +292,9 @@ ul {
 }
 
 .table-wrapper::-webkit-scrollbar {
-  width: 12px;      /* largura da barra vertical */
-  height: 12px;     /* altura da barra horizontal */
+  /* width: 12px;      
+  height: 12px;      */
+  display: none;
 }
 
 .table-wrapper::-webkit-scrollbar-track {
