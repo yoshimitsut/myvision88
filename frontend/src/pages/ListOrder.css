@@ -310,6 +310,42 @@ ul {
   scrollbar-color: #888 #f0f0f0;
 }
 
+.table-wrapper {
+  position: relative;
+}
+
+.table-wrapper::after {
+  content: "⎵ を押しながらドラッグ";
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.table-wrapper.space-drag::after {
+  content: "クリックしてドラッグ";
+  opacity: 1;
+  background: rgba(0, 100, 255, 0.7);
+}
+
+.table-wrapper.has-scroll:hover::after {
+  opacity: 1;
+}
+
+.table-wrapper.has-scroll.space-drag::after {
+  content: "クリックしてドラッグ";
+  opacity: 1;
+  background: rgba(0, 100, 255, 0.7);
+}
+
 .table-cake {
   th {
     color: #000;

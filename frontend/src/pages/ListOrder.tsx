@@ -226,6 +226,16 @@ useEffect(() => {
     currentEl = null;
   };
 
+  const checkScrollable = () => {
+    document.querySelectorAll<HTMLElement>(".table-wrapper").forEach(el => {
+      if (el.scrollWidth > el.clientWidth) {
+        el.classList.add("has-scroll");
+      } else {
+        el.classList.remove("has-scroll");
+      }
+    });
+  };
+
   const applyToWrappers = () => {
     document.querySelectorAll<HTMLElement>(".table-wrapper").forEach(el => {
       el.removeEventListener("mousedown", onMouseDown);
@@ -233,21 +243,29 @@ useEffect(() => {
     });
   };
 
-  const observer = new MutationObserver(applyToWrappers);
+  const observer = new MutationObserver(() => {
+    applyToWrappers();
+    checkScrollable();
+  });
+
   observer.observe(document.body, { childList: true, subtree: true });
 
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
   window.addEventListener("mousemove", onMouseMove);
   window.addEventListener("mouseup", onMouseUp);
+  window.addEventListener("resize", checkScrollable);
   applyToWrappers();
+  checkScrollable();
 
+  
   return () => {
     observer.disconnect();
     window.removeEventListener("keydown", onKeyDown);
     window.removeEventListener("keyup", onKeyUp);
     window.removeEventListener("mousemove", onMouseMove);
     window.removeEventListener("mouseup", onMouseUp);
+    window.removeEventListener("resize", checkScrollable);
   };
 }, []);
 
