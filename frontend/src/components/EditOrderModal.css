@@ -241,6 +241,37 @@
   flex-wrap: wrap;
 }
 
+
+  .pill {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .pill-group {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    padding-right: 30px;
+    flex-direction: row;
+    justify-content: center;
+
+    label {
+      border-radius: 30px;
+      border: 1px solid #7a7a7a;
+      width: 45%;
+    }
+
+  }
+
+  .pill.active {
+    background: #7a7a7a;
+    color: #fff;
+  }
+
+  .radio-input-fruit {
+    display: none;
+  }
+
 .fruit-pill {
   display: flex;
   align-items: center;
@@ -712,6 +743,14 @@
   .fruit-pill {
     padding: 0.25rem 0.75rem;
     font-size: 0.8rem;
+  }
+
+  .pill-group {
+    flex-direction: column;
+    label {
+      width: 95%;
+      align-items: center;
+    }
   }
 
   .modal-datetime {

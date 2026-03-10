@@ -336,7 +336,7 @@ body {
     font-size: 1.1rem;
     padding: 12px 0px 10px 10px;
     color: #7a7a7a;
-    margin: 0.6rem 0rem 1.2rem 0.7rem;
+    margin: 0.6rem 0rem 1.2rem 0rem;
     border: 1px solid #919191;
     border-radius: 0.4rem
   }
@@ -351,12 +351,26 @@ body {
 
   .pill-group {
     display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    padding-right: 30px;
     flex-direction: column;
-
+    
     label {
+      border-radius: 30px;
+      font-weight: 400;
       font-size: 1.2rem;
-      font-weight: 600;
+      border: 1px solid #7a7a7a;
     }
+  }
+
+  .pill.active {
+    background: #7a7a7a;
+    color: #fff;
+  }
+
+  .radio-input-fruit {
+    display: none;
   }
 
   .input-group {

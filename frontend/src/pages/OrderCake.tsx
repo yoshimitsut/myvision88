@@ -489,6 +489,7 @@ const isDateAllowed = (date: Date) => {
                     <div className="pill-group">
                       <label className={`pill ${item.fruit_option === "無し" ? "active" : ""}`}>
                         <input
+                          className='radio-input-fruit'
                           type="radio"
                           name={`fruit-option-${index}`}  
                           value="無し"
@@ -499,6 +500,7 @@ const isDateAllowed = (date: Date) => {
                       </label>
                       <label className={`pill ${item.fruit_option === "有り" ? "active" : ""}`}>
                         <input
+                          className='radio-input-fruit'
                           type="radio"
                           name={`fruit-option-${index}`} 
                           value="有り"

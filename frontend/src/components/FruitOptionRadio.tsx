@@ -27,23 +27,27 @@ const FruitOptionRadio: React.FC<FruitOptionRadioProps> = ({
       <div className="pill-group">
         <label className={`pill ${value === "無し" ? "active" : ""}`}>
           <input
+          className="radio-input-fruit"
             type="radio"
             name={name}
             value="無し"
             checked={value === "無し"}
             onChange={() => onChange("無し")}
           />
-          無し
+          <span>通常盛り</span>
+          <span>+0円</span>
         </label>
         <label className={`pill ${value === "有り" ? "active" : ""}`}>
           <input
+          className="radio-input-fruit"
             type="radio"
             name={name}
             value="有り"
             checked={value === "有り"}
             onChange={() => onChange("有り")}
           />
-          有り ＋648円（税込）
+          <span>フルーツ増し</span>
+          <span>＋648円</span>
         </label>
       </div>
     </div>
