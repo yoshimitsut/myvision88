@@ -1,0 +1,206 @@
+.store-settings-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.store-settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #007bff;
+}
+
+.store-settings-header h1 {
+  color: #333;
+  font-size: 24px;
+  margin: 0;
+}
+
+.store-settings-back-btn {
+  padding: 8px 16px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.store-settings-back-btn:hover {
+  background-color: #5a6268;
+}
+
+.store-settings-message {
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.store-settings-message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.store-settings-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.store-settings-form {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.store-settings-section {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.store-settings-section:last-child {
+  border-bottom: none;
+}
+
+.store-settings-section h2 {
+  color: #007bff;
+  font-size: 18px;
+  margin: 0 0 20px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.store-settings-field {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.store-settings-field label {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.store-settings-field input {
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.store-settings-field input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.store-settings-field input[type="password"] {
+  font-family: monospace;
+}
+
+.store-settings-checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.store-settings-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.store-settings-checkbox:hover {
+  background: #e9ecef;
+}
+
+.store-settings-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.store-settings-actions {
+  padding: 20px;
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 0 0 8px 8px;
+}
+
+.store-settings-save-btn {
+  padding: 12px 30px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.store-settings-save-btn:hover {
+  background-color: #218838;
+}
+
+.store-settings-save-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.store-settings-loading,
+.store-settings-error {
+  text-align: center;
+  padding: 50px;
+  font-size: 18px;
+  color: #6c757d;
+}
+
+.store-settings-error {
+  color: #dc3545;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .store-settings-container {
+    padding: 10px;
+  }
+
+  .store-settings-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .store-settings-checkbox-group {
+    grid-template-columns: 1fr;
+  }
+
+  .store-settings-section {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .store-settings-header h1 {
+    font-size: 20px;
+  }
+
+  .store-settings-save-btn {
+    width: 100%;
+  }
+}

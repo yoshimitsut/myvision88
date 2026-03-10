@@ -121,3 +121,20 @@ export type Newsletter = {
   link?: string;
   updated_at: string;
 };
+
+export interface StoreInfo {
+  id: number;
+  store_name: string;
+  mail_store: string;
+  mail_pass: string;
+  mail_resend: string;
+  resend_pass: string;
+  site_back: string;
+  tel: string;
+  open_hour: string;
+  folder_img: string;
+  use_admin_grafic: 's' | 'n';
+  use_admin_cake: 's' | 'n';
+  use_admin_date: 's' | 'n';
+  use_admin_download: 's' | 'n';
+}

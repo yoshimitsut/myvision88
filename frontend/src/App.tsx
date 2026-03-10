@@ -17,6 +17,8 @@ import StoreManagement from './pages/StoreManagement';
 import NewsletterManagement from './pages/NewsletterManagement';
 import Newsletter from './pages/Newsletter';
 
+import StoreSettings from './pages/StoreSettings'
+
 function App() {
   return (
     <Router>
@@ -25,6 +27,7 @@ function App() {
         <Route path="/cakeinformation" element={<CakeInformation />} />
         <Route path="/cakeinformationsize" element={<CakeInformationSize />} />
         <Route path="/order" element={<OrderCake />} />
+        <Route path="/newsletter" element={<Newsletter />} />
 
         <Route path="/orderstore" element={
         <ProtectedRoute>
@@ -68,9 +71,12 @@ function App() {
           </ProtectedRoute>
         } />
 
-        <Route path="/newsletter" element={
-            <Newsletter />
+        <Route path="/admin/storesettings" element={
+          <ProtectedRoute>
+            <StoreSettings />
+          </ProtectedRoute>
         } />
+
 
         <Route path="/store-login" element={<StoreLogin />} />
         
