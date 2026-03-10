@@ -242,12 +242,12 @@
 }
 
 
-  .pill {
+  .pill-edit {
     display: flex;
     justify-content: space-around;
   }
 
-  .pill-group {
+  .pill-edit-group {
     display: flex;
     gap: 0.5rem;
     width: 100%;
@@ -263,7 +263,7 @@
 
   }
 
-  .pill.active {
+  .pill-edit.active {
     background: #7a7a7a;
     color: #fff;
   }
@@ -272,7 +272,7 @@
     display: none;
   }
 
-.fruit-pill {
+.fruit-pill-edit {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -286,17 +286,17 @@
   font-size: 0.85rem;
 }
 
-.fruit-pill.active {
+.fruit-pill-edit.active {
   background: #7a7a7a;
   color: #fff;
   border-color: #7a7a7a;
 }
 
-.fruit-pill input[type="radio"] {
+.fruit-pill-edit input[type="radio"] {
   display: none;
 }
 
-.fruit-pill:hover:not(.active) {
+.fruit-pill-edit:hover:not(.active) {
   background: #f0f0f0;
 }
 
@@ -740,12 +740,7 @@
     gap: 0.3rem;
   }
 
-  .fruit-pill {
-    padding: 0.25rem 0.75rem;
-    font-size: 0.8rem;
-  }
-
-  .pill-group {
+  .pill-edit-group {
     flex-direction: column;
     label {
       width: 95%;
@@ -816,7 +811,7 @@
     font-size: 14px;
   }
 
-  .fruit-pill {
+  .fruit-pill-edit {
     flex: 1;
     justify-content: center;
     text-align: center;
@@ -845,7 +840,7 @@
     flex-direction: column;
   }
 
-  .fruit-pill {
+  .fruit-pill-edit {
     width: 100%;
   }
 

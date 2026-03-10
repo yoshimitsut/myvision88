@@ -24,8 +24,8 @@ const FruitOptionRadio: React.FC<FruitOptionRadioProps> = ({
         {required && "*"}
         {label}
       </label>
-      <div className="pill-group">
-        <label className={`pill ${value === "無し" ? "active" : ""}`}>
+      <div className="pill-edit-group">
+        <label className={`pill-edit ${value === "無し" ? "active" : ""}`}>
           <input
           className="radio-input-fruit"
             type="radio"
@@ -37,7 +37,7 @@ const FruitOptionRadio: React.FC<FruitOptionRadioProps> = ({
           <span>通常盛り</span>
           <span>+0円</span>
         </label>
-        <label className={`pill ${value === "有り" ? "active" : ""}`}>
+        <label className={`pill-edit ${value === "有り" ? "active" : ""}`}>
           <input
           className="radio-input-fruit"
             type="radio"
