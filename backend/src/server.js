@@ -9,6 +9,7 @@ const cakeRoutes = require('./routers/cakeRoutes');
 const orderRoutes = require('./routers/orderRoutes');
 const timeslotRoutes = require('./routers/timeslotRoutes');
 const newsletterRoutes = require('./routers/newsletter');
+const storeInfo = require('./routers/storeInfo');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -40,6 +41,7 @@ app.use('/api/timeslots', timeslotRoutes);
 // Rotas de pedido (reservar, orders/list)
 app.use('/api/', orderRoutes); 
 app.use("/api/newsletters", newsletterRoutes);
+app.use("/api/storeinfo", storeInfo);
 
 
 app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));
