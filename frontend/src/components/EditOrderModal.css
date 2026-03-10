@@ -1,30 +1,4 @@
 /* EditOrderModal.css */
-.size-select__option {
-  background-color: white !important;
-  color: black !important;
-}
-
-.size-select__option--is-focused {
-  background-color: #e8f0fe !important;
-  color: black !important;
-}
-
-.size-select__option--is-selected {
-  background-color: #007bff !important;
-  color: white !important;
-}
-
-/* Sobrescrever especificamente a classe gerada */
-.size-select__option.css-1otlwde-option {
-  background-color: white !important;
-  color: black !important;
-}
-
-/* .size-select__option--is-selected.css-1otlwde-option {
-  background-color: #007bff !important;
-  color: white !important;
-} */
-
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -44,50 +18,52 @@
   border-radius: 12px;
   width: 90%;
   max-width: 70vw;
-  max-height: 90%;
+  max-height: 90vh;
   overflow-y: auto;
-
-  .modal-top {
-    display: flex;
-    justify-content: space-between;
-  }
+  position: relative;
 }
 
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
+.modal-top {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  z-index: 999;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-/* .modal-content {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.3); 
-}*/
-
-.modal-content h2 {
-  margin-bottom: 16px;
+.modal-title {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #333;
 }
 
-.modal-content label {
-  display: block;
-  margin-top: 10px;
-  font-weight: bold;
+.modal-close-button {
+  padding: 8px 16px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+  white-space: nowrap;
 }
 
-.modal-content textarea {
-  width: 100%;
-  margin-top: 4px;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+.modal-close-button:hover {
+  background-color: #5a6268;
+}
+
+/* Campos do cliente */
+.modal-edit-content {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-name {
+  flex: 1;
+  min-width: 0; /* Evita overflow */
 }
 
 .input-text-modal {
@@ -96,149 +72,775 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   height: 2.3rem;
+  font-size: 0.9rem;
+  box-sizing: border-box;
 }
 
-.modal-buttons {
+.input-text-modal:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.input-text-modal:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+/* Container dos campos de email e telefone */
+.modal-contact {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.modal-contact > div {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Seção de bolos */
+.modal-cakes-section {
+  margin-top: 1.5rem;
+}
+
+.modal-cakes-header {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
-}
-
-.modal-buttons button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.modal-buttons button:first-child {
-  background: #ccc;
-}
-
-.modal-buttons button:last-child {
-  background: #007bff;
-  color: white;
-}
-
-
-.datetime-picker {
-  display: flex;
-  gap: 2em;
-}
-
-.cake-row {
-  justify-content: space-between;
-}
-
-.cake-item {
-  display: flex;
-  align-items: stretch; /* faz o número ocupar a altura total do texto */
-  gap: 0.8em;
-  margin-bottom: 0.8em;
-}
-
-.cake-number {
-  font-weight: bold;
-  border-radius: 8px;
-  width: 1em;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  /* min-height: -webkit-fill-available; */
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.cake-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.2em;
+.modal-cakes-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
 }
 
-/* .modal-content input {
-  height: 2.5em;
-} */
-
-.day-cell.domingo-cinza span {
-  color: #b0b0b0 !important; 
-}
-
-.modal-close-button {
-  padding: 0.75rem 1.5rem;
-  background-color: #6c757d;
+.add-cake-button {
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+  white-space: nowrap;
 }
 
-.modal-edit-content {
+.add-cake-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.add-cake-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Card de cada bolo */
+.cake-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem 1rem 1rem 1rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  background: #f9f9f9;
+}
+
+.cake-card:last-child {
+  margin-bottom: 0;
+}
+
+.remove-cake-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
   display: flex;
-  gap: 2rem;
-
-  .modal-name {
-    width: 50%;
-  }
-
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: background-color 0.3s;
+  z-index: 1;
 }
 
-.pill-group {
+.remove-cake-button:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.remove-cake-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.cake-number-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-weight: bold;
+  color: #007bff;
+  background: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  border: 1px solid #007bff;
+}
+
+/* Layout dos campos do bolo */
+.cake-fields {
+  margin-top: 8px;
+}
+
+.cake-row-1 {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.cake-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.cake-field label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Fruit options */
+.fruit-option-group {
+  margin-bottom: 1rem;
+}
+
+.fruit-option-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.fruit-options {
   display: flex;
   gap: 0.5rem;
-  width: 100%;
-  padding-right: 30px;
-  label {
-    font-weight: 400;
-    font-size: small;
-  }
+  flex-wrap: wrap;
 }
 
-.pill {
+.fruit-pill {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   border: 1px solid #7a7a7a;
   border-radius: 9999px;
-  padding: 0.2rem 1rem;
+  padding: 0.3rem 1rem;
   cursor: pointer;
   font-weight: 500;
   background: #fff;
-  transition: 0.3s;
+  transition: all 0.3s;
+  font-size: 0.85rem;
 }
 
-.pill.active {
+.fruit-pill.active {
   background: #7a7a7a;
   color: #fff;
+  border-color: #7a7a7a;
 }
 
-.pill input {
+.fruit-pill input[type="radio"] {
   display: none;
 }
 
-.react-datepicker__input-container input, .input-group {
-  padding: 10px 0px 10px 10px;
-  font-size: 0.9rem;
-  border-radius: 5px;
-  background-color: #fff;
+.fruit-pill:hover:not(.active) {
+  background: #f0f0f0;
 }
 
-@media (max-width: 450px) { 
+/* Quantidade */
+.cake-quantity {
+  margin-bottom: 1rem;
+}
+
+.cake-quantity label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Mensagem do bolo */
+.cake-message {
+  margin-top: 1rem;
+}
+
+.cake-message label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* DateTime Picker */
+.modal-datetime {
+  display: flex;
+  gap: 2rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.datetime-field {
+  flex: 1;
+  min-width: 250px;
+}
+
+.datetime-field label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Mensagem geral */
+.modal-message {
+  margin: 1.5rem 0;
+}
+
+.modal-message label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.modal-message textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.modal-message textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.modal-message textarea:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+/* Botões do modal */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.save-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+.save-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.save-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* React-Select custom styles */
+.size-select__option {
+  background-color: white !important;
+  color: black !important;
+}
+
+.size-select__option--is-focused {
+  background-color: #e8f0fe !important;
+  color: black !important;
+}
+
+.size-select__option--is-selected {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+/* DateTimePicker styles */
+.datetime-picker {
+  display: flex;
+  gap: 2rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.input-group-radio {
+  border: #d4d2d2 solid 1px;
+  border-radius: 5px;
+  padding: 8px;
+  margin-bottom: 4px;
+}
+
+.input-group-edit {
+  flex: 1;
+  min-width: 250px;
+}
+
+.input-group-edit label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #555;
+  padding-left: 2px;
+}
+
+/* Estilização do DatePicker */
+.input-group-edit .react-datepicker-wrapper {
+  width: 100%;
+}
+
+.input-group-edit .react-datepicker__input-container {
+  width: 100%;
+}
+
+.input-group-edit .react-datepicker__input-container input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #fff;
+  transition: all 0.3s;
+  box-sizing: border-box;
+}
+
+.input-group-edit .react-datepicker__input-container input:hover {
+  border-color: #007bff;
+}
+
+.input-group-edit .react-datepicker__input-container input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+.input-group-edit .react-datepicker__input-container input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Estilização do Select (react-select) */
+.input-group-edit .react-select__control {
+  min-height: 42px;
+  border-color: #ddd;
+  box-shadow: none;
+  transition: all 0.3s;
+}
+
+.input-group-edit .react-select__control:hover {
+  border-color: #007bff;
+}
+
+.input-group-edit .react-select__control--is-focused {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+.input-group-edit .react-select__control--is-disabled {
+  background-color: #f5f5f5;
+  border-color: #ddd;
+}
+
+.input-group-edit .react-select__placeholder {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.input-group-edit .react-select__single-value {
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.input-group-edit .react-select__menu {
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.input-group-edit .react-select__option {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.input-group-edit .react-select__option:hover {
+  background-color: #e8f0fe;
+}
+
+.input-group-edit .react-select__option--is-selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.input-group-edit .react-select__option--is-disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.input-group-edit .react-select__no-options-message {
+  padding: 10px;
+  color: #666;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Estilos específicos para o DatePicker no modal */
+.datepicker-calendar {
+  font-family: inherit;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.react-datepicker__header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+  border-radius: 8px 8px 0 0;
+}
+
+.react-datepicker__current-month {
+  font-size: 1rem;
+  color: #333;
+  padding: 8px 0;
+}
+
+.react-datepicker__day-name {
+  color: #666;
+  font-weight: 500;
+  width: 2.5rem;
+  line-height: 2.5rem;
+  margin: 0.2rem;
+}
+
+.react-datepicker__day {
+  width: 2.5rem;
+  line-height: 2.5rem;
+  margin: 0.2rem;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.react-datepicker__day:hover {
+  background-color: #e8f0fe;
+}
+
+.react-datepicker__day--selected {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+.react-datepicker__day--keyboard-selected {
+  background-color: rgba(0,123,255,0.2);
+}
+
+.react-datepicker__day--disabled {
+  color: #ccc !important;
+  cursor: not-allowed;
+}
+
+.react-datepicker__day--disabled:hover {
+  background-color: transparent;
+}
+
+.hoje-azul {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.domingo-vermelho {
+  color: #dc3545;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .datetime-picker {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .input-group-edit {
+    min-width: 100%;
+  }
+
+  .input-group-edit .react-datepicker__input-container input {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .react-datepicker__day {
+    width: 2rem;
+    line-height: 2rem;
+    margin: 0.1rem;
+  }
+
+  .react-datepicker__day-name {
+    width: 2rem;
+    margin: 0.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .input-group-edit label {
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+  }
+
+  .input-group-edit .react-datepicker__input-container input {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+
+  .input-group-edit .react-select__control {
+    min-height: 38px;
+  }
+
+  .input-group-edit .react-select__single-value {
+    font-size: 0.85rem;
+  }
+
+  .react-datepicker__day {
+    width: 1.8rem;
+    line-height: 1.8rem;
+    font-size: 0.85rem;
+  }
+
+  .react-datepicker__day-name {
+    width: 1.8rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Animações */
+.input-group-edit .react-datepicker__input-container input,
+.input-group-edit .react-select__control {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Mensagem de erro ou validação */
+.input-group-edit .error-message {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  padding-left: 2px;
+}
+
+/* Responsivo para mobile */
+@media (max-width: 768px) {
+  .modal-content {
+    max-width: 98vw;
+    padding: 15px;
+  }
+
   .modal-title {
     font-size: 1rem;
   }
+
   .modal-close-button {
-    width: 2rem;
-    padding: 5px 4px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
+
   .modal-edit-content {
-  gap: .5rem;
-  }
-
-  .cake-info-1{
-    align-items: flex-start;
     flex-direction: column;
-
-    div {
-      width: 100%;
-    }
+    gap: 0.5rem;
   }
+
+  .modal-contact {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .input-text-modal {
+    width: 100% !important;
+  }
+
+  .cake-row-1 {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .cake-field {
+    min-width: 100%;
+  }
+
+  .fruit-options {
+    gap: 0.3rem;
+  }
+
+  .fruit-pill {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .modal-datetime {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .datetime-field {
+    min-width: 100%;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .save-button {
+    width: 100%;
+  }
+
+  /* Ajustes para o DatePicker no mobile */
+  .react-datepicker {
+    font-size: 0.8rem;
+  }
+
+  .react-datepicker__month-container {
+    width: 100%;
+  }
+
+  .react-datepicker__day {
+    width: 2rem;
+    line-height: 2rem;
+    margin: 0.1rem;
+  }
+
+  .react-datepicker__day-name {
+    width: 2rem;
+    margin: 0.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 12px;
+    max-height: 95vh;
+  }
+
+  .modal-top {
+    margin-bottom: 15px;
+  }
+
+  .cake-card {
+    padding: 1.8rem 0.8rem 0.8rem 0.8rem;
+  }
+
+  .cake-number-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+
+  .remove-cake-button {
+    width: 22px;
+    height: 22px;
+    font-size: 14px;
+  }
+
+  .fruit-pill {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+    padding: 0.3rem 0;
+  }
+
+  .input-text-modal {
+    font-size: 0.85rem;
+    padding: 6px;
+    height: 2rem;
+  }
+
+  .modal-message textarea {
+    min-height: 60px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Ajustes para telas muito pequenas */
+@media (max-width: 360px) {
+  .modal-content {
+    padding: 10px;
+  }
+
+  .fruit-options {
+    flex-direction: column;
+  }
+
+  .fruit-pill {
+    width: 100%;
+  }
+
+  .react-datepicker__day {
+    width: 1.8rem;
+    line-height: 1.8rem;
+  }
+
+  .react-datepicker__day-name {
+    width: 1.8rem;
+  }
+}
+
+/* Estilos para o DatePicker */
+.day-cell.domingo-cinza span {
+  color: #b0b0b0 !important;
+}
+
+.react-datepicker__input-container input {
+  width: 100%;
+  padding: 10px;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+}
+
+.react-datepicker__input-container input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.react-datepicker__input-container input:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
 }

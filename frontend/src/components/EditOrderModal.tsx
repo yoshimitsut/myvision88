@@ -3,9 +3,10 @@ import Select, { type SingleValue, type StylesConfig } from "react-select";
 import type { CSSObjectWithLabel, GroupBase } from "react-select";
 import DateTimePicker from "./DateTimePicker";
 import type { Order, Cake, OrderCake, SizeOption } from "../types/types";
-import './EditOrderModal.css';
 import { formatDateForBackend } from "../utils/dateUtils";
 import FruitOptionRadio from "./FruitOptionRadio";
+
+import './EditOrderModal.css';
 
 type Props = {
   editingOrder: Order;
@@ -176,47 +177,53 @@ export default function EditOrderModal({
         </div>
 
         {/* Dados do cliente */}
-        <div className="modal-edit-content" >
-          <div className="modal-name">
-            <label>姓(カタカナ)：</label>
-            <input 
-              className="input-text-modal"
-              type="text" 
-              value={editingOrder.first_name || ""} 
-              onChange={(e) => setEditingOrder({ ...editingOrder, first_name: e.target.value })} 
-            />
-          </div>
-          <div style={{ width: "50%" }}>
-            <label>名(カタカナ)：</label>
-            <input 
-              className="input-text-modal"
-              type="text" 
-              value={editingOrder.last_name || ""} 
-              onChange={(e) => setEditingOrder({ ...editingOrder, last_name: e.target.value })} 
-            />
-          </div>
-        </div>
+        
+{/* Dados do cliente */}
+<div className="modal-edit-content">
+  <div className="modal-name">
+    <label>姓(カタカナ)：</label>
+    <input 
+      className="input-text-modal"
+      type="text" 
+      value={editingOrder.first_name || ""} 
+      onChange={(e) => setEditingOrder({ ...editingOrder, first_name: e.target.value })} 
+      disabled={isSaving}
+    />
+  </div>
+  <div className="modal-name">
+    <label>名(カタカナ)：</label>
+    <input 
+      className="input-text-modal"
+      type="text" 
+      value={editingOrder.last_name || ""} 
+      onChange={(e) => setEditingOrder({ ...editingOrder, last_name: e.target.value })} 
+      disabled={isSaving}
+    />
+  </div>
+</div>
 
-        <div style={{ display: "flex", gap: "2rem", marginTop: "1rem" }}>
-          <div style={{ width: "50%" }}>
-            <label>メールアドレス：</label>
-            <input 
-              className="input-text-modal"
-              type="text" 
-              value={editingOrder.email || ""} 
-              onChange={(e) => setEditingOrder({ ...editingOrder, email: e.target.value })} 
-            />
-          </div>
-          <div style={{ width: "50%" }}>
-            <label>お電話番号：</label>
-            <input 
-              className="input-text-modal"
-              type="text" 
-              value={editingOrder.tel || ""} 
-              onChange={(e) => setEditingOrder({ ...editingOrder, tel: e.target.value })} 
-            />
-          </div>
-        </div>
+<div className="modal-contact">
+  <div>
+    <label>メールアドレス：</label>
+    <input 
+      className="input-text-modal"
+      type="text" 
+      value={editingOrder.email || ""} 
+      onChange={(e) => setEditingOrder({ ...editingOrder, email: e.target.value })} 
+      disabled={isSaving}
+    />
+  </div>
+  <div>
+    <label>お電話番号：</label>
+    <input 
+      className="input-text-modal"
+      type="text" 
+      value={editingOrder.tel || ""} 
+      onChange={(e) => setEditingOrder({ ...editingOrder, tel: e.target.value })} 
+      disabled={isSaving}
+    />
+  </div>
+</div>
 
         {/* Resumo do pedido */}
         <div style={{ marginTop: "1rem" }}>
@@ -373,7 +380,7 @@ export default function EditOrderModal({
                     />
 
                     {/* 数量 */}
-                    <div style={{ width: "49%" }}>
+                    <div className="quantity-model">
                       <label>数量:</label>
                       <input
                         className="input-text-modal"
@@ -420,7 +427,7 @@ export default function EditOrderModal({
           <textarea 
             value={editingOrder.message || ""} 
             onChange={(e) => !isSaving && setEditingOrder({ ...editingOrder, message: e.target.value })} // 🔹 Não permite mudar durante salvamento
-            style={{ width: "100%", minHeight: "80px" }}
+            style={{ width: "100%", minHeight: "80px", padding: "5px" }}
             placeholder="全体メッセージを入力（任意）"
             disabled={isSaving} // 🔹 Desabilita durante salvamento
           />
