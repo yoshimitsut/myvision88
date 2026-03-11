@@ -19,6 +19,7 @@ export default function StoreSettings() {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/storeinfo`);
       const data = await res.json();
+      console.log('Dados recebidos da API:', data);
       setStoreInfo(data);
     } catch (error) {
       console.error('設定の読み込みエラー:', error);

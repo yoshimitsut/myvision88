@@ -3,14 +3,15 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Html5Qrcode } from 'html5-qrcode';
 import Select from "react-select";
 
+import { useStoreSettings } from '../hooks/useStoreSettings';
 import ExcelExportButton from '../components/ExcelExportButton';
 import EditOrderModal from "../components/EditOrderModal";
+
+import { formatDateJP } from "../utils/formatDateJP";
 
 import type { StylesConfig, SingleValue } from 'react-select';
 import type { Order, StatusOption } from '../types/types';
 import { STATUS_OPTIONS } from '../types/types';
-
-import { formatDateJP } from "../utils/formatDateJP";
 
 import './ListOrder.css';
 
@@ -22,6 +23,7 @@ export default function ListOrder() {
   const [search, setSearch] = useState('');
   const [viewMode] = useState<"date" | "order">("order");
   const [activeTab, setActiveTab] = useState<"today" | "active" | "completed" | "cancelled" | "past">("today");
+  const {settings} = useStoreSettings();
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
@@ -1288,19 +1290,27 @@ useEffect(() => {
         />
 
         <div className='btn-actions'>
-          <button onClick={() => navigate("/admin/cake")} className='list-btn cake-btn'>
-            <img src="/icons/cake7.png" alt="ケーキアイコン" />
-          </button>
-          <button onClick={() => navigate("/admin/date")} className='list-btn qrcode-btn'>
-            <img src="/icons/calendar_icon.png" alt="カレンダーアイコン" />
-          </button>
-          <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
+          {settings?.use_admin_cake === 's'&& (
+            <button onClick={() => navigate("/admin/cake")} className='list-btn cake-btn'>
+              <img src="/icons/cake7.png" alt="ケーキアイコン" />
+            </button>
+          )}
+          {settings?.use_admin_date === 's'&& (
+            <button onClick={() => navigate("/admin/date")} className='list-btn qrcode-btn'>
+              <img src="/icons/calendar_icon.png" alt="カレンダーアイコン" />
+            </button>
+          )}
+          {settings?.use_admin_download === 's'&& (
+            <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
+          )}
           <button onClick={() => setShowScanner(true)} className='list-btn qrcode-btn'>
             <img src="/icons/qr-code.ico" alt="QRコードアイコン" />
           </button>
-          <button onClick={() => navigate("/ordertable")} className='list-btn'>
-            <img src="/icons/graph.ico" alt="グラフアイコン" />
-          </button>
+          {settings?.use_admin_grafic === 's'&& (
+            <button onClick={() => navigate("/ordertable")} className='list-btn'>
+              <img src="/icons/graph.ico" alt="グラフアイコン" />
+            </button>
+          )}
         </div>
       </div>
 
