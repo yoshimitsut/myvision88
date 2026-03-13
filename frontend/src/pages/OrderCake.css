@@ -288,10 +288,17 @@ body {
   }
   
   .yassumi {
-    color:#a1a1a1;
-    font-size: 1.6rem;
+    color: #a1a1a1;
+    font-size: clamp(20px, 5vw, 30px); /* Ajuste para acompanhar o círculo */
     font-family: sans-serif;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(20px, 3vw, 25px); /* Mesma largura do círculo */
+    height: clamp(20px, 3vw, 25px); /* Mesma altura do círculo */
     margin-top: 3px;
+    align-items: flex-end;
   }
   
   .react-datepicker__day--disabled .selectable{
@@ -299,11 +306,17 @@ body {
   }
 
   .day-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 4.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 4.5rem;
+  justify-content:space-evenly; 
   }
+
+  .day-cell span:first-child {
+    line-height: 1.2;
+  }
+
 
   .cake-information, .date-information, .client-information {
     display: flex;
