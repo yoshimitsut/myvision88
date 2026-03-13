@@ -193,7 +193,7 @@ body {
 
   .react-datepicker-wrapper{
     width: 100%;
-    border: 1px solid #c0bfbf;
+    /* border: 1px solid #c0bfbf; */
     border-radius: 5px;
   }
 
@@ -263,6 +263,29 @@ body {
     position: relative;
     margin: 5px;
   }
+
+
+  .selectable-info {
+    border: 4px solid red;
+    inline-size: 3vw;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    max-inline-size: 20px;
+    
+    max-width: 25px;
+    max-height: 25px;
+    box-sizing: border-box;
+
+
+    width: clamp(20px, 3vw, 25px);
+    height: clamp(20px, 3vw, 25px);
+  }
+
+  .notice-op {
+    display: flex;
+    align-items: anchor-center;
+  }
+
   .rowgroup {
     text-align: center;
   }
@@ -321,7 +344,7 @@ body {
   .cake-information, .date-information, .client-information {
     display: flex;
     flex-direction: column;
-    /* gap: 15px; */
+    gap: 15px;
     border-bottom: 3px solid #000;
     padding-bottom: 30px;
   }
@@ -366,7 +389,7 @@ body {
     display: flex;
     gap: 0.5rem;
     width: 100%;
-    padding-right: 30px;
+    padding-right: 10px;
     flex-direction: column;
     
     label {
@@ -386,6 +409,14 @@ body {
     display: none;
   }
 
+  /* .react-select__control {
+    border: 1px solid #333333;
+  } */
+  
+  .react-select__control, .input-group input, .input-group textarea, .input-group-radio {
+    box-shadow: 0px 3px 3px rgba(96, 95, 95, 0.1);
+  }
+  
   .input-group {
     position: relative;
     /* margin: 16px 0; */
@@ -400,7 +431,7 @@ body {
     padding: 20px 0px 13px 10px;
     /* padding-bottom: 10px; */
     font-size: 18px;
-    border: 1px solid #000;
+    border: 1px solid #c1c1c1;
     border-radius:  10px;
     background-color: #fff;
     color: #000;

@@ -1,16 +1,26 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import Select from 'react-select';
+import { useState, useEffect, useMemo } from 'react';
 import DatePicker, { CalendarContainer } from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { ja } from 'date-fns/locale';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { addDays, isSameDay, format, endOfMonth, getDay } from 'date-fns';
+import { ja } from 'date-fns/locale';
 
-// Import dos componentes de formulário
-import Input from '../components/forms/Input';
+import Select from 'react-select';
 import type { StylesConfig, CSSObjectWithLabel, OptionProps, ControlProps } from 'react-select';
-import type { Cake, OrderCake, OptionType, SizeOption, TimeOptionType, TimeslotSQL } from "../types/types";
+import type { OrderCake, OptionType, SizeOption, TimeOptionType } from "../types/types";
+
+import "react-datepicker/dist/react-datepicker.css";
 import "./OrderCake.css";
+
+// ==================== HOOKS PERSONALIZADOS ====================
+import Input from '../components/forms/Input';
+
+import { useCakesData } from '../hooks/useCakesData';
+import { useTimeSlots } from '../hooks/useTimeSlots';
+import { useExcludedDates } from '../hooks/useExcludedDates';
+import { useHoursOptions } from '../hooks/useHoursOptions';
+import { useOrderForm } from '../hooks/useOrderForm';
+import { useDateValidation } from '../hooks/useDateValidation';
+
 
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
@@ -20,13 +30,13 @@ interface CustomOptionType extends OptionType {
   isDisabled?: boolean;
 }
 
-interface FormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  tel: string;
-  message: string;
-}
+// interface FormData {
+//   firstName: string;
+//   lastName: string;
+//   email: string;
+//   tel: string;
+//   message: string;
+// }
 
 // ==================== CONSTANTES ====================
 const DIAS_BLOQUEADOS = 2;
@@ -49,8 +59,8 @@ const CustomCalendarContainer = ({ className, children }: CalendarContainerProps
         <p>３日前よりご予約可能</p>
       </div>
       <div className='notice'>
-        <div className='selectable'></div>
-        <span>予約可能日  /  <span className='yassumi'>x</span> 予約不可</span>
+        <div className='selectable-info'></div>
+        <span className='notice-op'>予約可能日  /  <span className='yassumi'>x</span> 予約不可</span>
       </div>
     </div>
   </div>
@@ -75,88 +85,7 @@ const DayCell = ({ day, date, isSelectable }: DayCellProps) => {
   );
 };
 
-// ==================== HOOKS PERSONALIZADOS ====================
-const useCakesData = () => {
-  const [cakesData, setCakesData] = useState<Cake[]>([]);
 
-  useEffect(() => {
-    fetch(`${API_URL}/api/cake`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data.cakes)) {
-          setCakesData(data.cakes);
-        } else {
-          console.error("Formato inesperado:", data);
-        }
-      })
-      .catch(err => console.error("Erro ao carregar bolos:", err));
-  }, []);
-
-  return cakesData;
-};
-
-const useTimeSlots = () => {
-  const [timeSlotsData, setTimeSlotsData] = useState<TimeslotSQL[]>([]);
-  const [availableDates, setAvailableDates] = useState<string[]>([]);
-
-  useEffect(() => {
-    fetch(`${API_URL}/api/timeslots/`)
-      .then(res => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.timeslots)) {
-          setTimeSlotsData(data.timeslots);
-          
-          const uniqueDates = [...new Set(
-            data.timeslots.map((slot: TimeslotSQL) => slot.date.split("T")[0])
-          )] as string[];
-          
-          setAvailableDates(uniqueDates);
-        } else {
-          console.error("Formato inesperado de timeslots:", data);
-          setTimeSlotsData([]);
-          setAvailableDates([]);
-        }
-      })
-      .catch(err => {
-        console.error("Erro ao carregar datas:", err);
-        setTimeSlotsData([]);
-        setAvailableDates([]);
-      });
-  }, []);
-
-  return { timeSlotsData, availableDates };
-};
-
-const useExcludedDates = (today: Date, diasBloqueados: number) => {
-  return useMemo(() => {
-    const blockedDates: Date[] = [];
-    
-    for (let i = 0; i < diasBloqueados; i++) {
-      blockedDates.push(addDays(today, i));
-    }
-
-    return blockedDates;
-  }, [today, diasBloqueados]);
-};
-
-const useHoursOptions = (selectedDate: Date | null, timeSlotsData: TimeslotSQL[]) => {
-  return useMemo(() => {
-    if (!selectedDate) return [];
-
-    const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-    const availableSlots = timeSlotsData.filter((slot) => {
-      const slotDateStr = slot.date.split("T")[0];
-      return slotDateStr === formattedDate;
-    });
-
-    return availableSlots.map((slot) => ({
-      id: slot.id,
-      value: slot.time,
-      label: slot.time,
-      isDisabled: false
-    }));
-  }, [selectedDate, timeSlotsData]);
-};
 
 // ==================== COMPONENTE PRINCIPAL ====================
 export default function OrderCake() {
@@ -164,19 +93,20 @@ export default function OrderCake() {
   const [searchParams] = useSearchParams();
 
   // Estados
-  const [cakes, setCakes] = useState<OrderCake[]>([
-    { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "", fruit_option: "無し" }
-  ]);
+  // const [cakes, setCakes] = useState<OrderCake[]>([
+  //   { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "", fruit_option: "無し" }
+  // ]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [pickupHour, setPickupHour] = useState("時間を選択");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    tel: "",
-    message: ""
-  });
+  // const [formData, setFormData] = useState<FormData>({
+  //   firstName: "",
+  //   lastName: "",
+  //   email: "",
+  //   tel: "",
+  //   message: ""
+  // });
+
 
   // Hooks personalizados
   const cakesData = useCakesData();
@@ -185,6 +115,28 @@ export default function OrderCake() {
   const maxDate = useMemo(() => endOfMonth(addDays(today, 30)), [today]);
   const excludedDates = useExcludedDates(today, DIAS_BLOQUEADOS);
   const hoursOptions = useHoursOptions(selectedDate, timeSlotsData);
+
+   const initialCake = { 
+    cake_id: 0, 
+    name: "", 
+    amount: 1, 
+    size: "", 
+    price: 1, 
+    message_cake: "", 
+    fruit_option: "無し" as const 
+  };
+  
+  const { 
+    cakes, 
+    setCakes,  
+    formData, 
+    setFormData,
+    addCake, 
+    removeCake, 
+    updateCake, 
+    handleInputChange,
+    resetForm 
+  } = useOrderForm([initialCake]);
 
   // Efeito para inicializar bolo da URL
   useEffect(() => {
@@ -219,47 +171,7 @@ export default function OrderCake() {
   }, [hoursOptions, pickupHour, selectedDate]);
 
   // ==================== FUNÇÕES DE VALIDAÇÃO ====================
-  const isDateAllowed = useCallback((date: Date) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    
-    if (date < today) return false;
-    
-    const isBlocked = excludedDates.some(blockedDate => 
-      isSameDay(blockedDate, date)
-    );
-    if (isBlocked) return false;
-    
-    return availableDates.includes(dateStr);
-  }, [today, excludedDates, availableDates]);
-
-  // ==================== FUNÇÕES DE MANIPULAÇÃO ====================
-  const addCake = () => {
-    setCakes(prev => [
-      ...prev,
-      { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "", fruit_option: "無し" }
-    ]);
-  };
-
-  const removeCake = (index: number) => {
-    setCakes(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const updateCake = <K extends keyof OrderCake>(
-    index: number,
-    field: K,
-    value: OrderCake[K]
-  ) => {
-    setCakes(prev =>
-      prev.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      )
-    );
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
-  };
+  const { isDateAllowed } = useDateValidation(today, excludedDates, availableDates);
 
   const toKatakana = (str: string) => {
     return str.replace(/[\u3041-\u3096]/g, (ch) => 
@@ -325,18 +237,9 @@ export default function OrderCake() {
         navigate("/order/check", { state: { newOrderCreated: true } });
         
         // Reset form
-        setCakes([{
-          cake_id: cakesData[0]?.id || 0,
-          name: cakesData[0]?.name || "",
-          amount: 1,
-          size: "",
-          price: 1,
-          message_cake: "",
-          fruit_option: "無し"
-        }]);
+        resetForm();
         setSelectedDate(null);
         setPickupHour("時間を選択");
-        setFormData({ firstName: "", lastName: "", email: "", tel: "", message: "" });
       } else {
         alert(result.error);
       }
