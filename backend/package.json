@@ -12,17 +12,25 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "axios": "^1.13.6",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.3.1",
+    "helmet": "^8.1.0",
     "iconv-lite": "^0.7.2",
     "multer": "^2.0.2",
     "mysql2": "^3.15.1",
     "nodemailer": "^7.0.9",
     "qrcode": "^1.5.4",
-    "resend": "^6.5.2"
+    "react-square-web-payments-sdk": "^3.3.0",
+    "resend": "^6.5.2",
+    "square": "^44.0.1",
+    "uuid": "^13.0.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/uuid": "^10.0.0",
     "nodemon": "^3.1.10"
   }
 }
