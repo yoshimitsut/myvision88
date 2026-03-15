@@ -10,6 +10,7 @@ const orderRoutes = require('./routers/orderRoutes');
 const timeslotRoutes = require('./routers/timeslotRoutes');
 const newsletterRoutes = require('./routers/newsletter');
 const storeInfo = require('./routers/storeInfo');
+const processPayment = require('./routers/payments');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -34,6 +35,7 @@ app.get('/api/test', async (req, res) => {
   }
 });
 
+app.use("/api/process-payment", processPayment);
 
 // 🔹 USAR OS ROUTERS SEPARADOS
 app.use('/api/cake', cakeRoutes);
