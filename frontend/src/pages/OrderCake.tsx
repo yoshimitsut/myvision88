@@ -21,26 +21,31 @@ import { useHoursOptions } from '../hooks/useHoursOptions';
 import { useOrderForm } from '../hooks/useOrderForm';
 import { useDateValidation } from '../hooks/useDateValidation';
 
+// ==================== NOVOS IMPORTS PARA SQUARE ====================
+import { PaymentForm } from '../components/PaymentForm';
+import { calculateTotalPrice } from '../utils/priceCalculator';
+import type { OrderData, OrderStatus, PaymentStatus, SquarePaymentResponse, SquareError } from '../types/square';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
+const SQUARE_APP_ID = import.meta.env.VITE_SQUARE_APP_ID;
+const SQUARE_LOCATION_ID = import.meta.env.VITE_SQUARE_LOCATION_ID;
 
 // ==================== TIPOS ====================
 interface CustomOptionType extends OptionType {
   isDisabled?: boolean;
 }
 
-// interface FormData {
-//   firstName: string;
-//   lastName: string;
-//   email: string;
-//   tel: string;
-//   message: string;
-// }
+interface FruitOption {
+  value: "有り" | "無し";
+  label: string;
+  price: number;
+  priceText: string;
+}
 
 // ==================== CONSTANTES ====================
 const DIAS_BLOQUEADOS = 2;
-const FRUIT_OPTIONS = [
+const FRUIT_OPTIONS: readonly FruitOption[] = [
   { value: "無し", label: "通常盛り", price: 0, priceText: "+0円" },
   { value: "有り", label: "フルーツ増し", price: 648, priceText: "+648円" }
 ] as const;
@@ -85,29 +90,23 @@ const DayCell = ({ day, date, isSelectable }: DayCellProps) => {
   );
 };
 
-
-
 // ==================== COMPONENTE PRINCIPAL ====================
 export default function OrderCake() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Estados
-  // const [cakes, setCakes] = useState<OrderCake[]>([
-  //   { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "", fruit_option: "無し" }
-  // ]);
+  // Estados existentes
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [pickupHour, setPickupHour] = useState("時間を選択");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // const [formData, setFormData] = useState<FormData>({
-  //   firstName: "",
-  //   lastName: "",
-  //   email: "",
-  //   tel: "",
-  //   message: ""
-  // });
-
-
+  
+  // ==================== NOVOS ESTADOS PARA PAGAMENTO ====================
+  const [paymentStep, setPaymentStep] = useState<'form' | 'payment'>('form');
+  const [orderData, setOrderData] = useState<OrderData | null>(null);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [, setSquareInitialized] = useState(false);
+  const [paymentKey, setPaymentKey] = useState(0);
+  
   // Hooks personalizados
   const cakesData = useCakesData();
   const { timeSlotsData, availableDates } = useTimeSlots();
@@ -116,7 +115,7 @@ export default function OrderCake() {
   const excludedDates = useExcludedDates(today, DIAS_BLOQUEADOS);
   const hoursOptions = useHoursOptions(selectedDate, timeSlotsData);
 
-   const initialCake = { 
+  const initialCake = { 
     cake_id: 0, 
     name: "", 
     amount: 1, 
@@ -138,6 +137,30 @@ export default function OrderCake() {
     resetForm 
   } = useOrderForm([initialCake]);
 
+
+  useEffect(() => {
+  console.log('🔍 Verificando variáveis de ambiente:');
+  console.log('VITE_SQUARE_APP_ID:', import.meta.env.VITE_SQUARE_APP_ID);
+  console.log('VITE_SQUARE_LOCATION_ID:', import.meta.env.VITE_SQUARE_LOCATION_ID);
+  console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+  
+  if (!import.meta.env.VITE_SQUARE_APP_ID) {
+    console.error('❌ VITE_SQUARE_APP_ID não está configurado!');
+  }
+  if (!import.meta.env.VITE_SQUARE_LOCATION_ID) {
+    console.error('❌ VITE_SQUARE_LOCATION_ID não está configurado!');
+  }
+}, []);
+
+
+
+
+  // ==================== NOVO: Calcular total do pedido ====================
+  useEffect(() => {
+    const total = calculateTotalPrice(cakes, cakesData, FRUIT_OPTIONS);
+    setTotalAmount(total);
+  }, [cakes, cakesData]);
+
   // Efeito para inicializar bolo da URL
   useEffect(() => {
     const selectedCakeName = searchParams.get("cake");
@@ -158,7 +181,7 @@ export default function OrderCake() {
         fruit_option: "無し"
       }]);
     }
-  }, [cakesData, searchParams]);
+  }, [cakesData, searchParams, setCakes]);
 
   // Resetar horário quando data muda
   useEffect(() => {
@@ -173,7 +196,7 @@ export default function OrderCake() {
   // ==================== FUNÇÕES DE VALIDAÇÃO ====================
   const { isDateAllowed } = useDateValidation(today, excludedDates, availableDates);
 
-  const toKatakana = (str: string) => {
+  const toKatakana = (str: string): string => {
     return str.replace(/[\u3041-\u3096]/g, (ch) => 
       String.fromCharCode(ch.charCodeAt(0) + 0x60)
     );
@@ -191,15 +214,25 @@ export default function OrderCake() {
     return `${year}-${month}-${day}`;
   };
 
-  // ==================== SUBMISSÃO ====================
+  // ==================== FUNÇÃO MODIFICADA: SUBMISSÃO ====================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    
+    if (!selectedDate || pickupHour === "時間を選択") {
+      alert("受け取り日時を選択してください。");
+      return;
+    }
+
+    const invalidCake = cakes.find(c => !c.size);
+    if (invalidCake) {
+      alert("全てのケーキのサイズを選択してください。");
+      return;
+    }
 
     const clientId = crypto.randomUUID?.() || 
       `client_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
-    const data = {
+    const orderDataToSave: OrderData = {
       id_client: clientId,
       first_name: formData.firstName,
       last_name: formData.lastName,
@@ -208,10 +241,19 @@ export default function OrderCake() {
       date: getLocalDateString(selectedDate),
       date_order: format(new Date(), "yyyy-MM-dd"),
       pickupHour,
-      status: 'b',
+      status: 'b' as OrderStatus,
       message: formData.message,
+      total_amount: totalAmount,
+      payment_status: 'pending' as PaymentStatus,
       cakes: cakes.map(c => {
         const cakeData = cakesData?.find(cake => Number(cake.id) === Number(c.cake_id));
+        const fruitPrice = FRUIT_OPTIONS.find(f => f.value === c.fruit_option)?.price || 0;
+        
+        // Garantir que size não é undefined
+        if (!c.size) {
+          throw new Error(`Cake size is undefined for cake ${c.cake_id}`);
+        }
+        
         return {
           cake_id: cakeData?.id || c.cake_id,
           name: cakeData?.name || c.name,
@@ -219,38 +261,109 @@ export default function OrderCake() {
           price: c.price,
           size: c.size,
           message_cake: c.message_cake || "",
-          fruit_option: c.fruit_option
+          fruit_option: c.fruit_option,
+          fruit_price: fruitPrice
         };
       })
     };
 
+    setOrderData(orderDataToSave);
+    
+    // Ir para etapa de pagamento
+    setPaymentStep('payment');
+  };
+
+  // ==================== NOVA FUNÇÃO: Processar pagamento ====================
+  const handlePaymentSuccess = async (paymentResult: SquarePaymentResponse) => {
+    if (!orderData) {
+      alert("エラー: 注文データが見つかりません。");
+      return;
+    }
+
+    // Verificar se o pagamento foi bem-sucedido e tem os dados necessários
+    if (!paymentResult.success || !paymentResult.payment) {
+      alert("支払いは完了しましたが、決済情報の取得に失敗しました。管理者に連絡してください。");
+      console.error('Payment result missing payment data:', paymentResult);
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
+      // Atualizar status da reserva para pago
+      const reservationData: OrderData = {
+        ...orderData,
+        status: 'd',
+        payment_status: 'paid',
+        payment_id: paymentResult.payment?.id,
+        payment_details: paymentResult.payment
+      };
+
       const res = await fetch(`${API_URL}/api/reservar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(reservationData),
       });
       
       const result = await res.json();
       
       if (result.success) {
-        navigate("/order/check", { state: { newOrderCreated: true } });
+        navigate("/order/check", { 
+          state: { 
+            newOrderCreated: true,
+            paymentSuccess: true,
+            paymentId: paymentResult.payment?.id
+          } 
+        });
         
         // Reset form
         resetForm();
         setSelectedDate(null);
         setPickupHour("時間を選択");
+        setPaymentStep('form');
+        setOrderData(null);
       } else {
-        alert(result.error);
+        alert("予約の保存に失敗しましたが、支払いは完了しています。管理者に連絡してください。");
+        console.error(result.error);
       }
     } catch (error) {
-      alert("送信に失敗しました。");
+      alert("エラーが発生しました。");
       console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handlePaymentError = (error: SquareError | Error) => {
+  console.log('🔥 ERRO DE PAGAMENTO DETALHADO:');
+  console.log('Error object:', error);
+  console.log('Tipo do error:', typeof error);
+  console.log('É instância de Error?', error instanceof Error);
+  console.log('Construtor:', error?.constructor?.name);
+  console.log('Propriedades:', Object.keys(error));
+  
+  if (error instanceof Error) {
+    console.log('Error message:', error.message);
+    console.log('Error stack:', error.stack);
+    alert(`支払いエラー: ${error.message}`);
+  } else if (error && typeof error === 'object') {
+    console.log('Square error detail:', error.detail);
+    console.log('Square error code:', error.code);
+    alert(`支払いエラー: ${error.detail || '決済に失敗しました'}`);
+  } else {
+    alert(`支払いエラー: ${String(error)}`);
+  }
+  
+  setPaymentStep('form');
+};
+
+  const handleBackToForm = () => {
+    setPaymentStep('form');
+    // Incrementar a key para forçar recriação quando necessário
+    setPaymentKey(prev => prev + 1);
+  };
+
+  
   // ==================== STYLES TIPADOS ====================
   // Styles para OptionType (bolos, quantidades)
   const getBaseStyles = <T extends OptionType>(): StylesConfig<T, false> => ({
@@ -311,9 +424,32 @@ export default function OrderCake() {
   };
 
   const customStyles = getBaseStyles<OptionType>();
-  const customStylesHour = getBaseStyles<TimeOptionType>();
-  // const customStylesSize = getBaseStyles<SizeOption>();
+  const customStylesHour = getBaseStyles<TimeOptionType>()
   const customStylesCake = getBaseStyles<CustomOptionType>();
+
+  const orderSummaryData = {
+    items: cakes.map(cake => {
+      const cakeData = cakesData?.find(c => c.id === cake.cake_id);
+      return {
+        name: cakeData?.name || cake.name,
+        size: cake.size || '',
+        amount: cake.amount,
+        price: cake.price,
+        fruit_option: cake.fruit_option,
+        message_cake: cake.message_cake
+      };
+    }),
+    customer: {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      tel: formData.tel
+    },
+    pickupDate: selectedDate ? format(selectedDate, 'yyyy年MM月dd日') : '',
+    pickupTime: pickupHour,
+    totalAmount: totalAmount,
+    message: formData.message
+  };
 
   // ==================== RENDER ====================
   return (
@@ -322,267 +458,324 @@ export default function OrderCake() {
         <h2 className='cake-title-h2'>デコレーションケーキ</h2>
         <h2 className='cake-title-h2'>予約フォーム</h2>
 
-        <form className="form-order" onSubmit={handleSubmit}>
-          <div className="cake-information">
-            {cakes.map((item, index) => {
-              const selectedCakeData = cakesData?.find(c => c.id === item.cake_id);
-              const sizeOptions: SizeOption[] = selectedCakeData?.sizes.map(s => ({
-                ...s,
-                value: s.size,
-                label: `${s.size} ￥${s.price.toLocaleString()} `
-              })) || [];
-              const selectedSize = sizeOptions.find(s => s.size === item.size);
+        {paymentStep === 'form' ? (
+          // ==================== FORMULÁRIO DE RESERVA ====================
+          <form className="form-order" onSubmit={handleSubmit}>
+            <div className="cake-information">
+              {cakes.map((item, index) => {
+                const selectedCakeData = cakesData?.find(c => c.id === item.cake_id);
+                const sizeOptions: SizeOption[] = selectedCakeData?.sizes.map(s => ({
+                  ...s,
+                  value: s.size || '',
+                  label: s.size ? `${s.size} ￥${s.price.toLocaleString()}` : '',
+                })) || [];
+                const selectedSize = sizeOptions.find(s => s.size === item.size);
 
-              return (
-                <div className="box-cake" key={`${item.cake_id}-${index}`}>
-                  {index > 0 && (
-                    <div className='btn-remove-div'>
-                      <button type="button" onClick={() => removeCake(index)} className='btn-remove-cake'>
-                        ❌
-                      </button>
-                    </div>
-                  )}
-                  
-                  {selectedCakeData && (
-                    <img 
-                      className='img-cake-order' 
-                      src={`${API_URL}/image/${FOLDER_URL}/${selectedCakeData.image}`} 
-                      alt={selectedCakeData.name} 
-                    />
-                  )}
-                  
-                  <div className='input-group'>
-                    <Select<CustomOptionType, false>
-                      options={cakesData?.map(c => ({ value: String(c.id), label: c.name, image: c.image })) || []}
-                      value={cakesData?.map(c => ({ value: String(c.id), label: c.name }))
-                        .find(c => Number(c.value) === item.cake_id) || null}
-                      onChange={(selected) => {
-                        if (selected) {
-                          const newCakeId = Number(selected.value);
-                          const selectedCake = cakesData?.find(c => c.id === newCakeId);
-                          updateCake(index, "cake_id", newCakeId);
-                          updateCake(index, "size", "");
-                          updateCake(index, "price", 0);
-                          
-                          if (selectedCake?.sizes && selectedCake.sizes.length === 1) {
-                            const singleSize = selectedCake.sizes[0];
-                            if (singleSize.stock > 0) {
-                              updateCake(index, "size", singleSize.size);
-                              updateCake(index, "price", singleSize.price);
-                            }
-                          }
-                        } else {
-                          updateCake(index, "cake_id", 0);
-                          updateCake(index, "size", "");
-                          updateCake(index, "price", 0);
-                        }
-                      }}
-                      noOptionsMessage={() => "読み込み中..."}
-                      classNamePrefix="react-select"
-                      placeholder="ケーキを選択"
-                      required
-                      isSearchable={false}
-                      styles={customStylesCake}
-                    />
-                    <label className='select-group'>*ケーキ名:</label>
-                  </div>
-
-                  {selectedCakeData && (
+                return (
+                  <div className="box-cake" key={`${item.cake_id}-${index}`}>
+                    {index > 0 && (
+                      <div className='btn-remove-div'>
+                        <button type="button" onClick={() => removeCake(index)} className='btn-remove-cake'>
+                          ❌
+                        </button>
+                      </div>
+                    )}
+                    
+                    {selectedCakeData && selectedCakeData.image && (
+                      <img 
+                        className='img-cake-order' 
+                        src={`${API_URL}/image/${FOLDER_URL}/${selectedCakeData.image}`} 
+                        alt={selectedCakeData.name} 
+                      />
+                    )}
+                    
                     <div className='input-group'>
-                      <Select<SizeOption, false>
-                        options={sizeOptions} 
-                        value={selectedSize || null}
+                      <Select<CustomOptionType, false>
+                        options={cakesData?.map(c => ({ 
+                          value: String(c.id), 
+                          label: c.name, 
+                          image: c.image,
+                          isDisabled: false 
+                        })) || []}
+                        value={cakesData?.map(c => ({ 
+                          value: String(c.id), 
+                          label: c.name,
+                          image: c.image,
+                          isDisabled: false 
+                        })).find(c => Number(c.value) === item.cake_id) || null}
                         onChange={(selected) => {
                           if (selected) {
-                            updateCake(index, "size", selected.size);
-                            updateCake(index, "price", selected.price);
+                            const newCakeId = Number(selected.value);
+                            const selectedCake = cakesData?.find(c => c.id === newCakeId);
+                            updateCake(index, "cake_id", newCakeId);
+                            updateCake(index, "size", "");
+                            updateCake(index, "price", 1);
+                            
+                            if (selectedCake?.sizes && selectedCake.sizes.length === 1) {
+                              const singleSize = selectedCake.sizes[0];
+                              if (singleSize.stock > 0 && singleSize.size) {
+                                updateCake(index, "size", singleSize.size);
+                                updateCake(index, "price", singleSize.price);
+                              }
+                            }
+                          } else {
+                            updateCake(index, "cake_id", 0);
+                            updateCake(index, "size", "");
+                            updateCake(index, "price", 1);
                           }
                         }}
-                        placeholder='サイズを選択'
-                        isSearchable={false}
-                        classNamePrefix='react-select'
+                        noOptionsMessage={() => "読み込み中..."}
+                        classNamePrefix="react-select"
+                        placeholder="ケーキを選択"
                         required
-                        styles={customStylesSize}
+                        isSearchable={false}
+                        styles={customStylesCake}
                       />
-                      <label className='select-group'>*ケーキのサイズ</label>
+                      <label className='select-group'>*ケーキ名:</label>
                     </div>
+
+                    {selectedCakeData && (
+                      <div className='input-group'>
+                        <Select<SizeOption, false>
+                          options={sizeOptions} 
+                          value={selectedSize || null}
+                          onChange={(selected) => {
+                            if (selected && selected.size) {
+                              updateCake(index, "size", selected.size);
+                              updateCake(index, "price", selected.price);
+                            }
+                          }}
+                          placeholder='サイズを選択'
+                          isSearchable={false}
+                          classNamePrefix='react-select'
+                          required
+                          styles={customStylesSize}
+                        />
+                        <label className='select-group'>*ケーキのサイズ</label>
+                      </div>
+                    )}
+                    
+                    <div className="input-group-radio">
+                      <div className="pill-group">
+                        {FRUIT_OPTIONS.map(option => (
+                          <label 
+                            key={option.value}
+                            className={`pill ${item.fruit_option === option.value ? "active" : ""}`}
+                          >
+                            <input
+                              className='radio-input-fruit'
+                              type="radio"
+                              name={`fruit-option-${index}`}
+                              value={option.value}
+                              checked={item.fruit_option === option.value}
+                              onChange={() => updateCake(index, "fruit_option", option.value)}
+                            />
+                            <span style={{ width: "120px", textAlign: "start" }}>{option.label}</span>
+                            <span style={{ width: "5rem", textAlign: "end" }}>{option.priceText}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <label className='select-group-radio'>*フルーツ盛り</label>
+                    </div>
+
+                    <div className='input-group'>
+                      <Select<OptionType, false>
+                        options={Array.from({ length: 10 }, (_, i) => ({ 
+                          value: String(i + 1), 
+                          label: String(i + 1) 
+                        }))}
+                        value={Array.from({ length: 10 }, (_, i) => ({ 
+                          value: String(i + 1), 
+                          label: String(i + 1) 
+                        })).find(opt => opt.value === String(item.amount)) || null}
+                        isSearchable={false}
+                        onChange={(selected) => updateCake(index, "amount", selected ? Number(selected.value) : 1)}
+                        classNamePrefix="react-select"
+                        placeholder="数量"
+                        styles={customStyles}
+                        required
+                      />
+                      <label className='select-group'>*個数:</label>
+                    </div>
+                    
+                    <div className='input-group'>
+                      <label htmlFor={`message_cake_${index}`}>メッセージプレート</label>
+                      <textarea 
+                        id={`message_cake_${index}`}
+                        name="message_cake" 
+                        placeholder="ご要望がある場合のみご記入ください。"
+                        value={item.message_cake || ""}
+                        onChange={(e) => updateCake(index, "message_cake", e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className='btn-div'>
+                      <button type='button' onClick={addCake} className='btn btn-add-cake'>
+                        ➕ 別のケーキを追加
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="client-information">
+              <label className='title-information'>お客様情報</label>
+              <div className="full-name">
+                <Input
+                  id="firstName"
+                  label="*姓(カタカナ)"
+                  placeholder="ヒガ"
+                  value={formData.firstName}
+                  onChange={handleFirstNameChange}
+                  lang="ja"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  required
+                />
+                
+                <Input
+                  id="lastName"
+                  label="*名(カタカナ)"
+                  placeholder="タロウ"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  required
+                />
+                
+                <Input
+                  id="email"
+                  label="*メールアドレス"
+                  type="email"
+                  placeholder="必須"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                />
+                
+                <Input
+                  id="tel"
+                  label="*お電話番号"
+                  type="tel"
+                  placeholder="ハイフン不要"
+                  value={formData.tel}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="date-information">
+              <label className='title-information'>*受取日時</label>
+              <div className='input-group'>
+                <label htmlFor="datepicker" className='datepicker'>*受け取り希望日</label>
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={(date) => setSelectedDate(date)}
+                  minDate={today}
+                  maxDate={maxDate}
+                  excludeDates={excludedDates}
+                  filterDate={isDateAllowed}
+                  dateFormat="yyyy年MM月dd日"
+                  locale={ja}
+                  placeholderText="日付を選択"
+                  dayClassName={(date) => {
+                    if (isSameDay(date, today)) return "hoje-azul";
+                    if (getDay(date) === 0) return "domingo-vermelho";
+                    return "";
+                  }}
+                  className="react-datepicker"
+                  calendarClassName="datepicker-calendar"
+                  calendarContainer={CustomCalendarContainer}
+                  required
+                  renderDayContents={(day, date) => (
+                    <DayCell 
+                      day={day} 
+                      date={date!} 
+                      isSelectable={isDateAllowed(date!)} 
+                    />
                   )}
-                  
-                  <div className="input-group-radio">
-                    <div className="pill-group">
-                      {FRUIT_OPTIONS.map(option => (
-                        <label 
-                          key={option.value}
-                          className={`pill ${item.fruit_option === option.value ? "active" : ""}`}
-                        >
-                          <input
-                            className='radio-input-fruit'
-                            type="radio"
-                            name={`fruit-option-${index}`}
-                            value={option.value}
-                            checked={item.fruit_option === option.value}
-                            onChange={() => updateCake(index, "fruit_option", option.value)}
-                          />
-                          <span style={{ width: "120px", textAlign: "start" }}>{option.label}</span>
-                          <span style={{ width: "5rem", textAlign: "end" }}>{option.priceText}</span>
-                        </label>
-                      ))}
-                    </div>
-                    <label className='select-group-radio'>*フルーツ盛り</label>
-                  </div>
+                />
+              </div>
 
-                  <div className='input-group'>
-                    <Select<OptionType, false>
-                      options={Array.from({ length: 10 }, (_, i) => ({ 
-                        value: String(i + 1), 
-                        label: String(i + 1) 
-                      }))}
-                      value={Array.from({ length: 10 }, (_, i) => ({ 
-                        value: String(i + 1), 
-                        label: String(i + 1) 
-                      })).find(opt => opt.value === String(item.amount)) || null}
-                      isSearchable={false}
-                      onChange={(selected) => updateCake(index, "amount", selected ? Number(selected.value) : 0)}
-                      classNamePrefix="react-select"
-                      placeholder="数量"
-                      styles={customStyles}
-                      required
-                    />
-                    <label className='select-group'>*個数:</label>
-                  </div>
-                  
-                  <div className='input-group'>
-                    <label htmlFor={`message_cake_${index}`}>メッセージプレート</label>
-                    <textarea 
-                      id={`message_cake_${index}`}
-                      name="message_cake" 
-                      placeholder="ご要望がある場合のみご記入ください。"
-                      value={item.message_cake || ""}
-                      onChange={(e) => updateCake(index, "message_cake", e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className='btn-div'>
-                    <button type='button' onClick={addCake} className='btn btn-add-cake'>
-                      ➕ 別のケーキを追加
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="client-information">
-            <label className='title-information'>お客様情報</label>
-            <div className="full-name">
-              <Input
-                id="firstName"
-                label="*姓(カタカナ)"
-                placeholder="ヒガ"
-                value={formData.firstName}
-                onChange={handleFirstNameChange}
-                lang="ja"
-                autoCapitalize="none"
-                autoCorrect="off"
-                required
-              />
+              <div className='input-group'>
+                <Select<TimeOptionType, false>
+                  options={hoursOptions}
+                  value={hoursOptions.find(h => h.value === pickupHour)}
+                  onChange={(selected) => setPickupHour(selected?.value || "時間を選択")}
+                  classNamePrefix="react-select"
+                  styles={customStylesHour}
+                  placeholder={selectedDate ? "時間を選択" : "日付を選択してください"}
+                  isSearchable={false}
+                  isDisabled={!selectedDate || hoursOptions.length === 0}
+                  required
+                />
+                <label htmlFor="pickupHour" className='select-group'>受け取り希望時間</label>
+              </div>
               
-              <Input
-                id="lastName"
-                label="*名(カタカナ)"
-                placeholder="タロウ"
-                value={formData.lastName}
-                onChange={handleInputChange}
-                required
-              />
-              
-              <Input
-                id="email"
-                label="*メールアドレス"
-                type="email"
-                placeholder="必須"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
-              
-              <Input
-                id="tel"
-                label="*お電話番号"
-                type="tel"
-                placeholder="ハイフン不要"
-                value={formData.tel}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="date-information">
-            <label className='title-information'>*受取日時</label>
-            <div className='input-group'>
-              <label htmlFor="datepicker" className='datepicker'>*受け取り希望日</label>
-              <DatePicker
-                selected={selectedDate}
-                onChange={(date) => setSelectedDate(date)}
-                minDate={today}
-                maxDate={maxDate}
-                excludeDates={excludedDates}
-                filterDate={isDateAllowed}
-                dateFormat="yyyy年MM月dd日"
-                locale={ja}
-                placeholderText="日付を選択"
-                dayClassName={(date) => {
-                  if (isSameDay(date, today)) return "hoje-azul";
-                  if (getDay(date) === 0) return "domingo-vermelho";
-                  return "";
-                }}
-                className="react-datepicker"
-                calendarClassName="datepicker-calendar"
-                calendarContainer={CustomCalendarContainer}
-                required
-                renderDayContents={(day, date) => (
-                  <DayCell 
-                    day={day} 
-                    date={date!} 
-                    isSelectable={isDateAllowed(date!)} 
-                  />
-                )}
-              />
+              <div className='input-group' style={{ display: 'none' }}>
+                <label htmlFor="message">その他</label>
+                <textarea 
+                  id="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  placeholder=""
+                />
+              </div>
             </div>
 
-            <div className='input-group'>
-              <Select<TimeOptionType, false>
-                options={hoursOptions}
-                value={hoursOptions.find(h => h.value === pickupHour)}
-                onChange={(selected) => setPickupHour(selected?.value || "時間を選択")}
-                classNamePrefix="react-select"
-                styles={customStylesHour}
-                placeholder={selectedDate ? "時間を選択" : "日付を選択してください"}
-                isSearchable={false}
-                isDisabled={!selectedDate || hoursOptions.length === 0}
-                required
-              />
-              <label htmlFor="pickupHour" className='select-group'>受け取り希望時間</label>
+            {/* ==================== RESUMO DO PEDIDO ==================== */}
+            <div className="order-summary">
+              <h3>ご注文内容</h3>
+              {cakes.map((cake, index) => {
+                const cakeData = cakesData?.find(c => c.id === cake.cake_id);
+                const fruitPrice = FRUIT_OPTIONS.find(f => f.value === cake.fruit_option)?.price || 0;
+                const itemTotal = (cake.price + fruitPrice) * cake.amount;
+                
+                return (
+                  <div key={index} className="order-item">
+                    <span>{cakeData?.name} ({cake.size}) x{cake.amount}</span>
+                    <span>￥{itemTotal.toLocaleString()}</span>
+                  </div>
+                );
+              })}
+              <div className="order-total">
+                <strong>合計:</strong>
+                <strong>￥{totalAmount.toLocaleString()}</strong>
+              </div>
             </div>
-            
-            <div className='input-group' style={{ display: 'none' }}>
-              <label htmlFor="message">その他</label>
-              <textarea 
-                id="message"
-                value={formData.message}
-                onChange={handleInputChange}
-                placeholder=""
-              />
-            </div>
-          </div>
 
-          <div className='btn-div'>
-            <button type='submit' className='send btn' disabled={isSubmitting}>
-              {isSubmitting ? "送信中..." : "送信"}
+            <div className='btn-div'>
+              <button type='submit' className='send btn' disabled={isSubmitting}>
+                お支払いに進む (￥{totalAmount.toLocaleString()})
+              </button>
+            </div>
+          </form>
+        ) : (
+          // ==================== ETAPA DE PAGAMENTO ====================
+          <div className="payment-step">
+            <button onClick={handleBackToForm} className="btn-back" type="button">
+              ← 予約フォームに戻る
             </button>
+            
+            <h3>お支払い情報</h3>
+            <p className="payment-amount">
+              お支払い金額: <strong>￥{totalAmount.toLocaleString()}</strong>
+            </p>
+            
+            <PaymentForm
+              key={`payment-${paymentKey}`}
+              appId={SQUARE_APP_ID}
+              locationId={SQUARE_LOCATION_ID}
+              amount={totalAmount}
+              currency="JPY"
+              orderData={orderSummaryData} // 🔥 Passar todos os dados
+              onPaymentSuccess={handlePaymentSuccess}
+              onPaymentError={handlePaymentError}
+              onReady={() => setSquareInitialized(true)}
+            />
           </div>
-        </form>
+        )}
       </div>
     </div>
   );
