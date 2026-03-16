@@ -16,6 +16,7 @@ export interface OrderData {
   message: string;
   total_amount: number;
   payment_status: PaymentStatus; // Usando o tipo literal
+  payment_method?: 'card' | 'store';
   payment_id?: string;
   payment_details?: SquarePaymentDetails;
   cakes: OrderCakeItem[];
@@ -134,14 +135,4 @@ export interface PaymentFormProps {
   onReady?: () => void;
 }
 
-// export interface PaymentFormProps {
-//   appId: string;
-//   locationId: string;
-//   amount: number;
-//   currency: string;
-//   orderItems?: OrderSummaryItem[]; 
-//   totalAmount?: number; 
-//   onPaymentSuccess: (result: SquarePaymentResponse) => void;
-//   onPaymentError: (error: SquareError | Error) => void;
-//   onReady?: () => void;
-// }
+export type PaymentMethod = 'card' | 'store';

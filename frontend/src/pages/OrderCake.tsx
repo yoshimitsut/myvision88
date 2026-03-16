@@ -24,7 +24,7 @@ import { useDateValidation } from '../hooks/useDateValidation';
 // ==================== NOVOS IMPORTS PARA SQUARE ====================
 import { PaymentForm } from '../components/PaymentForm';
 import { calculateTotalPrice } from '../utils/priceCalculator';
-import type { OrderData, OrderStatus, PaymentStatus, SquarePaymentResponse, SquareError } from '../types/square';
+import type { OrderData, OrderStatus, PaymentStatus, SquarePaymentResponse, SquareError, PaymentMethod } from '../types/square';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
@@ -106,7 +106,9 @@ export default function OrderCake() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [, setSquareInitialized] = useState(false);
   const [paymentKey, setPaymentKey] = useState(0);
-  
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+  const [, setProcessingStorePayment] = useState(false);
+
   // Hooks personalizados
   const cakesData = useCakesData();
   const { timeSlotsData, availableDates } = useTimeSlots();
@@ -269,8 +271,58 @@ export default function OrderCake() {
 
     setOrderData(orderDataToSave);
     
-    // Ir para etapa de pagamento
-    setPaymentStep('payment');
+    if (paymentMethod === 'store') {
+      await handleStorePayment(orderDataToSave);
+    } else {
+      // Ir para etapa de pagamento
+      setPaymentStep('payment');
+    }
+  };
+
+  const handleStorePayment = async (orderDataToSave: OrderData) => {
+    setProcessingStorePayment(true);
+    
+    try {
+      // Atualizar status da reserva para pagamento pendente na loja
+      const reservationData: OrderData = {
+        ...orderDataToSave,
+        status: 'b',
+        payment_status: 'pending'
+      };
+
+      const res = await fetch(`${API_URL}/api/reservar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reservationData),
+      });
+      
+      const result = await res.json();
+      
+      if (result.success) {
+        navigate("/order/check", { 
+          state: { 
+            newOrderCreated: true,
+            paymentMethod: 'store',
+            paymentStatus: 'pending'
+          } 
+        });
+        
+        // Reset form
+        resetForm();
+        setSelectedDate(null);
+        setPickupHour("時間を選択");
+        setPaymentMethod('card');
+        setOrderData(null);
+      } else {
+        alert("予約の保存に失敗しました。");
+        console.error(result.error);
+      }
+    } catch (error) {
+      alert("エラーが発生しました。");
+      console.error(error);
+    } finally {
+      setProcessingStorePayment(false);
+    }
   };
 
   // ==================== NOVA FUNÇÃO: Processar pagamento ====================
@@ -363,6 +415,44 @@ export default function OrderCake() {
     setPaymentKey(prev => prev + 1);
   };
 
+  const PaymentMethodSelector = ({ 
+    selectedMethod, 
+    onChange 
+  }: { 
+    selectedMethod: PaymentMethod;
+    onChange: (method: PaymentMethod) => void;
+  }) => (
+    <div className="payment-method-selector">
+      <h3>お支払い方法を選択</h3>
+      <div className="payment-method-options">
+        <label className={`payment-method-option ${selectedMethod === 'card' ? 'active' : ''}`}>
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="card"
+            checked={selectedMethod === 'card'}
+            onChange={() => onChange('card')}
+          />
+          <span className="method-icon">💳</span>
+          <span className="method-label">クレジットカード</span>
+          <span className="method-description">オンライン決済</span>
+        </label>
+
+        <label className={`payment-method-option ${selectedMethod === 'store' ? 'active' : ''}`}>
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="store"
+            checked={selectedMethod === 'store'}
+            onChange={() => onChange('store')}
+          />
+          <span className="method-icon">🏪</span>
+          <span className="method-label">店舗支払い</span>
+          <span className="method-description">店頭でお支払い</span>
+        </label>
+      </div>
+    </div>
+  );
   
   // ==================== STYLES TIPADOS ====================
   // Styles para OptionType (bolos, quantidades)
@@ -744,6 +834,12 @@ export default function OrderCake() {
                 <strong>￥{totalAmount.toLocaleString()}</strong>
               </div>
             </div>
+            
+            {/* ==== SELETOR DE PAGAMENTO ==== */}
+            <PaymentMethodSelector
+              selectedMethod={paymentMethod}
+              onChange={setPaymentMethod}
+            />
 
             <div className='btn-div'>
               <button type='submit' className='send btn' disabled={isSubmitting}>

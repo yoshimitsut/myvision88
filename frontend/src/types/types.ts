@@ -138,4 +138,3 @@ export interface StoreInfo {
   use_admin_date: 's' | 'n';
   use_admin_download: 's' | 'n';
 }
-
