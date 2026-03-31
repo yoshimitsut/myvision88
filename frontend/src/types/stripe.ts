@@ -21,7 +21,6 @@ export interface OrderSummaryData {
 }
 
 export interface PaymentFormProps {
-  publishableKey: string;
   amount: number;
   currency: string;
   orderData: OrderSummaryData;

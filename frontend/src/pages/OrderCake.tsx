@@ -27,7 +27,6 @@ import { useDateValidation } from '../hooks/useDateValidation';
 import { calculateTotalPrice } from '../utils/priceCalculator';
 import type { StripePaymentResponse, StripeError, OrderData, OrderStatus, PaymentStatus } from '../types/stripe';
 
-const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
 
@@ -115,6 +114,8 @@ export default function OrderCake() {
   const maxDate = useMemo(() => endOfMonth(addDays(today, 30)), [today]);
   const excludedDates = useExcludedDates(today, DIAS_BLOQUEADOS);
   const hoursOptions = useHoursOptions(selectedDate, timeSlotsData);
+
+  // const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
   const initialCake = { 
     cake_id: 0, 
@@ -804,7 +805,7 @@ export default function OrderCake() {
             
             <PaymentFormStripe
               key={paymentKey}
-              publishableKey={STRIPE_PUBLISHABLE_KEY}
+              // publishableKey={STRIPE_PUBLISHABLE_KEY}
               amount={totalAmount}
               currency="jpy"
               orderData={orderSummaryData}

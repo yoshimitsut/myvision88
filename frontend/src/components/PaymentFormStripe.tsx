@@ -15,6 +15,12 @@ import type {
 import './PaymentForm.css';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const stripePromise = loadStripe(
+  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY, 
+  { locale: 'ja' }
+);
+
+// const API_URL = import.meta.env.VITE_API_URL;
 
 // Componente de resumo do pedido
 const OrderCompleteSummary = ({ orderData }: { orderData: OrderSummaryData }) => {
@@ -215,7 +221,6 @@ const PaymentFormInner = ({
 
 // Componente principal
 export function PaymentFormStripe({
-  publishableKey,
   amount,
   currency,
   orderData,
@@ -227,13 +232,7 @@ export function PaymentFormStripe({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Criar a Promise do Stripe
-  const stripePromise = loadStripe(publishableKey, {
-    locale: 'ja',
-    apiVersion: '2023-10-16',
-  });
-
-  useEffect(() => {
+  useEffect(() => {  
     const createPaymentIntent = async () => {
       try {
         setLoading(true);
@@ -272,14 +271,21 @@ export function PaymentFormStripe({
       }
     };
 
-    if (publishableKey && publishableKey !== 'pk_test_...' && publishableKey !== 'pk_live_...' && amount > 0) {
+    if (amount > 0) {
       createPaymentIntent();
     } else {
       setError('Configuração do Stripe inválida');
       setLoading(false);
       onPaymentError({ message: 'Stripe publishable key não configurada' });
     }
-  }, [amount, currency, orderData, publishableKey, onPaymentError, onReady]);
+  }, []);
+
+   // ✅ Limpa o estado quando o componente desmontar
+  useEffect(() => {
+    return () => {
+      setClientSecret(null);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -344,7 +350,6 @@ export function PaymentFormStripe({
             }}
           >
             <PaymentFormInner
-              publishableKey={publishableKey}
               amount={amount}
               currency={currency}
               orderData={orderData}
