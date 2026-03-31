@@ -8,6 +8,8 @@ import Select from 'react-select';
 import type { StylesConfig, CSSObjectWithLabel, OptionProps, ControlProps } from 'react-select';
 import type { OrderCake, OptionType, SizeOption, TimeOptionType } from "../types/types";
 
+import { PaymentFormStripe } from '../components/PaymentFormStripe';
+
 import "react-datepicker/dist/react-datepicker.css";
 import "./OrderCake.css";
 
@@ -21,15 +23,13 @@ import { useHoursOptions } from '../hooks/useHoursOptions';
 import { useOrderForm } from '../hooks/useOrderForm';
 import { useDateValidation } from '../hooks/useDateValidation';
 
-// ==================== NOVOS IMPORTS PARA SQUARE ====================
-import { PaymentForm } from '../components/PaymentForm';
+// ==================== IMPORTS PARA PAGAMENTO ====================
 import { calculateTotalPrice } from '../utils/priceCalculator';
-import type { OrderData, OrderStatus, PaymentStatus, SquarePaymentResponse, SquareError, PaymentMethod } from '../types/square';
+import type { StripePaymentResponse, StripeError, OrderData, OrderStatus, PaymentStatus } from '../types/stripe';
 
+const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
-const SQUARE_APP_ID = import.meta.env.VITE_SQUARE_APP_ID;
-const SQUARE_LOCATION_ID = import.meta.env.VITE_SQUARE_LOCATION_ID;
 
 // ==================== TIPOS ====================
 interface CustomOptionType extends OptionType {
@@ -100,13 +100,12 @@ export default function OrderCake() {
   const [pickupHour, setPickupHour] = useState("時間を選択");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // ==================== NOVOS ESTADOS PARA PAGAMENTO ====================
+  // Estados para pagamento
   const [paymentStep, setPaymentStep] = useState<'form' | 'payment'>('form');
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [totalAmount, setTotalAmount] = useState(0);
-  const [, setSquareInitialized] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'store'>('card');
   const [paymentKey, setPaymentKey] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [, setProcessingStorePayment] = useState(false);
 
   // Hooks personalizados
@@ -139,25 +138,7 @@ export default function OrderCake() {
     resetForm 
   } = useOrderForm([initialCake]);
 
-
-  useEffect(() => {
-  console.log('🔍 Verificando variáveis de ambiente:');
-  console.log('VITE_SQUARE_APP_ID:', import.meta.env.VITE_SQUARE_APP_ID);
-  console.log('VITE_SQUARE_LOCATION_ID:', import.meta.env.VITE_SQUARE_LOCATION_ID);
-  console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
-  
-  if (!import.meta.env.VITE_SQUARE_APP_ID) {
-    console.error('❌ VITE_SQUARE_APP_ID não está configurado!');
-  }
-  if (!import.meta.env.VITE_SQUARE_LOCATION_ID) {
-    console.error('❌ VITE_SQUARE_LOCATION_ID não está configurado!');
-  }
-}, []);
-
-
-
-
-  // ==================== NOVO: Calcular total do pedido ====================
+  // Calcular total do pedido
   useEffect(() => {
     const total = calculateTotalPrice(cakes, cakesData, FRUIT_OPTIONS);
     setTotalAmount(total);
@@ -216,7 +197,7 @@ export default function OrderCake() {
     return `${year}-${month}-${day}`;
   };
 
-  // ==================== FUNÇÃO MODIFICADA: SUBMISSÃO ====================
+  // ==================== FUNÇÕES DE SUBMISSÃO ====================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -251,7 +232,6 @@ export default function OrderCake() {
         const cakeData = cakesData?.find(cake => Number(cake.id) === Number(c.cake_id));
         const fruitPrice = FRUIT_OPTIONS.find(f => f.value === c.fruit_option)?.price || 0;
         
-        // Garantir que size não é undefined
         if (!c.size) {
           throw new Error(`Cake size is undefined for cake ${c.cake_id}`);
         }
@@ -274,7 +254,6 @@ export default function OrderCake() {
     if (paymentMethod === 'store') {
       await handleStorePayment(orderDataToSave);
     } else {
-      // Ir para etapa de pagamento
       setPaymentStep('payment');
     }
   };
@@ -283,7 +262,6 @@ export default function OrderCake() {
     setProcessingStorePayment(true);
     
     try {
-      // Atualizar status da reserva para pagamento pendente na loja
       const reservationData: OrderData = {
         ...orderDataToSave,
         status: 'b',
@@ -307,7 +285,6 @@ export default function OrderCake() {
           } 
         });
         
-        // Reset form
         resetForm();
         setSelectedDate(null);
         setPickupHour("時間を選択");
@@ -325,30 +302,21 @@ export default function OrderCake() {
     }
   };
 
-  // ==================== NOVA FUNÇÃO: Processar pagamento ====================
-  const handlePaymentSuccess = async (paymentResult: SquarePaymentResponse) => {
+  const handlePaymentSuccess = async (paymentResult: StripePaymentResponse) => {
     if (!orderData) {
       alert("エラー: 注文データが見つかりません。");
-      return;
-    }
-
-    // Verificar se o pagamento foi bem-sucedido e tem os dados necessários
-    if (!paymentResult.success || !paymentResult.payment) {
-      alert("支払いは完了しましたが、決済情報の取得に失敗しました。管理者に連絡してください。");
-      console.error('Payment result missing payment data:', paymentResult);
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // Atualizar status da reserva para pago
       const reservationData: OrderData = {
         ...orderData,
         status: 'd',
         payment_status: 'paid',
-        payment_id: paymentResult.payment?.id,
-        payment_details: paymentResult.payment
+        payment_id: paymentResult.paymentIntent.id,
+        payment_details: paymentResult.paymentIntent
       };
 
       const res = await fetch(`${API_URL}/api/reservar`, {
@@ -364,11 +332,10 @@ export default function OrderCake() {
           state: { 
             newOrderCreated: true,
             paymentSuccess: true,
-            paymentId: paymentResult.payment?.id
+            paymentId: paymentResult.paymentIntent.id
           } 
         });
         
-        // Reset form
         resetForm();
         setSelectedDate(null);
         setPickupHour("時間を選択");
@@ -386,32 +353,14 @@ export default function OrderCake() {
     }
   };
 
-  const handlePaymentError = (error: SquareError | Error) => {
-  console.log('🔥 ERRO DE PAGAMENTO DETALHADO:');
-  console.log('Error object:', error);
-  console.log('Tipo do error:', typeof error);
-  console.log('É instância de Error?', error instanceof Error);
-  console.log('Construtor:', error?.constructor?.name);
-  console.log('Propriedades:', Object.keys(error));
-  
-  if (error instanceof Error) {
-    console.log('Error message:', error.message);
-    console.log('Error stack:', error.stack);
+  const handlePaymentError = (error: StripeError) => {
+    console.error('Payment error:', error);
     alert(`支払いエラー: ${error.message}`);
-  } else if (error && typeof error === 'object') {
-    console.log('Square error detail:', error.detail);
-    console.log('Square error code:', error.code);
-    alert(`支払いエラー: ${error.detail || '決済に失敗しました'}`);
-  } else {
-    alert(`支払いエラー: ${String(error)}`);
-  }
-  
-  setPaymentStep('form');
-};
+    setPaymentStep('form');
+  };
 
   const handleBackToForm = () => {
     setPaymentStep('form');
-    // Incrementar a key para forçar recriação quando necessário
     setPaymentKey(prev => prev + 1);
   };
 
@@ -419,8 +368,8 @@ export default function OrderCake() {
     selectedMethod, 
     onChange 
   }: { 
-    selectedMethod: PaymentMethod;
-    onChange: (method: PaymentMethod) => void;
+    selectedMethod: 'card' | 'store';
+    onChange: (method: 'card' | 'store') => void;
   }) => (
     <div className="payment-method-selector">
       <h3>お支払い方法を選択</h3>
@@ -455,7 +404,6 @@ export default function OrderCake() {
   );
   
   // ==================== STYLES TIPADOS ====================
-  // Styles para OptionType (bolos, quantidades)
   const getBaseStyles = <T extends OptionType>(): StylesConfig<T, false> => ({
     option: (provided: CSSObjectWithLabel, state: OptionProps<T, false>) => ({
       ...provided,
@@ -484,7 +432,6 @@ export default function OrderCake() {
     }),
   });
 
-   // Styles para SizeOption (que agora implementa OptionType)
   const customStylesSize: StylesConfig<SizeOption, false> = {
     option: (provided: CSSObjectWithLabel, state: OptionProps<SizeOption, false>) => ({
       ...provided,
@@ -514,7 +461,7 @@ export default function OrderCake() {
   };
 
   const customStyles = getBaseStyles<OptionType>();
-  const customStylesHour = getBaseStyles<TimeOptionType>()
+  const customStylesHour = getBaseStyles<TimeOptionType>();
   const customStylesCake = getBaseStyles<CustomOptionType>();
 
   const orderSummaryData = {
@@ -549,7 +496,6 @@ export default function OrderCake() {
         <h2 className='cake-title-h2'>予約フォーム</h2>
 
         {paymentStep === 'form' ? (
-          // ==================== FORMULÁRIO DE RESERVA ====================
           <form className="form-order" onSubmit={handleSubmit}>
             <div className="cake-information">
               {cakes.map((item, index) => {
@@ -814,7 +760,6 @@ export default function OrderCake() {
               </div>
             </div>
 
-            {/* ==================== RESUMO DO PEDIDO ==================== */}
             <div className="order-summary">
               <h3>ご注文内容</h3>
               {cakes.map((cake, index) => {
@@ -835,7 +780,6 @@ export default function OrderCake() {
               </div>
             </div>
             
-            {/* ==== SELETOR DE PAGAMENTO ==== */}
             <PaymentMethodSelector
               selectedMethod={paymentMethod}
               onChange={setPaymentMethod}
@@ -848,7 +792,6 @@ export default function OrderCake() {
             </div>
           </form>
         ) : (
-          // ==================== ETAPA DE PAGAMENTO ====================
           <div className="payment-step">
             <button onClick={handleBackToForm} className="btn-back" type="button">
               ← 予約フォームに戻る
@@ -859,16 +802,15 @@ export default function OrderCake() {
               お支払い金額: <strong>￥{totalAmount.toLocaleString()}</strong>
             </p>
             
-            <PaymentForm
-              key={`payment-${paymentKey}`}
-              appId={SQUARE_APP_ID}
-              locationId={SQUARE_LOCATION_ID}
+            <PaymentFormStripe
+              key={paymentKey}
+              publishableKey={STRIPE_PUBLISHABLE_KEY}
               amount={totalAmount}
-              currency="JPY"
-              orderData={orderSummaryData} // 🔥 Passar todos os dados
+              currency="jpy"
+              orderData={orderSummaryData}
               onPaymentSuccess={handlePaymentSuccess}
               onPaymentError={handlePaymentError}
-              onReady={() => setSquareInitialized(true)}
+              onReady={() => console.log('Stripe pronto')}
             />
           </div>
         )}
