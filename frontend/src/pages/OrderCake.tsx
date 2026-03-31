@@ -314,7 +314,7 @@ export default function OrderCake() {
     try {
       const reservationData: OrderData = {
         ...orderData,
-        status: 'd',
+        status: 'f',
         payment_status: 'paid',
         payment_id: paymentResult.paymentIntent.id,
         payment_details: paymentResult.paymentIntent

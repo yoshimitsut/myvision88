@@ -197,7 +197,7 @@ useEffect(() => {
   const activeOrders = useMemo(() => {
     return orders.filter(o => {
       const date = new Date(o.date).setHours(0, 0, 0, 0);
-      const isActiveStatus = o.status === "a" || o.status === "b" || o.status === "c";
+      const isActiveStatus = o.status === "a" || o.status === "b" || o.status === "c" || o.status === "f";
       const isFutureOrToday = date >= today;
       return isActiveStatus && isFutureOrToday;
     });
@@ -207,7 +207,7 @@ useEffect(() => {
   const pastDateOrders = useMemo(() => {
     return orders.filter(o => {
       const date = new Date(o.date).setHours(0, 0, 0, 0);
-      const isActiveStatus = o.status === "a" || o.status === "b" || o.status === "c";
+      const isActiveStatus = o.status === "a" || o.status === "b" || o.status === "c" || o.status === "f";
       const isPastDate = date < today;
       return isActiveStatus && isPastDate;
     });
@@ -229,7 +229,7 @@ useEffect(() => {
   };
 
   // Função para alterar status
-  async function handleStatusChange(id: number, newStatus: "a" | "b" | "c" | "d" | "e") {
+  async function handleStatusChange(id: number, newStatus: "a" | "b" | "c" | "d" | "f" | "e") {
     const order = orders.find((o) => o.id_order === id);
     if (!order) return;
 
@@ -237,6 +237,7 @@ useEffect(() => {
       a: "未",
       b: "オンライン予約",
       c: "店頭支払い済",
+      f: "オンライン支払い済み",
       d: "お渡し済",
       e: "キャンセル",
     };
@@ -357,6 +358,10 @@ useEffect(() => {
             bgColor = "#6B6B6B";
             fontColor = "#FFF";
             break;
+          case "f":
+            bgColor = "#7332a8";
+            fontColor = "#fff";
+            break;
           case "e":
             bgColor = "#000";
             fontColor = "#fff";
@@ -401,6 +406,10 @@ useEffect(() => {
           break;
         case "d":
           bgColor = state.isFocused ? "#6B6B6B" : "white";
+          fontColor = state.isFocused ? "white" : "black";
+          break;
+        case "f":
+          bgColor = state.isFocused ? "#7332a8" : "white";
           fontColor = state.isFocused ? "white" : "black";
           break;
         case "e":

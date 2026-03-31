@@ -54,7 +54,7 @@ export interface StripeError {
 }
 
 // Tipos para o banco de dados
-export type OrderStatus = 'a' | 'b' | 'c' | 'd' | 'e'; // a = pendente, b = feito online, c = loja, d= online & pago, e= cancelado
+export type OrderStatus = 'a' | 'b' | 'c' | 'd' | 'f' | 'e'; // a = pendente, b = feito online, c = loja, d= online & pago, e= cancelado
 export type PaymentStatus = 'pending' | 'paid' | 'failed';
 
 export interface OrderData {

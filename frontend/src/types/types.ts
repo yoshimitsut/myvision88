@@ -98,7 +98,7 @@ export type MyContainerProps = {
   children?: ReactNode;
 };
 
-export type StatusValue = "a" | "b" | "c" | "d" | "e";
+export type StatusValue = "a" | "b" | "c" | "d" | "f" | "e";
 
 export type StatusOption = {
   value: StatusValue;
@@ -110,6 +110,7 @@ export const STATUS_OPTIONS: StatusOption[] = [
   { value: "b", label: "オンライン予約" },
   { value: "c", label: "店頭支払い済" },
   { value: "d", label: "お渡し済" },
+  { value: "f", label: "オンライン支払い済み" },
   { value: "e", label: "キャンセル" },
 ];
 
