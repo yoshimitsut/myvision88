@@ -1,29 +1,44 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db'); // Certifique-se de que o caminho está correto
-const { 
-    sendNewOrderConfirmation, 
-    sendOrderUpdateNotification, 
-    sendCancellationNotification,
-    sendOrderCompletedNotification
-} = require('../utils/email'); 
+const {
+  sendNewOrderConfirmation,
+  sendOrderUpdateNotification,
+  sendCancellationNotification,
+  sendOrderCompletedNotification
+} = require('../utils/email');
 
+const stripeRouter = require('./stripe');
 
 // POST /api/reservar - Criar Novo Pedido
 router.post('/reservar', async (req, res) => {
   const newOrder = req.body;
   const conn = await pool.getConnection();
+
   try {
     await conn.beginTransaction();
-    
+
     // 1️⃣ Inserir pedido
     const [orderResult] = await conn.query(
-      'INSERT INTO orders (first_name,last_name,tel,email,date,pickupHour,status,message) VALUES (?,?,?,?,?,?,?,?)',
-      [newOrder.first_name,newOrder.last_name,newOrder.tel,newOrder.email,newOrder.date,newOrder.pickupHour,newOrder.status,newOrder.message]
+      `INSERT INTO orders 
+       (first_name, last_name, tel, email, date, pickupHour, status, message, payment_intent_id, payment_status) 
+       VALUES (?,?,?,?,?,?,?,?,?,?)`,
+      [
+        newOrder.first_name,
+        newOrder.last_name,
+        newOrder.tel,
+        newOrder.email,
+        newOrder.date,
+        newOrder.pickupHour,
+        newOrder.status,
+        newOrder.message,
+        newOrder.payment_intent_id || null,
+        newOrder.payment_intent_id ? 'paid' : 'pending'
+      ]
     );
 
     const orderId = orderResult.insertId;
-    
+
     // 2️⃣ Inserir relação pedido <-> bolos e atualizar estoque
     for (const orderCake of newOrder.cakes) {
       // Buscar o preço da tabela cake_sizes
@@ -31,22 +46,22 @@ router.post('/reservar', async (req, res) => {
       //   'SELECT price FROM cake_sizes WHERE cake_id=? AND size=?',
       //   [orderCake.cake_id, orderCake.size]
       // );
-      
+
       // const price = priceResult[0]?.price;
-      
+
       // inserir na tabela order_cakes
       await conn.query(
         'INSERT INTO order_cakes (order_id, cake_id, size, amount, message_cake, fruit_option) VALUES (?,?,?,?,?,?)',
         [orderId, orderCake.cake_id, orderCake.size, orderCake.amount, orderCake.message_cake, orderCake.fruit_option]
       );
-      
+
       // atualizar estoque
       await conn.query(
         'UPDATE cake_sizes SET stock = GREATEST(stock - ?, 0) WHERE cake_id=? AND size=?',
         [orderCake.amount, orderCake.cake_id, orderCake.size]
       );
     }
-    
+
     // 3️⃣ Buscar informações completas dos bolos para o email
     const [cakesWithDetails] = await conn.query(
       `SELECT oc.*, c.name, c.image, cs.price
@@ -78,7 +93,7 @@ router.post('/reservar', async (req, res) => {
     await sendNewOrderConfirmation(orderDataForEmail, orderId);
 
     await conn.commit();
-    res.json({ success: true, id: orderId });
+    res.json({ success: true, id: orderId, payment_intent_id: newOrder.payment_intent_id });
   } catch (err) {
     await conn.rollback();
     console.error(err);
@@ -137,12 +152,12 @@ router.put('/orders/:id_order', async (req, res) => {
     }
 
     const [newCakesWithDetails] = await conn.query(
-       `SELECT oc.*, c.name, c.image, cs.price
+      `SELECT oc.*, c.name, c.image, cs.price
        FROM order_cakes oc 
        JOIN cakes c ON oc.cake_id = c.id 
        JOIN cake_sizes cs ON oc.cake_id = cs.cake_id AND oc.size = cs.size
        WHERE oc.order_id = ?`,
-       [id_order]
+      [id_order]
     );
 
     // 4. Lógica de estoque para cancelamento/reativação
@@ -165,9 +180,9 @@ router.put('/orders/:id_order', async (req, res) => {
     }
 
     // 5. Enviar Email de Atualização (usando utilitário)
-    const orderDataForEmail = { 
-      id_order, first_name, last_name, email, date, pickupHour, message, 
-      cakes:  newCakesWithDetails.map(cake => ({
+    const orderDataForEmail = {
+      id_order, first_name, last_name, email, date, pickupHour, message,
+      cakes: newCakesWithDetails.map(cake => ({
         cake_id: cake.cake_id,
         name: cake.name,
         image: cake.image,
@@ -182,7 +197,7 @@ router.put('/orders/:id_order', async (req, res) => {
     // console.log('📧 Dados para email:', orderDataForEmail);
 
     await sendOrderUpdateNotification(orderDataForEmail);
-    
+
     await conn.commit();
     res.json({ success: true, message: 'Pedido atualizado com sucesso', id_order });
   } catch (err) {
@@ -210,18 +225,54 @@ router.put('/reservar/:id_order', async (req, res) => {
     const order = rows[0];
     const previousStatus = order.status;
 
+    // 🆕 Se for cancelamento e tem payment_intent_id, cancelar no Stripe
+    let stripeResult = null;
+    if (status === 'e' && previousStatus !== 'e' && order.payment_intent_id) {
+      console.log(`🔄 Cancelando pagamento Stripe: ${order.payment_intent_id}`);
+
+      try {
+        // Chamar a função de cancelamento do Stripe
+        const stripeResponse = await fetch(`http://localhost:${process.env.PORT || 3000}/api/stripe/cancel-payment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            paymentIntentId: order.payment_intent_id,
+            reason: 'order_canceled_by_admin'
+          })
+        });
+
+        stripeResult = await stripeResponse.json();
+
+        if (!stripeResult.success) {
+          console.warn('⚠️ Falha ao cancelar Stripe:', stripeResult);
+          // Você pode optar por continuar ou parar o cancelamento
+          // throw new Error(`Falha no Stripe: ${stripeResult.message}`);
+        } else {
+          console.log('✅ Stripe cancelado/reembolsado:', stripeResult);
+        }
+
+      } catch (stripeError) {
+        console.error('❌ Erro ao chamar API Stripe:', stripeError);
+        stripeResult = {
+          success: false,
+          error: stripeError.message,
+          message: 'Erro na comunicação com Stripe'
+        };
+      }
+    }
+
     // 1. Atualizar status
     await conn.query('UPDATE orders SET status=? WHERE id_order=?', [status, id_order]);
 
     // 2. Se for cancelamento, devolver estoque e enviar email
     if (status === 'e' && previousStatus !== 'e') {
       const [orderCakes] = await conn.query('SELECT * FROM order_cakes WHERE order_id=?', [id_order]);
-      
+
       // Devolver estoque
       for (const oc of orderCakes) {
         await conn.query('UPDATE cake_sizes SET stock = stock + ? WHERE cake_id=? AND size=?', [oc.amount, oc.cake_id, oc.size]);
       }
-      
+
       // Buscar detalhes dos bolos para o email
       const [cakesDetails] = await conn.query(`
         SELECT oc.*, c.name 
@@ -229,14 +280,14 @@ router.put('/reservar/:id_order', async (req, res) => {
         JOIN cakes c ON oc.cake_id = c.id 
         WHERE oc.order_id = ?
       `, [id_order]);
-      
+
       await sendCancellationNotification(order, cakesDetails);
     }
 
-    if(status === 'd') {
+    if (status === 'd') {
       await sendOrderCompletedNotification(order);
     }
-    
+
     // 3. Se for reativação, remover estoque
     if (status !== 'e' && previousStatus === 'e') {
       const [orderCakes] = await conn.query('SELECT * FROM order_cakes WHERE order_id=?', [id_order]);
@@ -246,11 +297,14 @@ router.put('/reservar/:id_order', async (req, res) => {
     }
 
     await conn.commit();
-    res.json({ success: true, message:'Status atualizado', id_order });
-  } catch(err){
+
+    //Retornar resultado incluindo informação do Stripe
+    res.json({ success: true, message: 'Status atualizado', id_order, stripe: stripeResult });
+
+  } catch (err) {
     await conn.rollback();
     console.error(err);
-    res.status(500).json({ success:false, error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   } finally {
     conn.release();
   }
@@ -278,7 +332,7 @@ router.get('/list', async (req, res) => {
       LEFT JOIN cakes c ON oc.cake_id = c.id
       LEFT JOIN cake_sizes cs ON cs.cake_id = oc.cake_id AND cs.size = oc.size
     `;
-    
+
     const params = [];
 
     if (search) {

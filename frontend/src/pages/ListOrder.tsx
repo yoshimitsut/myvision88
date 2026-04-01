@@ -72,13 +72,13 @@ export default function ListOrder() {
       const searchUrl = search
         ? `${import.meta.env.VITE_API_URL}/api/list?search=${encodeURIComponent(search)}`
         : `${import.meta.env.VITE_API_URL}/api/list`;
-        
-        fetch(searchUrl)
+
+      fetch(searchUrl)
         .then((res) => res.json())
         .then((data) => {
           const normalized = Array.isArray(data) ? data : (data.orders || []);
           setOrders(normalized);
-          console.log("---"+normalized);
+          console.log("---" + normalized);
         })
         .catch((error) => {
           console.error('注文の読み込みエラー:', error);
@@ -104,7 +104,7 @@ export default function ListOrder() {
   // Agrupar pedidos por data
   const groupedOrders = useMemo(() => {
     return orders.reduce((acc, order) => {
-      const dateKey = formatDateJP(order.date); 
+      const dateKey = formatDateJP(order.date);
       if (!acc[dateKey]) acc[dateKey] = [];
       acc[dateKey].push(order);
       return acc;
@@ -114,57 +114,57 @@ export default function ListOrder() {
   // Efeito para o scanner QR Code
   // No seu componente ListOrder, substitua o useEffect do scanner por:
 
-useEffect(() => {
-  let html5QrCode: Html5Qrcode | null = null;
+  useEffect(() => {
+    let html5QrCode: Html5Qrcode | null = null;
 
-  if (showScanner) {
-    html5QrCode = new Html5Qrcode("reader");
+    if (showScanner) {
+      html5QrCode = new Html5Qrcode("reader");
 
-    html5QrCode.start(
-      { facingMode: "environment" },
-      { 
-        fps: 10, 
-        qrbox: { width: 250, height: 250 } // 🔹 Corrigido formato
-      },
-      (decodedText) => {
-        console.log("QR Code lido:", decodedText);
-        setShowScanner(false);
-        
-        const orderId = Number(decodedText);
-        if (!isNaN(orderId)) {
-          const found = orders.find((o) => o.id_order === orderId);
-          if (found) {
-            setScannedOrderId(found.id_order);
+      html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 } // 🔹 Corrigido formato
+        },
+        (decodedText) => {
+          console.log("QR Code lido:", decodedText);
+          setShowScanner(false);
+
+          const orderId = Number(decodedText);
+          if (!isNaN(orderId)) {
+            const found = orders.find((o) => o.id_order === orderId);
+            if (found) {
+              setScannedOrderId(found.id_order);
+            } else {
+              alert("注文が見つかりません。");
+            }
           } else {
-            alert("注文が見つかりません。");
+            alert("QRコードが無効です。");
           }
-        } else {
-          alert("QRコードが無効です。");
+        },
+        (error) => {
+          // Apenas log errors, não mostrar alertas para cada frame
+          if (!error.includes("NotFoundException")) {
+            console.warn("QRコード読み取りエラー:", error);
+          }
         }
-      },
-      (error) => {
-        // Apenas log errors, não mostrar alertas para cada frame
-        if (!error.includes("NotFoundException")) {
-          console.warn("QRコード読み取りエラー:", error);
-        }
-      }
-    ).catch((err) => {
-      console.error("Erro ao iniciar câmera:", err);
-      alert("カメラの起動に失敗しました。");
-      setShowScanner(false);
-    });
-  }
-
-  return () => {
-    if (html5QrCode && html5QrCode.isScanning) {
-      html5QrCode.stop().then(() => {
-        html5QrCode?.clear();
-      }).catch((err) => {
-        console.error("Erro ao parar scanner:", err);
+      ).catch((err) => {
+        console.error("Erro ao iniciar câmera:", err);
+        alert("カメラの起動に失敗しました。");
+        setShowScanner(false);
       });
     }
-  };
-}, [showScanner, orders]);
+
+    return () => {
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => {
+          html5QrCode?.clear();
+        }).catch((err) => {
+          console.error("Erro ao parar scanner:", err);
+        });
+      }
+    };
+  }, [showScanner, orders]);
 
   // Ordenar pedidos agrupados
   const sortedGroupedOrders = useMemo(() => {
@@ -187,7 +187,7 @@ useEffect(() => {
   const todayOrders = useMemo(() => {
     return orders.filter(o => {
       const date = new Date(o.date).setHours(0, 0, 0, 0);
-      const isFinish = o.status !== "d";  
+      const isFinish = o.status !== "d";
       const orderNoCanceled = o.status !== "e";
       return date === today && isFinish && orderNoCanceled;
     });
@@ -245,12 +245,21 @@ useEffect(() => {
     const currentStatus = statusMap[order.status ?? "a"];
     const nextStatus = statusMap[newStatus];
 
-    const confirmed = window.confirm(
-      `【確認】ステータスを変更しますか？\n\n` +
+    // Mensagem de confirmação especial para cancelamento com Stripe
+    let confirmationMessage = `【確認】ステータスを変更しますか？\n\n` +
       `受付番号: ${String(order.id_order).padStart(4, "0")}\n` +
       `お名前: ${order.first_name} ${order.last_name}\n\n` +
-      `${currentStatus} → ${nextStatus}`
-    );
+      `${currentStatus} → ${nextStatus}`;
+
+    // Se for cancelamento e pedido foi pago online, avisar sobre reembolso
+    if (newStatus === 'e' && (order.status === 'c' || order.status === 'f')) {
+      confirmationMessage = `⚠️ 注意: この注文はオンライン決済済みです。\n\n` +
+        `${confirmationMessage}\n\n` +
+        `✅ Stripeで自動的に返金処理が行われます。\n` +
+        `続行しますか？`;
+    }
+
+    const confirmed = window.confirm(confirmationMessage);
     if (!confirmed) return;
 
     const previousStatus = order.status;
@@ -275,6 +284,21 @@ useEffect(() => {
 
       if (!res.ok || !data || !data.success) {
         throw new Error(data?.error || `保存に失敗しました（ステータス ${res.status}）`);
+      }
+
+      // 🆕 Mostrar mensagem específica se houve cancelamento Stripe
+      if (newStatus === 'e' && data.stripe) {
+        if (data.stripe.success) {
+          if (data.stripe.action === 'refund') {
+            alert(`✅ 注文をキャンセルし、返金処理を行いました。\n返金ID: ${data.stripe.refundId}\n金額: ¥${(data.stripe.amount / 100).toLocaleString()}`);
+          } else if (data.stripe.action === 'cancel') {
+            alert(`✅ 注文をキャンセルしました。未決済の支払いは取り消されました。`);
+          } else if (data.stripe.action === 'already_canceled') {
+            alert(`ℹ️ 注文をキャンセルしました。この支払いは既にキャンセル済みです。`);
+          }
+        } else if (data.stripe && !data.stripe.success) {
+          alert(`⚠️ 注文はキャンセルされましたが、Stripeでの処理に問題がありました:\n${data.stripe.message}\n\n別途返金処理が必要な場合があります。`);
+        }
       }
 
       setOrders((old) =>
@@ -309,27 +333,27 @@ useEffect(() => {
         body: JSON.stringify(updatedOrder),
       });
       const data = await res.json();
-      
-      
+
+
       if (!res.ok || !data.success) {
         throw new Error(data.error || "更新に失敗しました。");
       }
-      
+
       setOrders((old) =>
         old.map((o) =>
           o.id_order === updatedOrder.id_order ? updatedOrder : o
-    )
-  );
-  
+        )
+      );
+
       setRefreshKey(prev => prev + 1);
-      
+
       setEditingOrder(null);
       alert("✅ 注文が正常に更新されました。");
     } catch (err) {
       console.error("❌ 編集保存エラー:", err);
       alert("❌ 更新中にエラーが発生しました。");
     } finally {
-      setIsSavingEdit(false); 
+      setIsSavingEdit(false);
     }
   };
 
@@ -521,7 +545,7 @@ useEffect(() => {
                     const matchesStatus = statusFilter === "すべて" || order.status === statusFilter;
                     const matchesCake = cakeFilter === "すべて" || order.cakes.some(cake => cake.name === cakeFilter);
                     const matchesHour = hourFilter === "すべて" || order.pickupHour === hourFilter;
-                    
+
                     return matchesStatus && matchesCake && matchesHour;
                   })
                   .map((order) => (
@@ -605,7 +629,7 @@ useEffect(() => {
             </table>
           </div>
 
-          
+
         )}
       </>
     );
@@ -622,7 +646,7 @@ useEffect(() => {
           {displayOrders
             .filter(([, list]) => list.some(o => activeOrders.includes(o)))
             .map(([groupTitles, ordersForGroup]: [string, Order[]]) => {
-              const activeOrdersForGroup = ordersForGroup.filter(order => 
+              const activeOrdersForGroup = ordersForGroup.filter(order =>
                 activeOrders.includes(order)
               );
 
@@ -727,7 +751,7 @@ useEffect(() => {
                           const matchesCake = cakeFilter === "すべて" || order.cakes.some(cake => cake.name === cakeFilter);
                           const matchesDate = dateFilter === "すべて" || formatDateJP(order.date) === formatDateJP(dateFilter);
                           const matchesHour = hourFilter === "すべて" || order.pickupHour === hourFilter;
-                          
+
                           return matchesStatus && matchesCake && matchesDate && matchesHour;
                         })
                         .sort((a, b) => {
@@ -858,7 +882,7 @@ useEffect(() => {
                       </li>
                     ))}
                   </ul>
-                  
+
                   <ul>
                     {order.cakes.map((cake, index) => (
                       <li key={`${cake.cake_id}-${index}`}>
@@ -891,124 +915,124 @@ useEffect(() => {
     </>
   );
 
-// 🔹 COMPONENTE PARA PEDIDOS COM DATA ANTERIOR (COM MOBILE)
-const PastDateOrdersTable = () => {
-  const sortedPastDateOrders = useMemo(() => {
-    return [...pastDateOrders].sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      
-      if (dateA !== dateB) {
-        return dateB - dateA;
-      }
-      
-      const timeA = a.pickupHour || "";
-      const timeB = b.pickupHour || "";
-      return timeA.localeCompare(timeB, "ja");
-    });
-  }, [pastDateOrders]);
+  // 🔹 COMPONENTE PARA PEDIDOS COM DATA ANTERIOR (COM MOBILE)
+  const PastDateOrdersTable = () => {
+    const sortedPastDateOrders = useMemo(() => {
+      return [...pastDateOrders].sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
 
-  return (
-    <>
-      {sortedPastDateOrders.length === 0 ? (
-        <p>過去の日付の注文はありません。</p>
-      ) : (
-        <>
-          {/* Tabela Desktop */}
-          <div className="desktop-table table-wrapper scroll-cell table-order-container">
-            <table className="list-order-table table-order">
-              <thead>
-                <tr>
-                  <th>受付番号</th>
-                  <th className='situation-cell'>お会計</th>
-                  <th>お名前</th>
-                  <th>受取希望日時</th>
-                  <th>ご注文のケーキ</th>
-                  <th>個数</th>
-                  <th>フルーツ盛り</th>
-                  <th className='message-cell'>メッセージプレート</th>
-                  <th className='message-cell'>その他メッセージ</th>
-                  <th>電話番号</th>
-                  <th>メールアドレス</th>
-                  <th>編集</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedPastDateOrders.map(order => (
-                  <tr key={order.id_order}>
-                    <td>{String(order.id_order).padStart(4, "0")}</td>
-                    <td className='situation-cell'>
-                      <Select<StatusOption, false>
-                        options={statusOptions}
-                        value={statusOptions.find((opt) => opt.value === order.status)}
-                        onChange={(selected: SingleValue<StatusOption>) => {
-                          if (selected) handleStatusChange(order.id_order, selected.value);
-                        }}
-                        styles={customStyles}
-                        isSearchable={false}
-                        isDisabled={isUpdating}
-                        isLoading={isUpdating && updatingOrderId === order.id_order}
-                      />
-                    </td>
-                    <td>{order.first_name} {order.last_name}</td>
-                    <td>{formatDateJP(order.date)} {order.pickupHour}</td>
-                    <td>
-                      <ul>
-                        {order.cakes.map((cake, i) => (
-                          <li key={i}>{cake.name} {cake.size}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td>
-                      <ul>
-                        {order.cakes.map((cake, i) => (
-                          <li key={i}>{cake.amount}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td>
-                      <ul>
-                        {order.cakes.map((cake, i) => (
-                          <li key={i}>{cake.fruit_option}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td>
-                      <ul>
-                        {order.cakes.map((cake, i) => (
-                          <li key={i}>{cake.message_cake}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td>{order.message}</td>
-                    <td>{order.tel}</td>
-                    <td>{order.email}</td>
-                    <td>
-                      <button
-                        onClick={() => setEditingOrder(order)}
-                        style={{
-                          padding: "0.25rem 0.5rem",
-                          backgroundColor: "#007bff",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                          fontSize: "0.8rem"
-                        }}
-                      >
-                        編集
-                      </button>
-                    </td>
+        if (dateA !== dateB) {
+          return dateB - dateA;
+        }
+
+        const timeA = a.pickupHour || "";
+        const timeB = b.pickupHour || "";
+        return timeA.localeCompare(timeB, "ja");
+      });
+    }, [pastDateOrders]);
+
+    return (
+      <>
+        {sortedPastDateOrders.length === 0 ? (
+          <p>過去の日付の注文はありません。</p>
+        ) : (
+          <>
+            {/* Tabela Desktop */}
+            <div className="desktop-table table-wrapper scroll-cell table-order-container">
+              <table className="list-order-table table-order">
+                <thead>
+                  <tr>
+                    <th>受付番号</th>
+                    <th className='situation-cell'>お会計</th>
+                    <th>お名前</th>
+                    <th>受取希望日時</th>
+                    <th>ご注文のケーキ</th>
+                    <th>個数</th>
+                    <th>フルーツ盛り</th>
+                    <th className='message-cell'>メッセージプレート</th>
+                    <th className='message-cell'>その他メッセージ</th>
+                    <th>電話番号</th>
+                    <th>メールアドレス</th>
+                    <th>編集</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {sortedPastDateOrders.map(order => (
+                    <tr key={order.id_order}>
+                      <td>{String(order.id_order).padStart(4, "0")}</td>
+                      <td className='situation-cell'>
+                        <Select<StatusOption, false>
+                          options={statusOptions}
+                          value={statusOptions.find((opt) => opt.value === order.status)}
+                          onChange={(selected: SingleValue<StatusOption>) => {
+                            if (selected) handleStatusChange(order.id_order, selected.value);
+                          }}
+                          styles={customStyles}
+                          isSearchable={false}
+                          isDisabled={isUpdating}
+                          isLoading={isUpdating && updatingOrderId === order.id_order}
+                        />
+                      </td>
+                      <td>{order.first_name} {order.last_name}</td>
+                      <td>{formatDateJP(order.date)} {order.pickupHour}</td>
+                      <td>
+                        <ul>
+                          {order.cakes.map((cake, i) => (
+                            <li key={i}>{cake.name} {cake.size}</li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td>
+                        <ul>
+                          {order.cakes.map((cake, i) => (
+                            <li key={i}>{cake.amount}</li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td>
+                        <ul>
+                          {order.cakes.map((cake, i) => (
+                            <li key={i}>{cake.fruit_option}</li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td>
+                        <ul>
+                          {order.cakes.map((cake, i) => (
+                            <li key={i}>{cake.message_cake}</li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td>{order.message}</td>
+                      <td>{order.tel}</td>
+                      <td>{order.email}</td>
+                      <td>
+                        <button
+                          onClick={() => setEditingOrder(order)}
+                          style={{
+                            padding: "0.25rem 0.5rem",
+                            backgroundColor: "#007bff",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "0.8rem"
+                          }}
+                        >
+                          編集
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          {/* Cards Mobile */}
-          <div className="mobile-orders">
-            {sortedPastDateOrders.map((order) => (
-              <div className="order-card" key={order.id_order}>
+            {/* Cards Mobile */}
+            <div className="mobile-orders">
+              {sortedPastDateOrders.map((order) => (
+                <div className="order-card" key={order.id_order}>
                   <Select<StatusOption, false>
                     options={statusOptions}
                     value={statusOptions.find((opt) => opt.value === order.status)}
@@ -1020,289 +1044,289 @@ const PastDateOrdersTable = () => {
                     isDisabled={isUpdating}
                     isLoading={isUpdating && updatingOrderId === order.id_order}
                   />
-                {/* <div className="order-header">
+                  {/* <div className="order-header">
                 </div> */}
-                <span className="order-id">受付番号: {String(order.id_order).padStart(4, "0")}</span>
-                <p><strong>お名前:</strong> {order.first_name} {order.last_name}</p>
-                <p><strong>受取日時:</strong> {formatDateJP(order.date)} {order.pickupHour}</p>
-                <details>
-                  <summary>ご注文内容</summary>
-                  <ul>
-                    {order.cakes.map((cake, index) => (
-                      <li key={`${cake.cake_id}-${index}`}>
-                        <strong>{cake.name}</strong><br />
-                        サイズ: {cake.size}<br />
-                        個数: {cake.amount}<br />
-                        フルーツ盛り: {cake.fruit_option}<br />
-                        プレートメッセージ: {cake.message_cake || "なし"}
-                      </li>
-                    ))}
-                  </ul>
-                  <p><strong>電話番号:</strong> {order.tel}</p>
-                  <p><strong>メール:</strong> {order.email}</p>
-                  <p><strong>その他メッセージ:</strong> {order.message || "なし"}</p>
-                </details>
-                <button
-                  onClick={() => setEditingOrder(order)}
-                  style={{
-                    marginTop: "0.5rem",
-                    padding: "0.5rem 1rem",
-                    backgroundColor: "#007bff",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer"
-                  }}
-                >
-                  編集
-                </button>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-    </>
-  );
-};
-
-// 🔹 COMPONENTE PARA PEDIDOS FINALIZADOS (COM MOBILE)
-const CompletedOrdersTable = () => {
-  const sortedCompletedOrders = useMemo(() => {
-    return [...completedOrders].sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      
-      if (dateA !== dateB) {
-        return dateB - dateA;
-      }
-      
-      const timeA = a.pickupHour || "";
-      const timeB = b.pickupHour || "";
-      return timeA.localeCompare(timeB, "ja");
-    });
-  }, [completedOrders]);
-
-  return (
-    <>
-      {sortedCompletedOrders.length === 0 ? (
-        <p>お渡し済みの注文はありません。</p>
-      ) : (
-        <>
-          {/* Tabela Desktop */}
-          <div className="desktop-table table-wrapper scroll-cell table-order-container">
-            <table className="list-order-table table-order">
-              <thead>
-                <tr>
-                  <th>受付番号</th>
-                  <th>お名前</th>
-                  <th>受取希望日時</th>
-                  <th>ご注文のケーキ</th>
-                  <th>個数</th>
-                  <th>フルーツ盛り</th>
-                  <th>メッセージプレート</th>
-                  <th>その他メッセージ</th>
-                  <th>電話番号</th>
-                  <th>メールアドレス</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedCompletedOrders.map(order => (
-                  <tr key={order.id_order}>
-                    <td>{String(order.id_order).padStart(4, "0")}</td>
-                    <td>{order.first_name} {order.last_name}</td>
-                    <td>{formatDateJP(order.date)} {order.pickupHour}</td>
-                    <td>
-                      <ul>
-                        {order.cakes.map((cake, i) => (
-                          <li key={i}>{cake.name} {cake.size}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td>
-                      <ul>
-                        {order.cakes.map((cake, i) => (
-                          <li key={i}>{cake.amount}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td>
-                      <ul>
-                        {order.cakes.map((cake, i) => (
-                          <li key={i}>{cake.fruit_option}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    
-                    <td>
-                      <ul>
-                        {order.cakes.map((cake, i) => (
-                          <li key={i}>{cake.message_cake}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td>{order.message}</td>
-                    <td>{order.tel}</td>
-                    <td>{order.email}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Cards Mobile */}
-          <div className="mobile-orders">
-            {sortedCompletedOrders.map((order) => (
-              <div className="order-card" key={order.id_order}>
-                <div className="order-header">
-                  <span className="order-status status-completed">✅ お渡し済み</span>
                   <span className="order-id">受付番号: {String(order.id_order).padStart(4, "0")}</span>
+                  <p><strong>お名前:</strong> {order.first_name} {order.last_name}</p>
+                  <p><strong>受取日時:</strong> {formatDateJP(order.date)} {order.pickupHour}</p>
+                  <details>
+                    <summary>ご注文内容</summary>
+                    <ul>
+                      {order.cakes.map((cake, index) => (
+                        <li key={`${cake.cake_id}-${index}`}>
+                          <strong>{cake.name}</strong><br />
+                          サイズ: {cake.size}<br />
+                          個数: {cake.amount}<br />
+                          フルーツ盛り: {cake.fruit_option}<br />
+                          プレートメッセージ: {cake.message_cake || "なし"}
+                        </li>
+                      ))}
+                    </ul>
+                    <p><strong>電話番号:</strong> {order.tel}</p>
+                    <p><strong>メール:</strong> {order.email}</p>
+                    <p><strong>その他メッセージ:</strong> {order.message || "なし"}</p>
+                  </details>
+                  <button
+                    onClick={() => setEditingOrder(order)}
+                    style={{
+                      marginTop: "0.5rem",
+                      padding: "0.5rem 1rem",
+                      backgroundColor: "#007bff",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer"
+                    }}
+                  >
+                    編集
+                  </button>
                 </div>
-                <p><strong>お名前:</strong> {order.first_name} {order.last_name}</p>
-                <p><strong>受取日時:</strong> {formatDateJP(order.date)} {order.pickupHour}</p>
-                <details>
-                  <summary>ご注文内容</summary>
-                  <ul>
-                    {order.cakes.map((cake, index) => (
-                      <li key={`${cake.cake_id}-${index}`}>
-                        <strong>{cake.name}</strong><br />
-                        サイズ: {cake.size}<br />
-                        個数: {cake.amount}<br />
-                        フルーツ盛り: {cake.fruit_option}<br />
-                        プレートメッセージ: {cake.message_cake || "なし"}
-                      </li>
-                    ))}
-                  </ul>
-                  <p><strong>電話番号:</strong> {order.tel}</p>
-                  <p><strong>メール:</strong> {order.email}</p>
-                  <p><strong>その他メッセージ:</strong> {order.message || "なし"}</p>
-                </details>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-    </>
-  );
-};
+              ))}
+            </div>
+          </>
+        )}
+      </>
+    );
+  };
 
-// 🔹 COMPONENTE PARA PEDIDOS CANCELADOS (COM MOBILE)
-const CancelledOrdersTable = () => {
-  const sortedCancelledOrders = useMemo(() => {
-    return [...cancelledOrders].sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      
-      if (dateA !== dateB) {
-        return dateB - dateA;
-      }
-      
-      const timeA = a.pickupHour || "";
-      const timeB = b.pickupHour || "";
-      return timeA.localeCompare(timeB, "ja");
-    });
-  }, [cancelledOrders]);
+  // 🔹 COMPONENTE PARA PEDIDOS FINALIZADOS (COM MOBILE)
+  const CompletedOrdersTable = () => {
+    const sortedCompletedOrders = useMemo(() => {
+      return [...completedOrders].sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
 
-  return (
-    <>
-      {sortedCancelledOrders.length === 0 ? (
-        <p>キャンセルされた注文はありません。</p>
-      ) : (
-        <>
-          {/* Tabela Desktop */}
-          <div className="desktop-table table-wrapper scroll-cell table-order-container">
-            <table className="list-order-table table-order">
-              <thead>
-                <tr>
-                  <th>受付番号</th>
-                  <th>お名前</th>
-                  <th>受取希望日時</th>
-                  <th>ご注文のケーキ</th>
-                  <th>個数</th>
-                  <th>フルーツ盛り</th>
-                  <th>メッセージプレート</th>
-                  <th>その他メッセージ</th>
-                  <th>電話番号</th>
-                  <th>メールアドレス</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedCancelledOrders.map(order => (
-                  <tr key={order.id_order}>
-                    <td>{String(order.id_order).padStart(4, "0")}</td>
-                    <td>{order.first_name} {order.last_name}</td>
-                    <td>{formatDateJP(order.date)} {order.pickupHour}</td>
-                    <td>
-                      <ul>
-                        {order.cakes.map((cake, i) => (
-                          <li key={i}>{cake.name} {cake.size}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td>
-                      <ul>
-                        {order.cakes.map((cake, i) => (
-                          <li key={i}>{cake.amount}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td>
-                      <ul>
-                        {order.cakes.map((cake, i) => (
-                          <li key={i}>{cake.fruit_option}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td>
-                      <ul>
-                        {order.cakes.map((cake, i) => (
-                          <li key={i}>{cake.message_cake}</li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td>{order.message}</td>
-                    <td>{order.tel}</td>
-                    <td>{order.email}</td>
+        if (dateA !== dateB) {
+          return dateB - dateA;
+        }
+
+        const timeA = a.pickupHour || "";
+        const timeB = b.pickupHour || "";
+        return timeA.localeCompare(timeB, "ja");
+      });
+    }, [completedOrders]);
+
+    return (
+      <>
+        {sortedCompletedOrders.length === 0 ? (
+          <p>お渡し済みの注文はありません。</p>
+        ) : (
+          <>
+            {/* Tabela Desktop */}
+            <div className="desktop-table table-wrapper scroll-cell table-order-container">
+              <table className="list-order-table table-order">
+                <thead>
+                  <tr>
+                    <th>受付番号</th>
+                    <th>お名前</th>
+                    <th>受取希望日時</th>
+                    <th>ご注文のケーキ</th>
+                    <th>個数</th>
+                    <th>フルーツ盛り</th>
+                    <th>メッセージプレート</th>
+                    <th>その他メッセージ</th>
+                    <th>電話番号</th>
+                    <th>メールアドレス</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {sortedCompletedOrders.map(order => (
+                    <tr key={order.id_order}>
+                      <td>{String(order.id_order).padStart(4, "0")}</td>
+                      <td>{order.first_name} {order.last_name}</td>
+                      <td>{formatDateJP(order.date)} {order.pickupHour}</td>
+                      <td>
+                        <ul>
+                          {order.cakes.map((cake, i) => (
+                            <li key={i}>{cake.name} {cake.size}</li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td>
+                        <ul>
+                          {order.cakes.map((cake, i) => (
+                            <li key={i}>{cake.amount}</li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td>
+                        <ul>
+                          {order.cakes.map((cake, i) => (
+                            <li key={i}>{cake.fruit_option}</li>
+                          ))}
+                        </ul>
+                      </td>
 
-          {/* Cards Mobile */}
-          <div className="mobile-orders">
-            {sortedCancelledOrders.map((order) => (
-              <div className="order-card" key={order.id_order}>
-                <div className="order-header">
-                  <span className="order-status status-cancelled">❌ キャンセル</span>
-                  <span className="order-id">受付番号: {String(order.id_order).padStart(4, "0")}</span>
+                      <td>
+                        <ul>
+                          {order.cakes.map((cake, i) => (
+                            <li key={i}>{cake.message_cake}</li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td>{order.message}</td>
+                      <td>{order.tel}</td>
+                      <td>{order.email}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Cards Mobile */}
+            <div className="mobile-orders">
+              {sortedCompletedOrders.map((order) => (
+                <div className="order-card" key={order.id_order}>
+                  <div className="order-header">
+                    <span className="order-status status-completed">✅ お渡し済み</span>
+                    <span className="order-id">受付番号: {String(order.id_order).padStart(4, "0")}</span>
+                  </div>
+                  <p><strong>お名前:</strong> {order.first_name} {order.last_name}</p>
+                  <p><strong>受取日時:</strong> {formatDateJP(order.date)} {order.pickupHour}</p>
+                  <details>
+                    <summary>ご注文内容</summary>
+                    <ul>
+                      {order.cakes.map((cake, index) => (
+                        <li key={`${cake.cake_id}-${index}`}>
+                          <strong>{cake.name}</strong><br />
+                          サイズ: {cake.size}<br />
+                          個数: {cake.amount}<br />
+                          フルーツ盛り: {cake.fruit_option}<br />
+                          プレートメッセージ: {cake.message_cake || "なし"}
+                        </li>
+                      ))}
+                    </ul>
+                    <p><strong>電話番号:</strong> {order.tel}</p>
+                    <p><strong>メール:</strong> {order.email}</p>
+                    <p><strong>その他メッセージ:</strong> {order.message || "なし"}</p>
+                  </details>
                 </div>
-                <p><strong>お名前:</strong> {order.first_name} {order.last_name}</p>
-                <p><strong>受取日時:</strong> {formatDateJP(order.date)} {order.pickupHour}</p>
-                <details>
-                  <summary>ご注文内容</summary>
-                  <ul>
-                    {order.cakes.map((cake, index) => (
-                      <li key={`${cake.cake_id}-${index}`}>
-                        <strong>{cake.name}</strong><br />
-                        サイズ: {cake.size}<br />
-                        個数: {cake.amount}<br />
-                        フルーツ盛り: {cake.fruit_option}<br />
-                        プレートメッセージ: {cake.message_cake || "なし"}
-                      </li>
-                    ))}
-                  </ul>
-                  <p><strong>電話番号:</strong> {order.tel}</p>
-                  <p><strong>メール:</strong> {order.email}</p>
-                  <p><strong>その他メッセージ:</strong> {order.message || "なし"}</p>
-                </details>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-    </>
-  );
-};
+              ))}
+            </div>
+          </>
+        )}
+      </>
+    );
+  };
+
+  // 🔹 COMPONENTE PARA PEDIDOS CANCELADOS (COM MOBILE)
+  const CancelledOrdersTable = () => {
+    const sortedCancelledOrders = useMemo(() => {
+      return [...cancelledOrders].sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+
+        if (dateA !== dateB) {
+          return dateB - dateA;
+        }
+
+        const timeA = a.pickupHour || "";
+        const timeB = b.pickupHour || "";
+        return timeA.localeCompare(timeB, "ja");
+      });
+    }, [cancelledOrders]);
+
+    return (
+      <>
+        {sortedCancelledOrders.length === 0 ? (
+          <p>キャンセルされた注文はありません。</p>
+        ) : (
+          <>
+            {/* Tabela Desktop */}
+            <div className="desktop-table table-wrapper scroll-cell table-order-container">
+              <table className="list-order-table table-order">
+                <thead>
+                  <tr>
+                    <th>受付番号</th>
+                    <th>お名前</th>
+                    <th>受取希望日時</th>
+                    <th>ご注文のケーキ</th>
+                    <th>個数</th>
+                    <th>フルーツ盛り</th>
+                    <th>メッセージプレート</th>
+                    <th>その他メッセージ</th>
+                    <th>電話番号</th>
+                    <th>メールアドレス</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedCancelledOrders.map(order => (
+                    <tr key={order.id_order}>
+                      <td>{String(order.id_order).padStart(4, "0")}</td>
+                      <td>{order.first_name} {order.last_name}</td>
+                      <td>{formatDateJP(order.date)} {order.pickupHour}</td>
+                      <td>
+                        <ul>
+                          {order.cakes.map((cake, i) => (
+                            <li key={i}>{cake.name} {cake.size}</li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td>
+                        <ul>
+                          {order.cakes.map((cake, i) => (
+                            <li key={i}>{cake.amount}</li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td>
+                        <ul>
+                          {order.cakes.map((cake, i) => (
+                            <li key={i}>{cake.fruit_option}</li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td>
+                        <ul>
+                          {order.cakes.map((cake, i) => (
+                            <li key={i}>{cake.message_cake}</li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td>{order.message}</td>
+                      <td>{order.tel}</td>
+                      <td>{order.email}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Cards Mobile */}
+            <div className="mobile-orders">
+              {sortedCancelledOrders.map((order) => (
+                <div className="order-card" key={order.id_order}>
+                  <div className="order-header">
+                    <span className="order-status status-cancelled">❌ キャンセル</span>
+                    <span className="order-id">受付番号: {String(order.id_order).padStart(4, "0")}</span>
+                  </div>
+                  <p><strong>お名前:</strong> {order.first_name} {order.last_name}</p>
+                  <p><strong>受取日時:</strong> {formatDateJP(order.date)} {order.pickupHour}</p>
+                  <details>
+                    <summary>ご注文内容</summary>
+                    <ul>
+                      {order.cakes.map((cake, index) => (
+                        <li key={`${cake.cake_id}-${index}`}>
+                          <strong>{cake.name}</strong><br />
+                          サイズ: {cake.size}<br />
+                          個数: {cake.amount}<br />
+                          フルーツ盛り: {cake.fruit_option}<br />
+                          プレートメッセージ: {cake.message_cake || "なし"}
+                        </li>
+                      ))}
+                    </ul>
+                    <p><strong>電話番号:</strong> {order.tel}</p>
+                    <p><strong>メール:</strong> {order.email}</p>
+                    <p><strong>その他メッセージ:</strong> {order.message || "なし"}</p>
+                  </details>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </>
+    );
+  };
 
   return (
     <div className='list-order-container'>
@@ -1331,7 +1355,7 @@ const CancelledOrdersTable = () => {
 
       {showScanner && (
         <div style={{ position: 'relative', marginBottom: 20 }}>
-          <button 
+          <button
             onClick={() => setShowScanner(false)}
             style={{
               position: 'absolute',
