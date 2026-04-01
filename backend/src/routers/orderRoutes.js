@@ -232,7 +232,7 @@ router.put('/reservar/:id_order', async (req, res) => {
 
       try {
         // Chamar a função de cancelamento do Stripe
-        const stripeResponse = await fetch(`http://localhost:${process.env.PORT || 3000}/api/stripe/cancel-payment`, {
+        const stripeResponse = await fetch(`${process.env.SERVER_URL}/api/stripe/cancel-payment`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
