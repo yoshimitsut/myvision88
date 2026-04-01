@@ -98,7 +98,7 @@ export default function OrderCake() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [pickupHour, setPickupHour] = useState("時間を選択");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Estados para pagamento
   const [paymentStep, setPaymentStep] = useState<'form' | 'payment'>('form');
   const [orderData, setOrderData] = useState<OrderData | null>(null);
@@ -117,26 +117,26 @@ export default function OrderCake() {
 
   // const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
-  const initialCake = { 
-    cake_id: 0, 
-    name: "", 
-    amount: 1, 
-    size: "", 
-    price: 1, 
-    message_cake: "", 
-    fruit_option: "無し" as const 
+  const initialCake = {
+    cake_id: 0,
+    name: "",
+    amount: 1,
+    size: "",
+    price: 1,
+    message_cake: "",
+    fruit_option: "無し" as const
   };
-  
-  const { 
-    cakes, 
-    setCakes,  
-    formData, 
+
+  const {
+    cakes,
+    setCakes,
+    formData,
     setFormData,
-    addCake, 
-    removeCake, 
-    updateCake, 
+    addCake,
+    removeCake,
+    updateCake,
     handleInputChange,
-    resetForm 
+    resetForm
   } = useOrderForm([initialCake]);
 
   // Calcular total do pedido
@@ -150,10 +150,10 @@ export default function OrderCake() {
     const selectedCakeName = searchParams.get("cake");
     if (!cakesData.length || !selectedCakeName) return;
 
-    const selectedCake = cakesData.find(c => 
+    const selectedCake = cakesData.find(c =>
       String(c.id) === selectedCakeName || c.name === selectedCakeName
     );
-    
+
     if (selectedCake) {
       setCakes([{
         cake_id: selectedCake.id,
@@ -181,7 +181,7 @@ export default function OrderCake() {
   const { isDateAllowed } = useDateValidation(today, excludedDates, availableDates);
 
   const toKatakana = (str: string): string => {
-    return str.replace(/[\u3041-\u3096]/g, (ch) => 
+    return str.replace(/[\u3041-\u3096]/g, (ch) =>
       String.fromCharCode(ch.charCodeAt(0) + 0x60)
     );
   };
@@ -201,7 +201,7 @@ export default function OrderCake() {
   // ==================== FUNÇÕES DE SUBMISSÃO ====================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedDate || pickupHour === "時間を選択") {
       alert("受け取り日時を選択してください。");
       return;
@@ -213,7 +213,7 @@ export default function OrderCake() {
       return;
     }
 
-    const clientId = crypto.randomUUID?.() || 
+    const clientId = crypto.randomUUID?.() ||
       `client_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
     const orderDataToSave: OrderData = {
@@ -232,11 +232,11 @@ export default function OrderCake() {
       cakes: cakes.map(c => {
         const cakeData = cakesData?.find(cake => Number(cake.id) === Number(c.cake_id));
         const fruitPrice = FRUIT_OPTIONS.find(f => f.value === c.fruit_option)?.price || 0;
-        
+
         if (!c.size) {
           throw new Error(`Cake size is undefined for cake ${c.cake_id}`);
         }
-        
+
         return {
           cake_id: cakeData?.id || c.cake_id,
           name: cakeData?.name || c.name,
@@ -251,7 +251,7 @@ export default function OrderCake() {
     };
 
     setOrderData(orderDataToSave);
-    
+
     if (paymentMethod === 'store') {
       await handleStorePayment(orderDataToSave);
     } else {
@@ -261,7 +261,7 @@ export default function OrderCake() {
 
   const handleStorePayment = async (orderDataToSave: OrderData) => {
     setProcessingStorePayment(true);
-    
+
     try {
       const reservationData: OrderData = {
         ...orderDataToSave,
@@ -274,18 +274,18 @@ export default function OrderCake() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reservationData),
       });
-      
+
       const result = await res.json();
-      
+
       if (result.success) {
-        navigate("/order/check", { 
-          state: { 
+        navigate("/order/check", {
+          state: {
             newOrderCreated: true,
             paymentMethod: 'store',
             paymentStatus: 'pending'
-          } 
+          }
         });
-        
+
         resetForm();
         setSelectedDate(null);
         setPickupHour("時間を選択");
@@ -316,7 +316,7 @@ export default function OrderCake() {
         ...orderData,
         status: 'f',
         payment_status: 'paid',
-        payment_id: paymentResult.paymentIntent.id,
+        payment_intent_id: paymentResult.paymentIntent.id,
         payment_details: paymentResult.paymentIntent
       };
 
@@ -325,18 +325,18 @@ export default function OrderCake() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reservationData),
       });
-      
+
       const result = await res.json();
-      
+
       if (result.success) {
-        navigate("/order/check", { 
-          state: { 
+        navigate("/order/check", {
+          state: {
             newOrderCreated: true,
             paymentSuccess: true,
             paymentId: paymentResult.paymentIntent.id
-          } 
+          }
         });
-        
+
         resetForm();
         setSelectedDate(null);
         setPickupHour("時間を選択");
@@ -365,10 +365,10 @@ export default function OrderCake() {
     setPaymentKey(prev => prev + 1);
   };
 
-  const PaymentMethodSelector = ({ 
-    selectedMethod, 
-    onChange 
-  }: { 
+  const PaymentMethodSelector = ({
+    selectedMethod,
+    onChange
+  }: {
     selectedMethod: 'card' | 'store';
     onChange: (method: 'card' | 'store') => void;
   }) => (
@@ -403,7 +403,7 @@ export default function OrderCake() {
       </div>
     </div>
   );
-  
+
   // ==================== STYLES TIPADOS ====================
   const getBaseStyles = <T extends OptionType>(): StylesConfig<T, false> => ({
     option: (provided: CSSObjectWithLabel, state: OptionProps<T, false>) => ({
@@ -517,28 +517,28 @@ export default function OrderCake() {
                         </button>
                       </div>
                     )}
-                    
+
                     {selectedCakeData && selectedCakeData.image && (
-                      <img 
-                        className='img-cake-order' 
-                        src={`${API_URL}/image/${FOLDER_URL}/${selectedCakeData.image}`} 
-                        alt={selectedCakeData.name} 
+                      <img
+                        className='img-cake-order'
+                        src={`${API_URL}/image/${FOLDER_URL}/${selectedCakeData.image}`}
+                        alt={selectedCakeData.name}
                       />
                     )}
-                    
+
                     <div className='input-group'>
                       <Select<CustomOptionType, false>
-                        options={cakesData?.map(c => ({ 
-                          value: String(c.id), 
-                          label: c.name, 
-                          image: c.image,
-                          isDisabled: false 
-                        })) || []}
-                        value={cakesData?.map(c => ({ 
-                          value: String(c.id), 
+                        options={cakesData?.map(c => ({
+                          value: String(c.id),
                           label: c.name,
                           image: c.image,
-                          isDisabled: false 
+                          isDisabled: false
+                        })) || []}
+                        value={cakesData?.map(c => ({
+                          value: String(c.id),
+                          label: c.name,
+                          image: c.image,
+                          isDisabled: false
                         })).find(c => Number(c.value) === item.cake_id) || null}
                         onChange={(selected) => {
                           if (selected) {
@@ -547,7 +547,7 @@ export default function OrderCake() {
                             updateCake(index, "cake_id", newCakeId);
                             updateCake(index, "size", "");
                             updateCake(index, "price", 1);
-                            
+
                             if (selectedCake?.sizes && selectedCake.sizes.length === 1) {
                               const singleSize = selectedCake.sizes[0];
                               if (singleSize.stock > 0 && singleSize.size) {
@@ -574,7 +574,7 @@ export default function OrderCake() {
                     {selectedCakeData && (
                       <div className='input-group'>
                         <Select<SizeOption, false>
-                          options={sizeOptions} 
+                          options={sizeOptions}
                           value={selectedSize || null}
                           onChange={(selected) => {
                             if (selected && selected.size) {
@@ -591,11 +591,11 @@ export default function OrderCake() {
                         <label className='select-group'>*ケーキのサイズ</label>
                       </div>
                     )}
-                    
+
                     <div className="input-group-radio">
                       <div className="pill-group">
                         {FRUIT_OPTIONS.map(option => (
-                          <label 
+                          <label
                             key={option.value}
                             className={`pill ${item.fruit_option === option.value ? "active" : ""}`}
                           >
@@ -617,13 +617,13 @@ export default function OrderCake() {
 
                     <div className='input-group'>
                       <Select<OptionType, false>
-                        options={Array.from({ length: 10 }, (_, i) => ({ 
-                          value: String(i + 1), 
-                          label: String(i + 1) 
+                        options={Array.from({ length: 10 }, (_, i) => ({
+                          value: String(i + 1),
+                          label: String(i + 1)
                         }))}
-                        value={Array.from({ length: 10 }, (_, i) => ({ 
-                          value: String(i + 1), 
-                          label: String(i + 1) 
+                        value={Array.from({ length: 10 }, (_, i) => ({
+                          value: String(i + 1),
+                          label: String(i + 1)
                         })).find(opt => opt.value === String(item.amount)) || null}
                         isSearchable={false}
                         onChange={(selected) => updateCake(index, "amount", selected ? Number(selected.value) : 1)}
@@ -634,18 +634,18 @@ export default function OrderCake() {
                       />
                       <label className='select-group'>*個数:</label>
                     </div>
-                    
+
                     <div className='input-group'>
                       <label htmlFor={`message_cake_${index}`}>メッセージプレート</label>
-                      <textarea 
+                      <textarea
                         id={`message_cake_${index}`}
-                        name="message_cake" 
+                        name="message_cake"
                         placeholder="ご要望がある場合のみご記入ください。"
                         value={item.message_cake || ""}
                         onChange={(e) => updateCake(index, "message_cake", e.target.value)}
                       />
                     </div>
-                    
+
                     <div className='btn-div'>
                       <button type='button' onClick={addCake} className='btn btn-add-cake'>
                         ➕ 別のケーキを追加
@@ -670,7 +670,7 @@ export default function OrderCake() {
                   autoCorrect="off"
                   required
                 />
-                
+
                 <Input
                   id="lastName"
                   label="*名(カタカナ)"
@@ -679,7 +679,7 @@ export default function OrderCake() {
                   onChange={handleInputChange}
                   required
                 />
-                
+
                 <Input
                   id="email"
                   label="*メールアドレス"
@@ -689,7 +689,7 @@ export default function OrderCake() {
                   onChange={handleInputChange}
                   required
                 />
-                
+
                 <Input
                   id="tel"
                   label="*お電話番号"
@@ -726,10 +726,10 @@ export default function OrderCake() {
                   calendarContainer={CustomCalendarContainer}
                   required
                   renderDayContents={(day, date) => (
-                    <DayCell 
-                      day={day} 
-                      date={date!} 
-                      isSelectable={isDateAllowed(date!)} 
+                    <DayCell
+                      day={day}
+                      date={date!}
+                      isSelectable={isDateAllowed(date!)}
                     />
                   )}
                 />
@@ -749,10 +749,10 @@ export default function OrderCake() {
                 />
                 <label htmlFor="pickupHour" className='select-group'>受け取り希望時間</label>
               </div>
-              
+
               <div className='input-group' style={{ display: 'none' }}>
                 <label htmlFor="message">その他</label>
-                <textarea 
+                <textarea
                   id="message"
                   value={formData.message}
                   onChange={handleInputChange}
@@ -767,7 +767,7 @@ export default function OrderCake() {
                 const cakeData = cakesData?.find(c => c.id === cake.cake_id);
                 const fruitPrice = FRUIT_OPTIONS.find(f => f.value === cake.fruit_option)?.price || 0;
                 const itemTotal = (cake.price + fruitPrice) * cake.amount;
-                
+
                 return (
                   <div key={index} className="order-item">
                     <span>{cakeData?.name} ({cake.size}) x{cake.amount}</span>
@@ -780,7 +780,7 @@ export default function OrderCake() {
                 <strong>￥{totalAmount.toLocaleString()}</strong>
               </div>
             </div>
-            
+
             <PaymentMethodSelector
               selectedMethod={paymentMethod}
               onChange={setPaymentMethod}
@@ -797,12 +797,12 @@ export default function OrderCake() {
             <button onClick={handleBackToForm} className="btn-back" type="button">
               ← 予約フォームに戻る
             </button>
-            
+
             <h3>お支払い情報</h3>
             <p className="payment-amount">
               お支払い金額: <strong>￥{totalAmount.toLocaleString()}</strong>
             </p>
-            
+
             <PaymentFormStripe
               key={paymentKey}
               // publishableKey={STRIPE_PUBLISHABLE_KEY}

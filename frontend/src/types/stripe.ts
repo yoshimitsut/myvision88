@@ -37,7 +37,7 @@ export interface StripePaymentIntent {
   created: number;
   receipt_email?: string;
   description?: string;
-  
+
 }
 
 export interface StripePaymentResponse {
@@ -72,6 +72,7 @@ export interface OrderData {
   payment_status: PaymentStatus;
   payment_id?: string;
   payment_details?: StripePaymentIntent;
+  payment_intent_id?: string;
   cakes: Array<{
     cake_id: number;
     name: string;
