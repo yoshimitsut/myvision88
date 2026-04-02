@@ -201,18 +201,7 @@ const PaymentFormInner = ({
       )}
 
       <div className="payment-element-wrapper">
-        <PaymentElement
-          options={{
-            fields: {
-              billingDetails: {
-                address: {
-                  country: 'never',
-                  postalCode: 'never'
-                }
-              }
-            }
-          }}
-        />
+        <PaymentElement />
       </div>
 
       <button
