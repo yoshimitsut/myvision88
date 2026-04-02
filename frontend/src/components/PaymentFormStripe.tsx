@@ -7,16 +7,16 @@ import {
   useElements,
   PaymentElement,
 } from '@stripe/react-stripe-js';
-import type { 
-  PaymentFormProps, 
-  StripePaymentResponse, 
-  OrderSummaryData 
+import type {
+  PaymentFormProps,
+  StripePaymentResponse,
+  OrderSummaryData
 } from '../types/stripe';
 import './PaymentForm.css';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const stripePromise = loadStripe(
-  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY, 
+  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
   { locale: 'ja' }
 );
 
@@ -32,7 +32,7 @@ const OrderCompleteSummary = ({ orderData }: { orderData: OrderSummaryData }) =>
   return (
     <div className="order-complete-summary">
       <h2>🧾 ご注文内容確認</h2>
-      
+
       <div className="summary-section">
         <h3>👤 お客様情報</h3>
         <div className="customer-info">
@@ -71,7 +71,7 @@ const OrderCompleteSummary = ({ orderData }: { orderData: OrderSummaryData }) =>
           {orderData.items.map((item, index) => {
             const itemTotal = calculateItemTotal(item);
             const fruitText = item.fruit_option === "有り" ? " (フルーツ増し)" : "";
-            
+
             return (
               <div key={index} className="cake-item">
                 <div className="cake-header">
@@ -178,7 +178,7 @@ const PaymentFormInner = ({
           },
           clientSecret: clientSecret,
         };
-        
+
         onPaymentSuccess(paymentResult);
       } else {
         throw new Error('Pagamento não foi confirmado');
@@ -199,9 +199,20 @@ const PaymentFormInner = ({
           <p>❌ {error}</p>
         </div>
       )}
-      
+
       <div className="payment-element-wrapper">
-        <PaymentElement />
+        <PaymentElement
+          options={{
+            fields: {
+              billingDetails: {
+                address: {
+                  country: 'never',
+                  postalCode: 'never'
+                }
+              }
+            }
+          }}
+        />
       </div>
 
       <button
@@ -231,14 +242,14 @@ export function PaymentFormStripe({
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  useEffect(() => {  
+
+  useEffect(() => {
     const createPaymentIntent = async () => {
       try {
         setLoading(true);
-        
+
         console.log('🟡 Criando PaymentIntent...');
-        
+
         const response = await fetch(`${API_URL}/api/create-payment-intent`, {
           method: 'POST',
           headers: {
@@ -258,7 +269,7 @@ export function PaymentFormStripe({
         }
 
         console.log('✅ PaymentIntent criado:', data);
-        
+
         setClientSecret(data.clientSecret);
         setLoading(false);
         onReady?.();
@@ -280,7 +291,7 @@ export function PaymentFormStripe({
     }
   }, []);
 
-   // ✅ Limpa o estado quando o componente desmontar
+  // ✅ Limpa o estado quando o componente desmontar
   useEffect(() => {
     return () => {
       setClientSecret(null);
@@ -299,8 +310,8 @@ export function PaymentFormStripe({
     return (
       <div className="payment-error">
         <p>❌ {error}</p>
-        <button 
-          onClick={() => window.location.reload()} 
+        <button
+          onClick={() => window.location.reload()}
           className="retry-button"
           style={{
             marginTop: '10px',
@@ -330,9 +341,10 @@ export function PaymentFormStripe({
       <div className="payment-right-column">
         <div className="payment-section">
           <h2>💳 お支払い</h2>
-          
-          <Elements 
-            stripe={stripePromise} 
+
+          <Elements
+            key={clientSecret}
+            stripe={stripePromise}
             options={{
               clientSecret,
               appearance: {
@@ -346,6 +358,21 @@ export function PaymentFormStripe({
                   spacingUnit: '4px',
                   borderRadius: '8px',
                 },
+                rules: {
+                  '.Fieldset--country': {
+                    display: 'none',
+                  },
+                  '.LinkAuthenticationElement': {
+                    display: 'none',
+                  },
+                  '.AffirmMessage': {
+                    display: 'none',
+                  },
+                  '.Fieldset--postalCode': {
+                    display: 'none',
+                  },
+                },
+                labels: 'floating',
               },
             }}
           >

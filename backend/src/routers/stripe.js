@@ -54,6 +54,7 @@ router.post('/create-payment-intent', async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount),
       currency: currency.toLowerCase(),
+      payment_method_types: ['card'],
       metadata: {
         orderName: orderData?.customer?.lastName + ' ' + orderData?.customer?.firstName || 'Cliente',
         orderEmail: orderData?.customer?.email || '',
