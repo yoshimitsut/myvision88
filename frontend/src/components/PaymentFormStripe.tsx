@@ -201,7 +201,21 @@ const PaymentFormInner = ({
       )}
 
       <div className="payment-element-wrapper">
-        <PaymentElement />
+        <PaymentElement
+          options={{
+            wallets: {
+              link: 'never'  // Desabilita o Link
+            },
+            defaultValues: {
+              billingDetails: {
+                address: {
+                  country: 'JP',           // 🇯🇵 Força Japão
+                  postal_code: '000-0000', // CEP padrão (opcional)
+                }
+              }
+            }
+          }}
+        />
       </div>
 
       <button
@@ -339,29 +353,19 @@ export function PaymentFormStripe({
               appearance: {
                 theme: 'stripe',
                 variables: {
-                  colorPrimary: '#fdd111',
-                  colorBackground: '#ffffff',
-                  colorText: '#30313d',
-                  colorDanger: '#df1b41',
-                  fontFamily: 'Ideal Sans, system-ui, sans-serif',
-                  spacingUnit: '4px',
-                  borderRadius: '8px',
+                  colorPrimary: '#1d1d1dff',
                 },
                 rules: {
                   '.Fieldset--country': {
-                    display: 'none',
+                    display: 'none',  // Esconde o campo de país completamente
                   },
                   '.LinkAuthenticationElement': {
                     display: 'none',
                   },
-                  '.AffirmMessage': {
-                    display: 'none',
-                  },
-                  '.Fieldset--postalCode': {
+                  'p-Field': {
                     display: 'none',
                   },
                 },
-                labels: 'floating',
               },
             }}
           >

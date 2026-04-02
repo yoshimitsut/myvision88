@@ -1,4 +1,3 @@
-
 .payment-page {
   display: grid;
   grid-template-columns: 1fr 420px;
@@ -7,6 +6,10 @@
   margin: 40px auto;
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.p-Field {
+  display: none;
 }
 
 /* responsivo */
@@ -31,7 +34,7 @@
   background: white;
   border-radius: 12px;
   padding: 28px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 
 /* títulos */
