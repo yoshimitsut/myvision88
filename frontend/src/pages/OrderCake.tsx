@@ -186,8 +186,9 @@ export default function OrderCake() {
     );
   };
 
-  const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, firstName: toKatakana(e.target.value) }));
+  const handleKatakanaBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: toKatakana(value) }));
   };
 
   const getLocalDateString = (date: Date | null): string => {
@@ -466,6 +467,7 @@ export default function OrderCake() {
   const customStylesCake = getBaseStyles<CustomOptionType>();
 
   const orderSummaryData = {
+    id_order: orderData?.id_client || '',
     items: cakes.map(cake => {
       const cakeData = cakesData?.find(c => c.id === cake.cake_id);
       return {
@@ -664,7 +666,8 @@ export default function OrderCake() {
                   label="*姓(カタカナ)"
                   placeholder="ヒガ"
                   value={formData.firstName}
-                  onChange={handleFirstNameChange}
+                  onChange={handleInputChange}
+                  onBlur={handleKatakanaBlur}
                   lang="ja"
                   autoCapitalize="none"
                   autoCorrect="off"
@@ -677,6 +680,7 @@ export default function OrderCake() {
                   placeholder="タロウ"
                   value={formData.lastName}
                   onChange={handleInputChange}
+                  onBlur={handleKatakanaBlur}
                   required
                 />
 
