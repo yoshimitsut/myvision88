@@ -286,18 +286,43 @@ export default function ListOrder() {
         throw new Error(data?.error || `保存に失敗しました（ステータス ${res.status}）`);
       }
 
-      // 🆕 Mostrar mensagem específica se houve cancelamento Stripe
       if (newStatus === 'e' && data.stripe) {
         if (data.stripe.success) {
           if (data.stripe.action === 'refund') {
-            alert(`✅ 注文をキャンセルし、返金処理を行いました。\n返金ID: ${data.stripe.refundId}\n金額: ¥${(data.stripe.amount / 100).toLocaleString()}`);
+            const amount = data.stripe.amount;
+            const formattedAmount = `¥${amount.toLocaleString('ja-JP')}`;
+
+            // ✅ Mostrar ID do pedido e nome do cliente
+            alert(`✅ 注文をキャンセルし、返金処理を行いました。
+      
+📋 受付番号: ${String(order.id_order).padStart(4, "0")}
+👤 お客様: ${order.last_name} ${order.first_name}
+💰 返金額: ${formattedAmount}
+🆔 返金ID: ${data.stripe.refundId}`);
+
           } else if (data.stripe.action === 'cancel') {
-            alert(`✅ 注文をキャンセルしました。未決済の支払いは取り消されました。`);
+            alert(`✅ 注文をキャンセルしました。
+      
+📋 受付番号: ${String(order.id_order).padStart(4, "0")}
+👤 お客様: ${order.last_name} ${order.first_name}
+未決済の支払いは取り消されました。`);
+
           } else if (data.stripe.action === 'already_canceled') {
-            alert(`ℹ️ 注文をキャンセルしました。この支払いは既にキャンセル済みです。`);
+            alert(`ℹ️ 注文をキャンセルしました。
+      
+📋 受付番号: ${String(order.id_order).padStart(4, "0")}
+👤 お客様: ${order.last_name} ${order.first_name}
+この支払いは既にキャンセル済みです。`);
           }
-        } else if (data.stripe && !data.stripe.success) {
-          alert(`⚠️ 注文はキャンセルされましたが、Stripeでの処理に問題がありました:\n${data.stripe.message}\n\n別途返金処理が必要な場合があります。`);
+        } else {
+          // ⚠️ Caso de erro no Stripe
+          alert(`⚠️ 注文はキャンセルされましたが、Stripeでの処理に問題がありました。
+    
+📋 受付番号: ${String(order.id_order).padStart(4, "0")}
+👤 お客様: ${order.last_name} ${order.first_name}
+❌ エラー: ${data.stripe.message || 'Erro na comunicação com Stripe'}
+
+別途返金処理が必要な場合があります。`);
         }
       }
 

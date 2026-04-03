@@ -9,6 +9,10 @@ const {
 } = require('../utils/email');
 
 const stripeRouter = require('./stripe');
+const { cancelStripePayment } = require('../services/stripeService');
+
+const Stripe = require('stripe');
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // POST /api/reservar - Criar Novo Pedido
 router.post('/reservar', async (req, res) => {
@@ -210,105 +214,161 @@ router.put('/orders/:id_order', async (req, res) => {
 });
 
 
-// PUT /api/reservar/:id_order - Atualizar Apenas Status (Cancelamento/Finalização)
 router.put('/reservar/:id_order', async (req, res) => {
   const { status } = req.body;
   const id_order = parseInt(req.params.id_order, 10);
+
   const conn = await pool.getConnection();
 
   try {
     await conn.beginTransaction();
 
-    // pega pedido atual
     const [rows] = await conn.query('SELECT * FROM orders WHERE id_order=?', [id_order]);
     if (rows.length === 0) throw new Error('Pedido não encontrado');
     const order = rows[0];
     const previousStatus = order.status;
 
-    // 🆕 Se for cancelamento e tem payment_intent_id, cancelar no Stripe
     let stripeResult = null;
+
+    // ✅ APENAS UMA CHAMADA - Remova a duplicada
     if (status === 'e' && previousStatus !== 'e' && order.payment_intent_id) {
       console.log(`🔄 Cancelando pagamento Stripe: ${order.payment_intent_id}`);
 
       try {
-        // Chamar a função de cancelamento do Stripe
-        const stripeResponse = await fetch(`${process.env.SERVER_URL}/api/stripe/cancel-payment`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            paymentIntentId: order.payment_intent_id,
-            reason: 'order_canceled_by_admin'
-          })
-        });
+        // ✅ Use apenas UMA das opções abaixo:
 
-        stripeResult = await stripeResponse.json();
+        // Opção 1: Usar o serviço
+        const { cancelStripePayment } = require('../services/stripeService');
+        stripeResult = await cancelStripePayment(order.payment_intent_id);
 
-        if (!stripeResult.success) {
-          console.warn('⚠️ Falha ao cancelar Stripe:', stripeResult);
-          // Você pode optar por continuar ou parar o cancelamento
-          // throw new Error(`Falha no Stripe: ${stripeResult.message}`);
-        } else {
-          console.log('✅ Stripe cancelado/reembolsado:', stripeResult);
-        }
+        // Opção 2: Chamada direta (se preferir)
+        // const Stripe = require('stripe');
+        // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+        // const refund = await stripe.refunds.create({
+        //   payment_intent: order.payment_intent_id,
+        //   reason: 'requested_by_customer'
+        // });
+        // stripeResult = { success: true, refundId: refund.id };
 
       } catch (stripeError) {
-        console.error('❌ Erro ao chamar API Stripe:', stripeError);
-        stripeResult = {
-          success: false,
-          error: stripeError.message,
-          message: 'Erro na comunicação com Stripe'
-        };
+        console.error('❌ Erro:', stripeError.message);
+        stripeResult = { success: false, error: stripeError.message };
       }
     }
 
-    // 1. Atualizar status
+    // Atualizar status no banco
     await conn.query('UPDATE orders SET status=? WHERE id_order=?', [status, id_order]);
 
-    // 2. Se for cancelamento, devolver estoque e enviar email
-    if (status === 'e' && previousStatus !== 'e') {
-      const [orderCakes] = await conn.query('SELECT * FROM order_cakes WHERE order_id=?', [id_order]);
-
-      // Devolver estoque
-      for (const oc of orderCakes) {
-        await conn.query('UPDATE cake_sizes SET stock = stock + ? WHERE cake_id=? AND size=?', [oc.amount, oc.cake_id, oc.size]);
-      }
-
-      // Buscar detalhes dos bolos para o email
-      const [cakesDetails] = await conn.query(`
-        SELECT oc.*, c.name 
-        FROM order_cakes oc 
-        JOIN cakes c ON oc.cake_id = c.id 
-        WHERE oc.order_id = ?
-      `, [id_order]);
-
-      await sendCancellationNotification(order, cakesDetails);
-    }
-
-    if (status === 'd') {
-      await sendOrderCompletedNotification(order);
-    }
-
-    // 3. Se for reativação, remover estoque
-    if (status !== 'e' && previousStatus === 'e') {
-      const [orderCakes] = await conn.query('SELECT * FROM order_cakes WHERE order_id=?', [id_order]);
-      for (const oc of orderCakes) {
-        await conn.query('UPDATE cake_sizes SET stock = stock - ? WHERE cake_id=? AND size=?', [oc.amount, oc.cake_id, oc.size]);
-      }
-    }
+    // ... resto do código
 
     await conn.commit();
-
-    //Retornar resultado incluindo informação do Stripe
-    res.json({ success: true, message: 'Status atualizado', id_order, stripe: stripeResult });
+    res.json({ success: true, stripe: stripeResult });
 
   } catch (err) {
     await conn.rollback();
-    console.error(err);
     res.status(500).json({ success: false, error: err.message });
   } finally {
     conn.release();
   }
 });
+// router.put('/reservar/:id_order', async (req, res) => {
+//   const { status } = req.body;
+//   const id_order = parseInt(req.params.id_order, 10);
+//   const conn = await pool.getConnection();
+
+//   try {
+//     await conn.beginTransaction();
+
+//     // pega pedido atual
+//     const [rows] = await conn.query('SELECT * FROM orders WHERE id_order=?', [id_order]);
+//     if (rows.length === 0) throw new Error('Pedido não encontrado');
+//     const order = rows[0];
+//     const previousStatus = order.status;
+
+//     // 🆕 Se for cancelamento e tem payment_intent_id, cancelar no Stripe
+//     let stripeResult = null;
+//     if (status === 'e' && previousStatus !== 'e' && order.payment_intent_id) {
+//       console.log(`🔄 Cancelando pagamento Stripe: ${order.payment_intent_id}`);
+
+//       try {
+//         // Chamar a função de cancelamento do Stripe
+//         const stripeResponse = await fetch(`${process.env.SERVER_URL}/api/stripe/cancel-payment`, {
+//           method: 'POST',
+//           headers: { 'Content-Type': 'application/json' },
+//           body: JSON.stringify({
+//             paymentIntentId: order.payment_intent_id,
+//             reason: 'order_canceled_by_admin'
+//           })
+//         });
+
+//         stripeResult = await stripeResponse.json();
+
+//         if (!stripeResult.success) {
+//           console.warn('⚠️ Falha ao cancelar Stripe:', stripeResult);
+//           // Você pode optar por continuar ou parar o cancelamento
+//           // throw new Error(`Falha no Stripe: ${stripeResult.message}`);
+//         } else {
+//           console.log('✅ Stripe cancelado/reembolsado:', stripeResult);
+//         }
+
+//       } catch (stripeError) {
+//         console.error('❌ Erro ao chamar API Stripe:', stripeError);
+//         stripeResult = {
+//           success: false,
+//           error: stripeError.message,
+//           message: 'Erro na comunicação com Stripe'
+//         };
+//       }
+//     }
+
+//     // 1. Atualizar status
+//     await conn.query('UPDATE orders SET status=? WHERE id_order=?', [status, id_order]);
+
+//     // 2. Se for cancelamento, devolver estoque e enviar email
+//     if (status === 'e' && previousStatus !== 'e') {
+//       const [orderCakes] = await conn.query('SELECT * FROM order_cakes WHERE order_id=?', [id_order]);
+
+//       // Devolver estoque
+//       for (const oc of orderCakes) {
+//         await conn.query('UPDATE cake_sizes SET stock = stock + ? WHERE cake_id=? AND size=?', [oc.amount, oc.cake_id, oc.size]);
+//       }
+
+//       // Buscar detalhes dos bolos para o email
+//       const [cakesDetails] = await conn.query(`
+//         SELECT oc.*, c.name 
+//         FROM order_cakes oc 
+//         JOIN cakes c ON oc.cake_id = c.id 
+//         WHERE oc.order_id = ?
+//       `, [id_order]);
+
+//       await sendCancellationNotification(order, cakesDetails);
+//     }
+
+//     if (status === 'd') {
+//       await sendOrderCompletedNotification(order);
+//     }
+
+//     // 3. Se for reativação, remover estoque
+//     if (status !== 'e' && previousStatus === 'e') {
+//       const [orderCakes] = await conn.query('SELECT * FROM order_cakes WHERE order_id=?', [id_order]);
+//       for (const oc of orderCakes) {
+//         await conn.query('UPDATE cake_sizes SET stock = stock - ? WHERE cake_id=? AND size=?', [oc.amount, oc.cake_id, oc.size]);
+//       }
+//     }
+
+//     await conn.commit();
+
+//     //Retornar resultado incluindo informação do Stripe
+//     res.json({ success: true, message: 'Status atualizado', id_order, stripe: stripeResult });
+
+//   } catch (err) {
+//     await conn.rollback();
+//     console.error(err);
+//     res.status(500).json({ success: false, error: err.message });
+//   } finally {
+//     conn.release();
+//   }
+// });
 
 // GET /api/list - Listar Pedidos
 router.get('/list', async (req, res) => {

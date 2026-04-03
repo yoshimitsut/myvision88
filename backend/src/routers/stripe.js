@@ -56,13 +56,14 @@ router.post('/create-payment-intent', async (req, res) => {
       currency: currency.toLowerCase(),
       payment_method_types: ['card'],
       metadata: {
+        orderId: orderData?.id_order || '',
         orderName: orderData?.customer?.lastName + ' ' + orderData?.customer?.firstName || 'Cliente',
         orderEmail: orderData?.customer?.email || '',
         orderPhone: orderData?.customer?.tel || '',
         pickupDate: orderData?.pickupDate || '',
         pickupTime: orderData?.pickupTime || '',
       },
-      description: `Pedido de bolo - ${orderData?.customer?.lastName || 'Cliente'}`,
+      description: `注文予約 - ${orderData?.customer?.lastName} ${orderData?.customer?.firstName} (${orderData?.customer?.email})`,
       receipt_email: orderData?.customer?.email || undefined,
     });
 

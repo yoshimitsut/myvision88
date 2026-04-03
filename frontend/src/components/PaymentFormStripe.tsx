@@ -1,5 +1,5 @@
 // src/components/PaymentFormStripe.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -105,18 +105,18 @@ const OrderCompleteSummary = ({ orderData }: { orderData: OrderSummaryData }) =>
       <div className="summary-total-section">
         <div className="total-row">
           <span>商品合計</span>
-          <span>￥{orderData.totalAmount.toLocaleString()}</span>
+          <span>￥{orderData.totalAmount.toLocaleString('ja-JP')}</span>
         </div>
         <div className="total-row grand-total">
           <span>お支払い金額 (税込)</span>
-          <span className="total-amount">￥{orderData.totalAmount.toLocaleString()}</span>
+          <span className="total-amount">￥{orderData.totalAmount.toLocaleString('ja-JP')}</span>
         </div>
       </div>
     </div>
   );
 };
 
-// Componente de formulário de pagamento interno usando PaymentElement
+// Componente principal
 interface PaymentFormInnerProps extends PaymentFormProps {
   clientSecret: string;
 }
@@ -132,19 +132,26 @@ const PaymentFormInner = ({
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasSubmitted = useRef(false); // ✅ Evitar submissão duplicada
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+
+    // ✅ Evitar submissão duplicada
+    if (hasSubmitted.current) {
+      console.log('⚠️ Submissão já em andamento');
+      return;
+    }
 
     if (!stripe || !elements) {
       return;
     }
 
+    hasSubmitted.current = true;
     setLoading(true);
     setError(null);
 
     try {
-      // Confirmar o pagamento com o PaymentElement
       const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
@@ -154,10 +161,16 @@ const PaymentFormInner = ({
               name: `${orderData.customer.lastName} ${orderData.customer.firstName}`,
               email: orderData.customer.email,
               phone: orderData.customer.tel,
+              address: {  // ✅ Adicionar endereço padrão
+                country: 'JP',
+                postal_code: '000-0000',
+                line1: 'Tokyo',
+                city: 'Tokyo',
+              }
             },
           },
         },
-        redirect: 'if_required', // Não redirecionar automaticamente
+        redirect: 'if_required',
       });
 
       if (stripeError) {
@@ -189,6 +202,7 @@ const PaymentFormInner = ({
       onPaymentError({ message: errorMsg });
     } finally {
       setLoading(false);
+      hasSubmitted.current = false;
     }
   };
 
@@ -204,13 +218,13 @@ const PaymentFormInner = ({
         <PaymentElement
           options={{
             wallets: {
-              link: 'never'  // Desabilita o Link
+              link: 'never'
             },
             defaultValues: {
               billingDetails: {
                 address: {
-                  country: 'JP',           // 🇯🇵 Força Japão
-                  postal_code: '000-0000', // CEP padrão (opcional)
+                  country: 'JP',
+                  postal_code: '000-0000',
                 }
               }
             }
@@ -233,7 +247,6 @@ const PaymentFormInner = ({
   );
 };
 
-// Componente principal
 export function PaymentFormStripe({
   amount,
   currency,
@@ -242,26 +255,40 @@ export function PaymentFormStripe({
   onPaymentError,
   onReady
 }: PaymentFormProps) {
+  console.log('🏗️ PaymentFormStripe MOUNTOU - ID:', Math.random().toString(36).substring(7));
+
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const hasCreated = useRef(false);
+  const isCreating = useRef(false);
+
+  // ✅ Referência para evitar recriação se orderData mudar
+  const orderDataRef = useRef(orderData);
+  orderDataRef.current = orderData;
+
   useEffect(() => {
+    console.log('🔥 useEffect RODOU - hasCreated:', hasCreated.current, 'isCreating:', isCreating.current);
+    if (hasCreated.current || isCreating.current) {
+      console.log('⚠️ PaymentIntent já foi criado ou está sendo criado');
+      return;
+    }
+
     const createPaymentIntent = async () => {
+      isCreating.current = true;
+
       try {
         setLoading(true);
-
         console.log('🟡 Criando PaymentIntent...');
 
         const response = await fetch(`${API_URL}/api/create-payment-intent`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             amount: amount,
             currency: currency.toLowerCase(),
-            orderData: orderData,
+            orderData: orderDataRef.current, // ✅ Usar ref para valor estável
           }),
         });
 
@@ -273,6 +300,7 @@ export function PaymentFormStripe({
 
         console.log('✅ PaymentIntent criado:', data);
 
+        hasCreated.current = true;
         setClientSecret(data.clientSecret);
         setLoading(false);
         onReady?.();
@@ -281,25 +309,26 @@ export function PaymentFormStripe({
         console.error('❌ Erro:', errorMsg);
         setError(errorMsg);
         setLoading(false);
-        onPaymentError({ message: errorMsg });
+        onPaymentError?.({ message: errorMsg });
+      } finally {
+        isCreating.current = false;
       }
     };
 
-    if (amount > 0) {
+    if (amount > 0 && !clientSecret) {
       createPaymentIntent();
-    } else {
+    } else if (amount <= 0) {
       setError('Configuração do Stripe inválida');
       setLoading(false);
-      onPaymentError({ message: 'Stripe publishable key não configurada' });
+      onPaymentError?.({ message: 'Stripe publishable key não configurada' });
     }
-  }, []);
 
-  // ✅ Limpa o estado quando o componente desmontar
-  useEffect(() => {
-    return () => {
-      setClientSecret(null);
-    };
-  }, []);
+    // Removemos o cleanup do hasCreated/isCreating para evitar 
+    // recriação dupla no React.StrictMode
+  }, [amount, currency]);
+
+  // Remover a limpeza do clientSecret no onmount para também evitar
+  // problemas com o StrictMode. O estado já é limpo quando o componente é destruído.
 
   if (loading) {
     return (
@@ -357,12 +386,9 @@ export function PaymentFormStripe({
                 },
                 rules: {
                   '.Fieldset--country': {
-                    display: 'none',  // Esconde o campo de país completamente
-                  },
-                  '.LinkAuthenticationElement': {
                     display: 'none',
                   },
-                  'p-Field': {
+                  '.LinkAuthenticationElement': {
                     display: 'none',
                   },
                 },
