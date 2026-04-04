@@ -9,7 +9,7 @@ import type { OrderCake, SizeOption } from "../types/types";
 import { PaymentFormStripe } from '../components/PaymentFormStripe';
 
 import "react-datepicker/dist/react-datepicker.css";
-import "./OrderCake.css";
+import "./OrderCakeStore.css";
 
 // ==================== HOOKS PERSONALIZADOS ====================
 import Input from '../components/forms/Input';
@@ -557,26 +557,36 @@ export default function OrderCake() {
                     </div>
 
                     <div className="input-group-radio">
-                      <div className="pill-group" style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                        {Array.from({ length: 10 }, (_, i) => String(i + 1)).map(q => (
-                          <label
-                            key={q}
-                            className={`pill ${String(item.amount) === q ? "active" : ""}`}
-                            style={{ flex: '1 0 calc(20% - 0.5rem)', textAlign: 'center', justifyContent: 'center' }}
+                      <div className="input-group-quantity">
+                        <div className="quantity-control">
+                          <button
+                            type="button"
+                            className="quantity-btn"
+                            onClick={() => {
+                              const newAmount = Math.max(1, item.amount - 1);
+                              updateCake(index, "amount", newAmount);
+                            }}
+                            disabled={item.amount <= 1}
                           >
-                            <input
-                              type="radio"
-                              name={`amount-${index}`}
-                              value={q}
-                              checked={String(item.amount) === q}
-                              style={{ display: "none" }}
-                              onChange={() => updateCake(index, "amount", Number(q))}
-                            />
-                            <span>{q}</span>
-                          </label>
-                        ))}
+                            −
+                          </button>
+
+                          <span className="quantity-value">{item.amount}</span>
+
+                          <button
+                            type="button"
+                            className="quantity-btn"
+                            onClick={() => {
+                              const newAmount = Math.min(99, item.amount + 1);
+                              updateCake(index, "amount", newAmount);
+                            }}
+                            disabled={item.amount >= 99}
+                          >
+                            +
+                          </button>
+                        </div>
+                        <label className='select-group-radio'>*個数:</label>
                       </div>
-                      <label className='select-group-radio'>*個数:</label>
                     </div>
 
                     <div className='input-group'>
@@ -782,6 +792,6 @@ export default function OrderCake() {
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 }
