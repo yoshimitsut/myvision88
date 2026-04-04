@@ -143,3 +143,53 @@
 .small-table td {
   font-size: 0.9rem;
 }
+
+/* ============================
+   RESPONSIVIDADE (Tablets e Mobile)
+============================ */
+
+@media (max-width: 768px) {
+  .cake-screen {
+    padding: 1rem;
+  }
+
+  .featured-cake {
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .featured-cake img {
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+  }
+
+  .featured-info {
+    width: 100%;
+  }
+
+  .next-btn {
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    padding: 5px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .featured-info h2 {
+    font-size: 1.5rem;
+  }
+
+  .all-title {
+    font-size: 1.5rem;
+  }
+
+  .cake-list {
+    grid-template-columns: 1fr;
+  }
+}
