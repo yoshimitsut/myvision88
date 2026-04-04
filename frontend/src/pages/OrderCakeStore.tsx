@@ -4,9 +4,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { addDays, isSameDay, format, endOfMonth, getDay } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
-import Select from 'react-select';
-import type { StylesConfig, CSSObjectWithLabel, OptionProps, ControlProps } from 'react-select';
-import type { OrderCake, OptionType, SizeOption, TimeOptionType } from "../types/types";
+// import Select from 'react-select';
+
+import type { OrderCake, SizeOption } from "../types/types";
 
 import { PaymentFormStripe } from '../components/PaymentFormStripe';
 
@@ -31,10 +31,6 @@ const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
 
 // ==================== TIPOS ====================
-interface CustomOptionType extends OptionType {
-  isDisabled?: boolean;
-}
-
 interface FruitOption {
   value: "有り" | "無し";
   label: string;
@@ -411,66 +407,7 @@ export default function OrderCake() {
     </div>
   );
 
-  // ==================== STYLES TIPADOS ====================
-  const getBaseStyles = <T extends OptionType>(): StylesConfig<T, false> => ({
-    option: (provided: CSSObjectWithLabel, state: OptionProps<T, false>) => ({
-      ...provided,
-      backgroundColor: state.isSelected ? '#fdd111' : state.isFocused ? '#fdeca2' : 'white',
-      color: state.isDisabled ? '#999' : '#333',
-      cursor: state.isDisabled ? 'not-allowed' : 'pointer',
-    }),
-    control: (provided: CSSObjectWithLabel, state: ControlProps<T, false>) => ({
-      ...provided,
-      borderColor: state.isFocused ? '#fdeca2' : '#ddd',
-      boxShadow: state.isFocused ? '0 0 0 1px #fdeca2' : 'none',
-      '&:hover': {
-        ...(provided['&:hover'] as CSSObjectWithLabel),
-        borderColor: '#fdeca2'
-      },
-    }),
-    singleValue: (provided: CSSObjectWithLabel) => ({
-      ...provided,
-      color: '#333',
-      borderRadius: '4px',
-      padding: '2px 6px',
-    }),
-    menu: (provided: CSSObjectWithLabel) => ({
-      ...provided,
-      zIndex: 9999,
-    }),
-  });
 
-  const customStylesSize: StylesConfig<SizeOption, false> = {
-    option: (provided: CSSObjectWithLabel, state: OptionProps<SizeOption, false>) => ({
-      ...provided,
-      backgroundColor: state.isSelected ? '#fdd111' : state.isFocused ? '#fdeca2' : 'white',
-      color: state.isDisabled ? '#999' : '#333',
-      cursor: state.isDisabled ? 'not-allowed' : 'pointer',
-    }),
-    control: (provided: CSSObjectWithLabel, state: ControlProps<SizeOption, false>) => ({
-      ...provided,
-      borderColor: state.isFocused ? '#fdeca2' : '#ddd',
-      boxShadow: state.isFocused ? '0 0 0 1px #fdeca2' : 'none',
-      '&:hover': {
-        ...(provided['&:hover'] as CSSObjectWithLabel),
-        borderColor: '#fdeca2'
-      },
-    }),
-    singleValue: (provided: CSSObjectWithLabel) => ({
-      ...provided,
-      color: '#333',
-      borderRadius: '4px',
-      padding: '2px 6px',
-    }),
-    menu: (provided: CSSObjectWithLabel) => ({
-      ...provided,
-      zIndex: 9999,
-    }),
-  };
-
-  const customStyles = getBaseStyles<OptionType>();
-  const customStylesHour = getBaseStyles<TimeOptionType>();
-  const customStylesCake = getBaseStyles<CustomOptionType>();
 
   const orderSummaryData = {
     id_order: orderData?.id_client || '',
@@ -514,7 +451,6 @@ export default function OrderCake() {
                   value: s.size || '',
                   label: s.size ? `${s.size} ￥${s.price.toLocaleString()}` : '',
                 })) || [];
-                const selectedSize = sizeOptions.find(s => s.size === item.size);
 
                 return (
                   <div className="box-cake" key={`${item.cake_id}-${index}`}>
