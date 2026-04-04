@@ -122,7 +122,7 @@ export default function OrderCake() {
     name: "",
     amount: 1,
     size: "",
-    price: 1,
+    price: 0,
     message_cake: "",
     fruit_option: "無し" as const
   };
@@ -160,7 +160,7 @@ export default function OrderCake() {
         name: selectedCake.name,
         amount: 1,
         size: "",
-        price: 1,
+        price: 0,
         message_cake: "",
         fruit_option: "無し"
       }]);
@@ -202,15 +202,19 @@ export default function OrderCake() {
   // ==================== FUNÇÕES DE SUBMISSÃO ====================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     if (!selectedDate || pickupHour === "時間を選択") {
       alert("受け取り日時を選択してください。");
+      setIsSubmitting(false);
       return;
     }
 
     const invalidCake = cakes.find(c => !c.size);
     if (invalidCake) {
       alert("全てのケーキのサイズを選択してください。");
+      setIsSubmitting(false);
       return;
     }
 
@@ -257,6 +261,7 @@ export default function OrderCake() {
       await handleStorePayment(orderDataToSave);
     } else {
       setPaymentStep('payment');
+      setIsSubmitting(false);
     }
   };
 
@@ -301,6 +306,7 @@ export default function OrderCake() {
       console.error(error);
     } finally {
       setProcessingStorePayment(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -397,7 +403,7 @@ export default function OrderCake() {
             checked={selectedMethod === 'store'}
             onChange={() => onChange('store')}
           />
-          <span className="method-icon">🏪</span>
+          <span className="method-icon"><img src="/icons/store.png" alt="store icon" className='store-icon-order' /></span>
           <span className="method-label">店舗支払い</span>
           <span className="method-description">店頭でお支払い</span>
         </label>
@@ -548,7 +554,7 @@ export default function OrderCake() {
                             const selectedCake = cakesData?.find(c => c.id === newCakeId);
                             updateCake(index, "cake_id", newCakeId);
                             updateCake(index, "size", "");
-                            updateCake(index, "price", 1);
+                            updateCake(index, "price", 0);
 
                             if (selectedCake?.sizes && selectedCake.sizes.length === 1) {
                               const singleSize = selectedCake.sizes[0];
@@ -560,7 +566,7 @@ export default function OrderCake() {
                           } else {
                             updateCake(index, "cake_id", 0);
                             updateCake(index, "size", "");
-                            updateCake(index, "price", 1);
+                            updateCake(index, "price", 0);
                           }
                         }}
                         noOptionsMessage={() => "読み込み中..."}
@@ -767,7 +773,7 @@ export default function OrderCake() {
 
             <div className="order-summary">
               <h3>ご注文内容</h3>
-              {cakes.map((cake, index) => {
+              {cakes.filter(cake => cake.cake_id !== 0 && cake.size !== "").map((cake, index) => {
                 const cakeData = cakesData?.find(c => c.id === cake.cake_id);
                 const fruitPrice = FRUIT_OPTIONS.find(f => f.value === cake.fruit_option)?.price || 0;
                 const itemTotal = (cake.price + fruitPrice) * cake.amount;
@@ -791,8 +797,13 @@ export default function OrderCake() {
             />
 
             <div className='btn-div'>
-              <button type='submit' className='send btn' disabled={isSubmitting}>
-                お支払いに進む (￥{totalAmount.toLocaleString()})
+              <button
+                type='submit'
+                className='send btn'
+                disabled={isSubmitting}
+                style={{ opacity: isSubmitting ? 0.6 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+              >
+                {isSubmitting ? '処理中...' : `お支払いに進む (￥${totalAmount.toLocaleString()})`}
               </button>
             </div>
           </form>
