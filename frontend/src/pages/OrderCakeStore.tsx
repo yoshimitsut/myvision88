@@ -4,8 +4,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { addDays, isSameDay, format, endOfMonth, getDay } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
-// import Select from 'react-select';
-
 import type { OrderCake, SizeOption } from "../types/types";
 
 import { PaymentFormStripe } from '../components/PaymentFormStripe';
