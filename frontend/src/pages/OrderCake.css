@@ -1,3 +1,7 @@
+.store-icon-order {
+  width: 4rem;
+}
+
 /* Estilos para o resumo do pedido */
 .order-summary {
   background: #f9f9f9;
@@ -66,7 +70,7 @@
   background: white;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .card-container {
@@ -183,7 +187,7 @@
   .payment-method-options {
     flex-direction: column;
   }
-  
+
   .payment-method-option {
     min-width: auto;
   }
@@ -209,7 +213,7 @@ body {
 
 }
 
-.container{
+.container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -261,10 +265,12 @@ body {
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
-  
+
   /* opacity: 1; */
 
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     /* padding: 10px; */
     background: transparent;
     font-family: inter;
@@ -283,7 +289,7 @@ body {
   }
 
 
-  .cake-information{
+  .cake-information {
     .box-cake {
       position: relative;
       border-radius: 8px;
@@ -291,25 +297,25 @@ body {
       display: flex;
       flex-direction: column;
       align-items: center;
-      
-        
+
+
       .cake-img {
         width: 200px;
       }
-      
+
       .box-selection {
         /* width: 100vh; */
         border: 1px solid;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        
+
         .option-cake {
           padding: 10px;
-          
+
         }
       }
     }
-    
+
     .btn-remove-div {
       height: 30px;
       padding-bottom: 20px;
@@ -326,7 +332,7 @@ body {
       font-size: 18px;
       color: #d11a2a;
     }
-    
+
     .img-cake-order {
       width: 350px;
       padding: 35px;
@@ -334,43 +340,45 @@ body {
   }
 
 
-  .client-information{
+  .client-information {
     .full-name {
       display: flex;
       gap: 5px;
       flex-direction: column;
     }
   }
-  
+
   .datepicker {
     z-index: 1;
   }
 
   .react-datepicker-popper {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  transform: none !important;
-  width: 100% !important;
-  height: 100% !important;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: white; /* fundo */
-  z-index: 9999; /* acima de tudo */
-}
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    /* fundo */
+    z-index: 9999;
+    /* acima de tudo */
+  }
 
-.react-datepicker {
-  font-size: 1.2rem;
-  width: 100%;
-  height: auto;
-  /* max-width: 500px; centraliza se quiser */
-}
+  .react-datepicker {
+    font-size: 1.2rem;
+    width: 100%;
+    height: auto;
+    /* max-width: 500px; centraliza se quiser */
+  }
 
   .react-datepicker__header h2 {
     font-size: 1.5rem;
     padding-bottom: 0.4rem;
-  } 
+  }
 
   .react-datepicker {
     font-size: 2rem;
@@ -385,7 +393,7 @@ body {
     height: 100%;
   }
 
-  .react-datepicker-wrapper{
+  .react-datepicker-wrapper {
     width: 100%;
     /* border: 1px solid #c0bfbf; */
     border-radius: 5px;
@@ -398,7 +406,7 @@ body {
     /* border-radius: 6px; */
   }
 
-  .react-datepicker__day{
+  .react-datepicker__day {
     width: 11vw;
     aspect-ratio: 0 / 1.3;
     max-width: 65px;
@@ -406,18 +414,22 @@ body {
     text-align: left;
     margin: 0px !important;
   }
-  
-  .react-datepicker__day--outside-month{
+
+  .react-datepicker__day--outside-month {
     border: 1px solid #c8c8c8;
+
     .day-cell {
       color: transparent;
+
       .yassumi {
         color: transparent;
       }
+
       .selectable {
         display: none;
       }
     }
+
     .day-content {
       color: transparent;
       display: none;
@@ -425,7 +437,7 @@ body {
   }
 
   .react-datepicker__day--selected {
-    background-color: #fff176 !important; 
+    background-color: #fff176 !important;
     color: #000;
   }
 
@@ -465,7 +477,7 @@ body {
     border-radius: 50%;
     -webkit-border-radius: 50%;
     max-inline-size: 20px;
-    
+
     max-width: 25px;
     max-height: 25px;
     box-sizing: border-box;
@@ -492,7 +504,7 @@ body {
     -webkit-border-radius: 50%;
     max-inline-size: 20px;
     /* margin-top: 8px; */
-    
+
     /* width: 3vw; */
     /* height: 3vw; */
     max-width: 25px;
@@ -503,31 +515,34 @@ body {
     width: clamp(20px, 3vw, 25px);
     height: clamp(20px, 3vw, 25px);
   }
-  
+
   .yassumi {
     color: #a1a1a1;
-    font-size: clamp(20px, 5vw, 30px); /* Ajuste para acompanhar o círculo */
+    font-size: clamp(20px, 5vw, 30px);
+    /* Ajuste para acompanhar o círculo */
     font-family: sans-serif;
     line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: clamp(20px, 3vw, 25px); /* Mesma largura do círculo */
-    height: clamp(20px, 3vw, 25px); /* Mesma altura do círculo */
+    width: clamp(20px, 3vw, 25px);
+    /* Mesma largura do círculo */
+    height: clamp(20px, 3vw, 25px);
+    /* Mesma altura do círculo */
     margin-top: 3px;
     align-items: flex-end;
   }
-  
-  .react-datepicker__day--disabled .selectable{
-     display: none;
+
+  .react-datepicker__day--disabled .selectable {
+    display: none;
   }
 
   .day-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 4.5rem;
-  justify-content:space-evenly; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 4.5rem;
+    justify-content: space-evenly;
   }
 
   .day-cell span:first-child {
@@ -535,7 +550,9 @@ body {
   }
 
 
-  .cake-information, .date-information, .client-information {
+  .cake-information,
+  .date-information,
+  .client-information {
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -570,7 +587,8 @@ body {
     border: 1px solid #919191;
     border-radius: 0.4rem
   }
-  .css-1qdu2hq-control{
+
+  .css-1qdu2hq-control {
     background-color: white;
   }
 
@@ -585,7 +603,7 @@ body {
     width: 100%;
     padding-right: 10px;
     flex-direction: column;
-    
+
     label {
       border-radius: 30px;
       font-weight: 400;
@@ -606,11 +624,14 @@ body {
   /* .react-select__control {
     border: 1px solid #333333;
   } */
-  
-  .react-select__control, .input-group input, .input-group textarea, .input-group-radio {
+
+  .react-select__control,
+  .input-group input,
+  .input-group textarea,
+  .input-group-radio {
     box-shadow: 0px 3px 3px rgba(96, 95, 95, 0.1);
   }
-  
+
   .input-group {
     position: relative;
     /* margin: 16px 0; */
@@ -618,7 +639,7 @@ body {
     font-weight: bold;
     font-size: 1.2rem;
   }
-  
+
   .input-group input,
   .input-group textarea {
     width: 100%;
@@ -626,7 +647,7 @@ body {
     /* padding-bottom: 10px; */
     font-size: 18px;
     border: 1px solid #c1c1c1;
-    border-radius:  10px;
+    border-radius: 10px;
     background-color: #fff;
     color: #000;
     outline: none;
@@ -655,10 +676,10 @@ body {
   }
 
   .btn-div {
-    display:flex;
+    display: flex;
     justify-content: center;
-    
-    .btn  {
+
+    .btn {
       transition: 0.5s all;
       padding: 15px;
       cursor: pointer;
@@ -667,7 +688,8 @@ body {
       background-color: #2d2a2a;
       color: #fff;
     }
-    .btn:hover{
+
+    .btn:hover {
       background-color: #131313d2;
     }
 
@@ -702,7 +724,7 @@ body {
   color: #0e56ff !important;
 }
 
-.react-datepicker__day--disabled{
+.react-datepicker__day--disabled {
   color: #ccc !important;
 }
 
@@ -715,7 +737,7 @@ body {
   .container {
     /* background: orange; */
     width: 100vw;
-    
+
   }
 }
 
@@ -734,7 +756,7 @@ body {
     display: flex;
     justify-content: center;
     flex-direction: column;
-    
+
   }
 }
 
@@ -758,9 +780,11 @@ body {
       }
     }
   }
-  .react-datepicker__day{
+
+  .react-datepicker__day {
     /* width: 12vw; */
   }
+
   .react-datepicker__day-name {
     width: 12vw;
   }

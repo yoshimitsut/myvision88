@@ -13,13 +13,14 @@ const hasSize = (size: SizeOption): size is SizeOption & { size: string } => {
 };
 
 export const calculateTotalPrice = (
-  cakes: OrderCake[], 
-  cakesData: Cake[] | null, 
+  cakes: OrderCake[],
+  cakesData: Cake[] | null,
   fruitOptions: readonly FruitOption[]
 ): number => {
   if (!cakesData) return 0;
-  
+
   return cakes.reduce<number>((total, cake) => {
+    if (!cake.size) return total;
     const fruitPrice = fruitOptions.find(f => f.value === cake.fruit_option)?.price ?? 0;
     return total + (cake.price + fruitPrice) * cake.amount;
   }, 0);
