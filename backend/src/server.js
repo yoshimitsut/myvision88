@@ -7,6 +7,7 @@ const path = require('path');
 // Importar Routers - CORRIGIDO para usar a pasta 'routers' em todas as importações
 const cakeRoutes = require('./routers/cakeRoutes');
 const orderRoutes = require('./routers/orderRoutes');
+const okashiRoutes = require('./routers/okashiRoutes');
 const timeslotRoutes = require('./routers/timeslotRoutes');
 const newsletterRoutes = require('./routers/newsletter');
 const storeInfo = require('./routers/storeInfo');
@@ -39,6 +40,7 @@ app.use("/api", stripeRoutes);
 
 // 🔹 USAR OS ROUTERS SEPARADOS
 app.use('/api/cake', cakeRoutes);
+app.use('/api/okashi', okashiRoutes);
 app.use('/api/timeslots', timeslotRoutes);
 // Rotas de pedido (reservar, orders/list)
 app.use('/api/', orderRoutes); 

@@ -13,6 +13,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import TimeSlotsManagement from './pages/TimeSlotsManagement';
 import CakeManagement from './pages/CakeManagement';
+import OkashiManagement from './pages/OkashiManagement';
 import StoreManagement from './pages/StoreManagement';
 import NewsletterManagement from './pages/NewsletterManagement';
 import Newsletter from './pages/Newsletter';
@@ -30,9 +31,9 @@ function App() {
         <Route path="/newsletter" element={<Newsletter />} />
 
         <Route path="/orderstore" element={
-        <ProtectedRoute>
-          <OrderCakeStore />
-        </ProtectedRoute>
+          <ProtectedRoute>
+            <OrderCakeStore />
+          </ProtectedRoute>
         } />
 
         <Route path="/list" element={
@@ -40,7 +41,7 @@ function App() {
             <ListOrder />
           </ProtectedRoute>
         } />
-        
+
         <Route path="/ordertable" element={
           <ProtectedRoute>
             <SalesOrder />
@@ -56,6 +57,12 @@ function App() {
         <Route path="/admin/cake" element={
           <ProtectedRoute>
             <CakeManagement />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/okashi" element={
+          <ProtectedRoute>
+            <OkashiManagement />
           </ProtectedRoute>
         } />
 
@@ -79,7 +86,7 @@ function App() {
 
 
         <Route path="/store-login" element={<StoreLogin />} />
-        
+
         <Route path="/order/check" element={<Check />} />
       </Routes>
 
