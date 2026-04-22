@@ -133,7 +133,7 @@ router.post('/', (req, res, next) => {
 
     // console.log('📦 Dados recebidos:', req.body);
 
-    const { name, description, sizes } = req.body;
+    const { name, description, sizes, is_active } = req.body;
     
     // Validação
     if (!name || !String(name).trim()) {
@@ -144,6 +144,8 @@ router.post('/', (req, res, next) => {
       });
     }
 
+    const isActiveVal = (is_active === 'true' || is_active === true || is_active === '1' || is_active === 1 || is_active === undefined) ? 1 : 0;
+
     // Pega o nome do arquivo
     const imageFilename = req.file ? req.file.filename : '';
     
@@ -152,8 +154,8 @@ router.post('/', (req, res, next) => {
 
     // Insere no banco
     const [cakeResult] = await connection.query(
-      'INSERT INTO cakes (name, description, image) VALUES (?, ?, ?)',
-      [String(name).trim(), description?.trim() || '', imageFilename]
+      'INSERT INTO cakes (name, description, image, is_active) VALUES (?, ?, ?, ?)',
+      [String(name).trim(), description?.trim() || '', imageFilename, isActiveVal]
     );
 
     const cakeId = cakeResult.insertId;
@@ -172,9 +174,10 @@ router.post('/', (req, res, next) => {
       
       if (Array.isArray(sizesArray) && sizesArray.length > 0) {
         for (const size of sizesArray) {
+          const sizeIsActive = (size.is_active === undefined || size.is_active === true || size.is_active === 'true' || size.is_active === 1 || size.is_active === '1') ? 1 : 0;
           await connection.query(
-            'INSERT INTO cake_sizes (cake_id, size, stock, price) VALUES (?, ?, ?, ?)',
-            [cakeId, size.size, size.stock || 0, size.price || 0]
+            'INSERT INTO cake_sizes (cake_id, size, stock, price, is_active) VALUES (?, ?, ?, ?, ?)',
+            [cakeId, size.size, size.stock || 0, size.price || 0, sizeIsActive]
           );
         }
       }
@@ -226,7 +229,9 @@ router.put('/:id', (req, res, next) => {
     await connection.beginTransaction();
 
     const cakeId = req.params.id;
-    const { name, description, sizes, existingImage } = req.body;
+    const { name, description, sizes, existingImage, is_active } = req.body;
+
+    const isActiveVal = (is_active === 'true' || is_active === true || is_active === '1' || is_active === 1 || is_active === undefined) ? 1 : 0;
 
     // console.log('📦 Update - Dados:', { cakeId, name, description, sizes, existingImage });
 
@@ -272,8 +277,8 @@ router.put('/:id', (req, res, next) => {
 
     // Atualiza cake
     await connection.query(
-      'UPDATE cakes SET name = ?, description = ?, image = ? WHERE id = ?',
-      [String(name).trim(), description?.trim() || '', imageFilename, cakeId]
+      'UPDATE cakes SET name = ?, description = ?, image = ?, is_active = ? WHERE id = ?',
+      [String(name).trim(), description?.trim() || '', imageFilename, isActiveVal, cakeId]
     );
 
     // Remove sizes antigos
@@ -293,9 +298,10 @@ router.put('/:id', (req, res, next) => {
       
       if (Array.isArray(sizesArray) && sizesArray.length > 0) {
         for (const size of sizesArray) {
+          const sizeIsActive = (size.is_active === undefined || size.is_active === true || size.is_active === 'true' || size.is_active === 1 || size.is_active === '1') ? 1 : 0;
           await connection.query(
-            'INSERT INTO cake_sizes (cake_id, size, stock, price) VALUES (?, ?, ?, ?)',
-            [cakeId, size.size, size.stock || 0, size.price || 0]
+            'INSERT INTO cake_sizes (cake_id, size, stock, price, is_active) VALUES (?, ?, ?, ?, ?)',
+            [cakeId, size.size, size.stock || 0, size.price || 0, sizeIsActive]
           );
         }
       }
