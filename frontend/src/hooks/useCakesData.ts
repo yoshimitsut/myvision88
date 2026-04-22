@@ -13,7 +13,13 @@ export const useCakesData = () => {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data.cakes)) {
-          setCakesData(data.cakes);
+          const activeCakes = data.cakes
+            .filter((cake: Cake) => cake.is_active !== 0)
+            .map((cake: Cake) => ({
+              ...cake,
+              sizes: cake.sizes ? cake.sizes.filter(size => size.is_active !== 0) : []
+            }));
+          setCakesData(activeCakes);
         } else {
           setError("Formato inesperado");
         }

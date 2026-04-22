@@ -12,7 +12,6 @@ import { PaymentFormStripe } from '../components/PaymentFormStripe';
 
 import "react-datepicker/dist/react-datepicker.css";
 import "./OrderCake.css";
-
 // ==================== HOOKS PERSONALIZADOS ====================
 import Input from '../components/forms/Input';
 

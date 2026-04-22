@@ -6,8 +6,6 @@ import type { Cake } from '../types/types'
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
 
-
-
 export default function Hero() {
   const [cakes, setCakes] = useState<Cake[]>([]);
   const navigate = useNavigate();
@@ -16,7 +14,8 @@ export default function Hero() {
     fetch(`${API_URL}/api/cake`)
       .then((res) => res.json())
       .then((data) => {
-        setCakes(data.cakes || []);
+        const activeCakes = (data.cakes || []).filter((cake: Cake) => cake.is_active !== 0);
+        setCakes(activeCakes);
       })
       .catch((err) => console.error("Erro ao carregar bolos:", err));
   }, []);
