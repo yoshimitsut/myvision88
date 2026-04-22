@@ -6,6 +6,7 @@ interface CakeSize {
   size: string;
   stock: number;
   price: number;
+  is_active?: number;
 }
 
 interface Cake {
@@ -13,6 +14,7 @@ interface Cake {
   name: string;
   description: string;
   image: string;
+  is_active?: number;
   sizes: CakeSize[];
 }
 
@@ -30,10 +32,11 @@ export default function CakeManagement() {
   const [newCake, setNewCake] = useState({
     name: '',
     description: '',
-    image: ''
+    image: '',
+    is_active: true
   });
   const [newSizes, setNewSizes] = useState<Omit<CakeSize, 'id'>[]>([
-    { size: '', stock: 0, price: 0 }
+    { size: '', stock: 0, price: 0, is_active: 1 }
   ]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -45,7 +48,7 @@ export default function CakeManagement() {
       setLoading(true);
       const response = await fetch(`${API_URL}/api/cake`);
       const data = await response.json();
-      
+
       if (data.success && Array.isArray(data.cakes)) {
         setCakes(data.cakes);
       } else {
@@ -79,7 +82,7 @@ export default function CakeManagement() {
       }
 
       setSelectedImage(file);
-      
+
       // プレビューを作成
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -91,8 +94,8 @@ export default function CakeManagement() {
 
   // 🔹 フォームをクリア
   const clearForm = () => {
-    setNewCake({ name: '', description: '', image: '' });
-    setNewSizes([{ size: '', stock: 0, price: 0 }]);
+    setNewCake({ name: '', description: '', image: '', is_active: true });
+    setNewSizes([{ size: '', stock: 0, price: 0, is_active: 1 }]);
     setSelectedImage(null);
     setImagePreview(null);
   };
@@ -100,7 +103,7 @@ export default function CakeManagement() {
   // 🔹 新しいケーキを追加
   const handleAddCake = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setUploading(true);
 
@@ -113,15 +116,24 @@ export default function CakeManagement() {
 
       // FormDataを使用してマルチパートデータとして送信
       const formData = new FormData();
-      
+
+      const validSizes = newSizes.filter(size => size.size.trim() !== '');
+      const hasActiveSize = validSizes.some(size => size.is_active !== 0);
+
+      if (newCake.is_active && !hasActiveSize) {
+        alert('少なくとも1つのサイズが必要です');
+        setUploading(false);
+        return;
+      }
+
       // テキストフィールドを追加
       formData.append('name', newCake.name.trim());
       formData.append('description', newCake.description?.trim() || '');
-      
+      formData.append('is_active', newCake.is_active ? '1' : '0');
+
       // サイズをJSON文字列として追加
-      const validSizes = newSizes.filter(size => size.size.trim() !== '');
       formData.append('sizes', JSON.stringify(validSizes));
-      
+
       // 画像があれば追加
       if (selectedImage) {
         formData.append('image', selectedImage);
@@ -158,26 +170,35 @@ export default function CakeManagement() {
   // 🔹 ケーキを更新
   const handleUpdateCake = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!editingCake) return;
 
     try {
       setUploading(true);
 
+      const validSizes = newSizes.filter(size => size.size.trim() !== '');
+      const hasActiveSize = validSizes.some(size => size.is_active !== 0);
+
+      if (newCake.is_active && !hasActiveSize) {
+        alert('少なくとも1つのサイズが必要です');
+        setUploading(false);
+        return;
+      }
+
       // FormDataを使用
       const formData = new FormData();
-      
+
       formData.append('name', newCake.name.trim());
       formData.append('description', newCake.description?.trim() || '');
-      
-      const validSizes = newSizes.filter(size => size.size.trim() !== '');
+      formData.append('is_active', newCake.is_active ? '1' : '0');
+
       formData.append('sizes', JSON.stringify(validSizes));
-      
+
       // 既存の画像ファイル名を送信
       if (newCake.image && !selectedImage) {
         formData.append('existingImage', newCake.image);
       }
-      
+
       // 新しい画像があれば追加
       if (selectedImage) {
         formData.append('image', selectedImage);
@@ -214,7 +235,7 @@ export default function CakeManagement() {
 
   // 🔹 新しいサイズを追加
   const addNewSize = () => {
-    setNewSizes(prev => [...prev, { size: '', stock: 0, price: 0 }]);
+    setNewSizes(prev => [...prev, { size: '', stock: 0, price: 0, is_active: 1 }]);
   };
 
   // 🔹 サイズを削除
@@ -226,9 +247,9 @@ export default function CakeManagement() {
 
   // 🔹 サイズを更新
   const updateSize = (index: number, field: keyof Omit<CakeSize, 'id'>, value: string | number) => {
-    setNewSizes(prev => 
-      prev.map((size, i) => 
-        i === index ? { ...size, [field]: field === 'size' ? value : Number(value) || 0 } : size
+    setNewSizes(prev =>
+      prev.map((size, i) =>
+        i === index ? { ...size, [field]: field === 'is_active' ? value : field === 'size' ? value : Number(value) || 0 } : size
       )
     );
   };
@@ -261,9 +282,10 @@ export default function CakeManagement() {
     setNewCake({
       name: cake.name,
       description: cake.description || '',
-      image: cake.image || ''
+      image: cake.image || '',
+      is_active: cake.is_active === undefined ? true : Boolean(cake.is_active)
     });
-    setNewSizes(cake.sizes.length > 0 ? cake.sizes : [{ size: '', stock: 0, price: 0 }]);
+    setNewSizes(cake.sizes.length > 0 ? cake.sizes.map(s => ({ ...s, is_active: s.is_active === undefined ? 1 : s.is_active })) : [{ size: '', stock: 0, price: 0, is_active: 1 }]);
     setImagePreview(cake.image ? `${API_URL}/image/${FOLDER_URL}/${cake.image}` : null);
     setSelectedImage(null);
     setActiveTab('add');
@@ -278,14 +300,14 @@ export default function CakeManagement() {
 
       {/* ナビゲーションタブ */}
       <div className="cake-tabs">
-        <button 
-          className={`tab-button ${activeTab === 'list' ? 'active' : ''}`}
+        <button
+          className={`tab-cake-button ${activeTab === 'list' ? 'active' : ''}`}
           onClick={() => setActiveTab('list')}
         >
           📋 ケーキ一覧
         </button>
-        <button 
-          className={`tab-button ${activeTab === 'add' ? 'active' : ''}`}
+        <button
+          className={`tab-cake-button ${activeTab === 'add' ? 'active' : ''}`}
           onClick={() => {
             setActiveTab('add');
             setEditingCake(null);
@@ -301,7 +323,7 @@ export default function CakeManagement() {
         {activeTab === 'list' && (
           <div className="cake-list-admin">
             <h2>登録済みケーキ一覧</h2>
-            
+
             {cakes.length === 0 ? (
               <p className="no-cakes">登録されているケーキがありません。</p>
             ) : (
@@ -310,8 +332,8 @@ export default function CakeManagement() {
                   <div key={cake.id} className="cake-card">
                     <div className="cake-image">
                       {cake.image ? (
-                        <img 
-                          src={`${API_URL}/image/myvision88/${cake.image}`} 
+                        <img
+                          src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`}
                           alt={cake.name}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = '/default-cake.jpg';
@@ -321,14 +343,14 @@ export default function CakeManagement() {
                         <div className="no-image">📷 画像なし</div>
                       )}
                     </div>
-                    
+
                     <div className='cake-info-actions'>
                       <div className="cake-info">
-                        <h3>{cake.name}</h3>
+                        <h3>{cake.name} {cake.is_active === 0 && <span style={{ color: 'red', fontSize: '0.8em' }}>(非アクティブ)</span>}</h3>
                         {cake.description && (
                           <p className="cake-description">{cake.description}</p>
                         )}
-                        
+
                         <div className="cake-sizes">
                           <h4>サイズ:</h4>
                           {cake.sizes.length === 0 ? (
@@ -337,7 +359,9 @@ export default function CakeManagement() {
                             <ul>
                               {cake.sizes.map(size => (
                                 <li key={size.id}>
-                                  <span className="size-name">{size.size}</span>
+                                  <span className="size-name" style={{ textDecoration: size.is_active === 0 ? 'line-through' : 'none', color: size.is_active === 0 ? '#999' : 'inherit' }}>
+                                    {size.size} {size.is_active === 0 && '(無効)'}
+                                  </span>
                                   <span className="size-details">
                                     在庫: {size.stock} | ¥{size.price.toLocaleString('ja-JP')}
                                   </span>
@@ -349,14 +373,14 @@ export default function CakeManagement() {
                       </div>
 
                       <div className="cake-actions">
-                        <button 
-                          className="edit-btn"
+                        <button
+                          className="edit-cake-btn"
                           onClick={() => handleEditCake(cake)}
                         >
                           ✏️ 編集
                         </button>
-                        <button 
-                          className="delete-btn"
+                        <button
+                          className="delete-cake-btn"
                           onClick={() => handleDeleteCake(cake.id)}
                         >
                           🗑️ 削除
@@ -373,7 +397,7 @@ export default function CakeManagement() {
         {activeTab === 'add' && (
           <div className="cake-form-container">
             <h2>{editingCake ? 'ケーキを編集' : '新しいケーキを追加'}</h2>
-            
+
             <form onSubmit={editingCake ? handleUpdateCake : handleAddCake} className="cake-form" encType="multipart/form-data">
               <div className="form-group">
                 <label htmlFor="name">ケーキ名 *</label>
@@ -398,16 +422,28 @@ export default function CakeManagement() {
                 />
               </div>
 
+              <div className="form-group checkbox-group">
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={newCake.is_active}
+                    onChange={(e) => setNewCake(prev => ({ ...prev, is_active: e.target.checked }))}
+                    style={{ width: 'auto' }}
+                  />
+                  アクティブ (販売中)
+                </label>
+              </div>
+
               {/* 🔹 画像セクション */}
               <div className="form-group">
                 <label htmlFor="image">ケーキ画像</label>
-                
+
                 {/* 画像プレビュー */}
                 {(imagePreview || (editingCake && newCake.image && !selectedImage)) && (
                   <div className="image-preview">
-                    <img 
-                      src={imagePreview || `${API_URL}/image/${FOLDER_URL}/${newCake.image}`} 
-                      alt="プレビュー" 
+                    <img
+                      src={imagePreview || `${API_URL}/image/${FOLDER_URL}/${newCake.image}`}
+                      alt="プレビュー"
                     />
                     <button
                       type="button"
@@ -434,7 +470,7 @@ export default function CakeManagement() {
                 <label htmlFor="image-upload" className="image-upload-label">
                   📁 {selectedImage ? '画像が選択されました' : '画像を選択'}
                 </label>
-                
+
                 {selectedImage && (
                   <div className="file-info">
                     <small>ファイル: {selectedImage.name}</small>
@@ -457,7 +493,7 @@ export default function CakeManagement() {
                 </div>
 
                 {newSizes.map((size, index) => (
-                  <div key={index} className="size-row">
+                  <div key={index} className="size-row-admin">
                     <div className="size-input-group">
                       <label>サイズ</label>
                       <input
@@ -491,6 +527,18 @@ export default function CakeManagement() {
                       />
                     </div>
 
+                    <div className="size-input-group checkbox-group" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', gap: '4px' }}>
+                        <span>有効</span>
+                        <input
+                          type="checkbox"
+                          checked={size.is_active !== 0}
+                          onChange={(e) => updateSize(index, 'is_active', e.target.checked ? 1 : 0)}
+                          style={{ width: 'auto', margin: 0, cursor: 'pointer' }}
+                        />
+                      </label>
+                    </div>
+
                     {newSizes.length > 1 && (
                       <button
                         type="button"
@@ -505,15 +553,15 @@ export default function CakeManagement() {
               </div>
 
               <div className="form-actions">
-                <button 
-                  type="submit" 
-                  className="submit-btn"
+                <button
+                  type="submit"
+                  className="submit-cake-btn"
                   disabled={uploading}
                 >
                   {uploading ? '⏳ 処理中...' : editingCake ? '💾 ケーキを更新' : '➕ ケーキを追加'}
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => {
                     setActiveTab('list');
                     setEditingCake(null);
