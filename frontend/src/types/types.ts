@@ -4,9 +4,9 @@ import type { ReactNode } from "react";
 // ------------------ 🎂 Bolos ------------------
 
 export type SizeOption = {
-  id?: number;            // opcional: vem da tabela cake_sizes
-  cake_id: number;
-  size?: string;
+  id?: number;
+  cake_id?: number;
+  size: string;
   price: number;
   stock: number;
   isDisabled?: boolean;
@@ -14,12 +14,12 @@ export type SizeOption = {
 };
 
 export type Cake = {
-  id: number;              // era id_cake, agora o MySQL usa "id"
+  id: number;
   name: string;
-  description: string | null; // pode ser null no banco
-  image: string | null;       // pode ser null
+  description: string | null;
+  image: string | null;
   is_active?: number;
-  sizes: SizeOption[];        // associação via cake_sizes
+  sizes: SizeOption[];
 };
 
 // Caso o backend retorne { cakes: [...] }
