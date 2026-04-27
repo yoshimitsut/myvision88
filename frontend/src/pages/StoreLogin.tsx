@@ -8,22 +8,39 @@ export default function StoreLogin() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 🧩 Lista de senhas válidas
-  const VALID_PASSWORDS = ['0318', 't123'];
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
 
-    if (VALID_PASSWORDS.includes(password)) {
-      sessionStorage.setItem('store_authenticated', 'true');
-      
-      // 🔥 CORREÇÃO: Obter a rota original do state
-      const from = location.state?.from?.pathname || '/list';
-      console.log('Redirecionando para:', from); // Para debug
-      
-      navigate(from, { replace: true });
-    } else {
-      setError('パスワードが正しくありません');
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+      console.log('Login attempt result:', data);
+
+      if (data.success) {
+        // Limpar estados antigos para evitar conflitos
+        sessionStorage.clear();
+        localStorage.removeItem('store_token');
+        
+        localStorage.setItem('store_token', data.token);
+        localStorage.setItem('store_user', JSON.stringify(data.user));
+        sessionStorage.setItem('store_authenticated', 'true');
+        
+        const from = location.state?.from?.pathname || '/list';
+        navigate(from, { replace: true });
+      } else {
+        setError(data.error || 'パスワードが正しくありません');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('サーバーに接続できません');
     }
   };
 

@@ -18,7 +18,12 @@ export default function NewsletterPage() {
 
   const fetchNewsletters = async (): Promise<Newsletter[]> => {
     try {
-      const res = await fetch(`${API_URL}/api/newsletters`);
+      const token = localStorage.getItem('store_token');
+      const res = await fetch(`${API_URL}/api/newsletters`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       return Array.isArray(data) ? data : [];
     } catch (err) {
@@ -48,9 +53,13 @@ export default function NewsletterPage() {
       ? `${API_URL}/api/newsletters/${form.id}`
       : `${API_URL}/api/newsletters`;
 
+    const token = localStorage.getItem('store_token');
     await fetch(url, {
       method,
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify(form),
     });
 
@@ -63,8 +72,12 @@ export default function NewsletterPage() {
   const remove = async (id?: number) => {
     if (!id) return;
 
+    const token = localStorage.getItem('store_token');
     await fetch(`${API_URL}/api/newsletters/${id}`, {
       method: "DELETE",
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
 
     const data = await fetchNewsletters();

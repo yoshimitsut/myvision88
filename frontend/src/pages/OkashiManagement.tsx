@@ -43,7 +43,12 @@ export default function OkashiManagement() {
   const fetchOkashi = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/okashi`);
+      const token = localStorage.getItem('store_token');
+      const response = await fetch(`${API_URL}/api/okashi`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
 
       if (data.success && Array.isArray(data.okashi)) {
@@ -124,8 +129,12 @@ export default function OkashiManagement() {
       console.log('📦 sizes:', JSON.stringify(validSizes));
       console.log('📦 image:', selectedImage?.name);
 
+      const token = localStorage.getItem('store_token');
       const response = await fetch(`${API_URL}/api/okashi`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData,
       });
 
@@ -177,8 +186,12 @@ export default function OkashiManagement() {
       console.log('📦 sizes:', JSON.stringify(validSizes));
       console.log('📦 new image:', selectedImage?.name);
 
+      const token = localStorage.getItem('store_token');
       const response = await fetch(`${API_URL}/api/okashi/${editingOkashi.id}`, {
         method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData,
       });
 
@@ -227,8 +240,12 @@ export default function OkashiManagement() {
     if (!confirm('このお菓子を削除してもよろしいですか？')) return;
 
     try {
+      const token = localStorage.getItem('store_token');
       const response = await fetch(`${API_URL}/api/okashi/${okashiId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       const data = await response.json();

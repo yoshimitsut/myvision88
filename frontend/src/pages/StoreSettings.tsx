@@ -17,7 +17,12 @@ export default function StoreSettings() {
 
   const fetchStoreInfo = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/storeinfo`);
+      const token = localStorage.getItem('store_token');
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/storeinfo`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       console.log('Dados recebidos da API:', data);
       setStoreInfo(data);
@@ -58,9 +63,13 @@ export default function StoreSettings() {
     setMessage({ type: '', text: '' });
 
     try {
+      const token = localStorage.getItem('store_token');
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/storeinfo`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(storeInfo),
       });
 

@@ -259,8 +259,12 @@ const handleDeselectAllDays = (): void => {
   // Função auxiliar para deletar um slot de tempo
   const deleteTimeSlot = async (slotId: number): Promise<boolean> => {
     try {
+      const token = localStorage.getItem('store_token');
       const response = await fetch(`${API_BASE_URL}/${slotId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (!response.ok) {
@@ -279,7 +283,12 @@ const handleDeselectAllDays = (): void => {
   const loadExistingData = async () => {
     try {
       setIsLoadingExisting(true);
-      const response = await fetch(`${API_BASE_URL}/`);
+      const token = localStorage.getItem('store_token');
+      const response = await fetch(`${API_BASE_URL}/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       
       // console.log('Dados carregados da API:', data);
@@ -395,9 +404,13 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
 
       console.log(`Enviando lote para datas: ${dates.join(', ')} com horários: ${times.join(', ')}`);
 
+      const token = localStorage.getItem('store_token');
       const response = await fetch(`${API_BASE_URL}/batch`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(payload),
       });
 
@@ -444,7 +457,12 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
   const fetchTimeSlots = async () => {
     try {
       setIsLoadingTimes(true);
-      const response = await fetch(`${API_BASE_URL}/times`);
+      const token = localStorage.getItem('store_token');
+      const response = await fetch(`${API_BASE_URL}/times`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       if (data.success && data.times) {
         setTimeSlots(data.times);
@@ -486,10 +504,12 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
     setIsAddingTime(true);
 
     try {
+      const token = localStorage.getItem('store_token');
       const response = await fetch(`${API_BASE_URL}/times`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ time_value: newTime }),
       });
@@ -548,8 +568,12 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
     }
 
     try {
+      const token = localStorage.getItem('store_token');
       const response = await fetch(`${API_BASE_URL}/times/${timeId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       const data: ApiResponse = await response.json();
