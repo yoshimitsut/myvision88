@@ -73,7 +73,12 @@ export default function ListOrder() {
         ? `${import.meta.env.VITE_API_URL}/api/list?search=${encodeURIComponent(search)}`
         : `${import.meta.env.VITE_API_URL}/api/list`;
 
-      fetch(searchUrl)
+      const token = localStorage.getItem('store_token');
+      fetch(searchUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
         .then((res) => res.json())
         .then((data) => {
           const normalized = Array.isArray(data) ? data : (data.orders || []);
@@ -268,9 +273,13 @@ export default function ListOrder() {
     setUpdatingOrderId(id);
 
     try {
+      const token = localStorage.getItem('store_token');
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/reservar/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ status: newStatus }),
       });
 
@@ -295,17 +304,17 @@ export default function ListOrder() {
             // ✅ Mostrar ID do pedido e nome do cliente
             alert(`✅ 注文をキャンセルし、返金処理を行いました。
       
-📋 受付番号: ${String(order.id_order).padStart(4, "0")}
-👤 お客様: ${order.last_name} ${order.first_name}
-💰 返金額: ${formattedAmount}
-🆔 返金ID: ${data.stripe.refundId}`);
+            📋 受付番号: ${String(order.id_order).padStart(4, "0")}
+            👤 お客様: ${order.last_name} ${order.first_name}
+            💰 返金額: ${formattedAmount}
+            🆔 返金ID: ${data.stripe.refundId}`);
 
           } else if (data.stripe.action === 'cancel') {
             alert(`✅ 注文をキャンセルしました。
       
-📋 受付番号: ${String(order.id_order).padStart(4, "0")}
-👤 お客様: ${order.last_name} ${order.first_name}
-未決済の支払いは取り消されました。`);
+            📋 受付番号: ${String(order.id_order).padStart(4, "0")}
+            👤 お客様: ${order.last_name} ${order.first_name}
+            未決済の支払いは取り消されました。`);
 
           } else if (data.stripe.action === 'already_canceled') {
             alert(`ℹ️ 注文をキャンセルしました。
@@ -352,9 +361,13 @@ export default function ListOrder() {
     setIsSavingEdit(true);
 
     try {
+      const token = localStorage.getItem('store_token');
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${updatedOrder.id_order}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify(updatedOrder),
       });
       const data = await res.json();

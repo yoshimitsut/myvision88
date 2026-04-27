@@ -26,6 +26,17 @@ export const useCakeManagement = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  // Helper para requisições protegidas
+  const protectedFetch = useCallback(async (url: string, options: RequestInit = {}) => {
+    const token = localStorage.getItem('store_token');
+    const headers = {
+      ...options.headers,
+      'Authorization': `Bearer ${token}`
+    };
+
+    return fetch(url, { ...options, headers });
+  }, []);
+
   // ケーキを読み込む
   const fetchCakes = useCallback(async () => {
     try {
@@ -113,7 +124,7 @@ export const useCakeManagement = () => {
         formData.append('image', selectedImage);
       }
 
-      const response = await fetch(`${API_URL}/api/cake`, {
+      const response = await protectedFetch(`${API_URL}/api/cake`, {
         method: 'POST',
         body: formData,
       });
@@ -168,7 +179,7 @@ export const useCakeManagement = () => {
         formData.append('image', selectedImage);
       }
 
-      const response = await fetch(`${API_URL}/api/cake/${editingCake.id}`, {
+      const response = await protectedFetch(`${API_URL}/api/cake/${editingCake.id}`, {
         method: 'PUT',
         body: formData,
       });
@@ -218,7 +229,7 @@ export const useCakeManagement = () => {
     if (!confirm('このケーキを削除してもよろしいですか？')) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/cake/${cakeId}`, {
+      const response = await protectedFetch(`${API_URL}/api/cake/${cakeId}`, {
         method: 'DELETE',
       });
 

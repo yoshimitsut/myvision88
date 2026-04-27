@@ -11,8 +11,11 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation();
 
   useEffect(() => {
+    const token = localStorage.getItem('store_token');
     const authStatus = sessionStorage.getItem('store_authenticated') === 'true';
-    setIsAuthenticated(authStatus);
+    
+    // Se temos o token, consideramos autenticado (o backend validará o resto)
+    setIsAuthenticated(!!token || authStatus);
   }, []);
 
   if (isAuthenticated === null) {

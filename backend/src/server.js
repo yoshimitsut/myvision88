@@ -1,10 +1,18 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const path = require('path');
 
-// Importar Routers - CORRIGIDO para usar a pasta 'routers' em todas as importações
+
+// Manter o processo vivo
+setInterval(() => {
+  // Apenas para manter o event loop ocupado
+}, 1000000);
+
+// Importar Routers
 const cakeRoutes = require('./routers/cakeRoutes');
 const orderRoutes = require('./routers/orderRoutes');
 const okashiRoutes = require('./routers/okashiRoutes');
@@ -12,17 +20,40 @@ const timeslotRoutes = require('./routers/timeslotRoutes');
 const newsletterRoutes = require('./routers/newsletter');
 const storeInfo = require('./routers/storeInfo');
 const stripeRoutes = require('./routers/stripe');
+const authRoutes = require('./routers/authRoutes');
+
+// Middleware de Autenticação
+const authMiddleware = require('./middleware/authMiddleware');
 
 const app = express();
+
+// 🚀 Prevenção de queda do servidor
+process.on('uncaughtException', (err) => {
+  console.error('❌ ERRO CRÍTICO (Não capturado):', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('⚠️ REJEIÇÃO NÃO TRATADA em:', promise, 'razão:', reason);
+});
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// app.use(helmet({
+//   crossOriginResourcePolicy: false, 
+// }));
 
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, 
+//   max: 100, 
+//   message: 'Muitas requisições vindas deste IP, tente novamente mais tarde.'
+// });
+// app.use('/api/', limiter);
+
+app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
 // app.use('/image', express.static('image'));
-app.use('/image', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/image', express.static(path.join(__dirname, '../uploads')));
 
 // Rota de Teste de Conexão (opcional, pode ser movida)
 const pool = require('./config/db'); // Se quiser manter o teste de conexão aqui
@@ -36,16 +67,44 @@ app.get('/api/test', async (req, res) => {
   }
 });
 
+// 🔹 MIDDLEWARE DE PROTEÇÃO SELETIVA
+// Define o que é público e o que precisa de Token
+const selectiveAuth = (req, res, next) => {
+  // Rotas Públicas
+  // No caso de cake/okashi/timeslots, o path que o middleware vê é '/' quando montado no prefixo
+  const isPublicGet = req.method === 'GET' && (
+    req.path === '/' ||
+    req.path === '/cake' ||
+    req.path === '/okashi' ||
+    req.path === '/timeslots' ||
+    req.path === '/times'
+  );
+
+  const isPublicPost = req.method === 'POST' && req.path === '/reservar';
+
+  if (isPublicGet || isPublicPost) {
+    console.log(`🔓 [PUBLIC] ${req.method} ${req.path}`);
+    return next();
+  }
+
+  // Todo o resto do painel administrativo precisa de Token
+  console.log(`🔐 [PROTECTED] ${req.method} ${req.path}`);
+  authMiddleware(req, res, next);
+};
+
+// 🔹 REGISTRO DE ROTAS
+app.use("/api/auth", authRoutes);
 app.use("/api", stripeRoutes);
 
-// 🔹 USAR OS ROUTERS SEPARADOS
-app.use('/api/cake', cakeRoutes);
-app.use('/api/okashi', okashiRoutes);
-app.use('/api/timeslots', timeslotRoutes);
-// Rotas de pedido (reservar, orders/list)
-app.use('/api/', orderRoutes); 
-app.use("/api/newsletters", newsletterRoutes);
-app.use("/api/storeinfo", storeInfo);
+// Aplicar roteadores com proteção seletiva e caminhos corretos
+app.use('/api/cake', selectiveAuth, cakeRoutes);
+app.use('/api/okashi', selectiveAuth, okashiRoutes);
+app.use('/api/timeslots', selectiveAuth, timeslotRoutes);
+app.use('/api/newsletters', selectiveAuth, newsletterRoutes);
+app.use('/api/storeinfo', selectiveAuth, storeInfo);
+
+// OrderRoutes é montado na raiz /api porque já contém /reservar e /list internamente
+app.use('/api', selectiveAuth, orderRoutes);
 
 
 app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));
