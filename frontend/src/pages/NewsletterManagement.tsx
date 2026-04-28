@@ -18,7 +18,7 @@ export default function NewsletterPage() {
 
   const fetchNewsletters = async (): Promise<Newsletter[]> => {
     try {
-      const token = localStorage.getItem('store_token');
+      const token = sessionStorage.getItem('store_token');
       const res = await fetch(`${API_URL}/api/newsletters`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -53,7 +53,7 @@ export default function NewsletterPage() {
       ? `${API_URL}/api/newsletters/${form.id}`
       : `${API_URL}/api/newsletters`;
 
-    const token = localStorage.getItem('store_token');
+    const token = sessionStorage.getItem('store_token');
     await fetch(url, {
       method,
       headers: { 
@@ -72,7 +72,7 @@ export default function NewsletterPage() {
   const remove = async (id?: number) => {
     if (!id) return;
 
-    const token = localStorage.getItem('store_token');
+    const token = sessionStorage.getItem('store_token');
     await fetch(`${API_URL}/api/newsletters/${id}`, {
       method: "DELETE",
       headers: {

@@ -1,17 +1,17 @@
-.okashi-management {
+.gift-management {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
 
-.okashi-management h1 {
+.gift-management h1 {
   text-align: center;
   margin-bottom: 30px;
   color: #333;
 }
 
 /* Tabs */
-.okashi-tabs {
+.gift-tabs {
   display: flex;
   gap: 10px;
   margin-bottom: 30px;
@@ -33,24 +33,24 @@
 }
 
 /* Grid de produtos */
-.okashi-grid {
+.gift-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 20px;
 }
 
-.okashi-card {
+.gift-card {
   border: 1px solid #e0e0e0;
   border-radius: 12px;
   overflow: hidden;
   transition: box-shadow 0.3s ease;
 }
 
-.okashi-card:hover {
+.gift-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.okashi-image {
+.gift-image {
   width: 100%;
   height: 200px;
   background-color: #f5f5f5;
@@ -59,7 +59,7 @@
   justify-content: center;
 }
 
-.okashi-image img {
+.gift-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -70,34 +70,34 @@
   color: #ccc;
 }
 
-.okashi-info-actions {
+.gift-info-actions {
   padding: 16px;
 }
 
-.okashi-info h3 {
+.gift-info h3 {
   margin: 0 0 8px 0;
   font-size: 18px;
 }
 
-.okashi-description {
+.gift-description {
   color: #666;
   font-size: 14px;
   margin-bottom: 12px;
 }
 
-.okashi-sizes h4 {
+.gift-sizes h4 {
   margin: 0 0 8px 0;
   font-size: 14px;
   color: #555;
 }
 
-.okashi-sizes ul {
+.gift-sizes ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.okashi-sizes li {
+.gift-sizes li {
   display: flex;
   justify-content: space-between;
   padding: 6px 0;
@@ -113,7 +113,7 @@
   color: #666;
 }
 
-.okashi-actions {
+.gift-actions {
   display: flex;
   gap: 10px;
   margin-top: 16px;
@@ -140,7 +140,7 @@
 }
 
 /* Formulário */
-.okashi-form-container {
+.gift-form-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
@@ -168,6 +168,54 @@
 }
 
 /* Imagem */
+.images-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.image-preview-item {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.image-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-preview-item .remove-image-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  margin-top: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border-radius: 50%;
+  background: rgba(220, 53, 69, 0.9);
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.image-preview-item .remove-image-btn:hover {
+  opacity: 1;
+}
+
 .image-preview {
   margin-bottom: 12px;
 }
@@ -283,7 +331,7 @@
 
 /* Responsivo */
 @media (max-width: 768px) {
-  .okashi-grid {
+  .gift-grid {
     grid-template-columns: 1fr;
   }
 

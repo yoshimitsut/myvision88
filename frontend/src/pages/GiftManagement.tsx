@@ -1,136 +1,154 @@
 import React, { useState, useEffect } from 'react';
-import './OkashiManagement.css';
+import './GiftManagement.css';
 
-interface OkashiSize {
+interface GiftSize {
   id: number;
   size: string;
   stock: number;
   price: number;
 }
 
-interface Okashi {
+interface Gift {
   id: number;
   name: string;
   description: string;
-  image: string;
-  sizes: OkashiSize[];
+  image: string; // Main image
+  images: string[]; // All images
+  sizes: GiftSize[];
 }
 
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
 
-export default function OkashiManagement() {
-  const [okashiList, setOkashiList] = useState<Okashi[]>([]);
+export default function GiftManagement() {
+  const [giftList, setGiftList] = useState<Gift[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'list' | 'add'>('list');
-  const [editingOkashi, setEditingOkashi] = useState<Okashi | null>(null);
+  const [editingGift, setEditingGift] = useState<Gift | null>(null);
 
-  // 新しいお菓子の状態
-  const [newOkashi, setNewOkashi] = useState({
+  // 新しいギフトの状態
+  const [newGift, setNewGift] = useState({
     name: '',
     description: '',
     image: ''
   });
-  const [newSizes, setNewSizes] = useState<Omit<OkashiSize, 'id'>[]>([
+  const [newSizes, setNewSizes] = useState<Omit<GiftSize, 'id'>[]>([
     { size: '', stock: 0, price: 0 }
   ]);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
 
-  // お菓子を読み込む
-  const fetchOkashi = async () => {
+  // ギフトを読み込む
+  const fetchGifts = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('store_token');
-      const response = await fetch(`${API_URL}/api/okashi`, {
+      const token = sessionStorage.getItem('store_token');
+      const response = await fetch(`${API_URL}/api/gift`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       const data = await response.json();
 
-      if (data.success && Array.isArray(data.okashi)) {
-        setOkashiList(data.okashi);
+      if (data.success && Array.isArray(data.gift)) {
+        setGiftList(data.gift);
       } else {
         throw new Error('予期しないレスポンス形式');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'お菓子の読み込みエラー');
+      setError(err instanceof Error ? err.message : 'ギフトの読み込みエラー');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchOkashi();
+    fetchGifts();
   }, []);
 
   // 🔹 画像処理
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        alert('画像ファイルを選択してください。');
-        return;
-      }
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const validFiles = files.filter(file => {
+        if (!file.type.startsWith('image/')) {
+          alert(`${file.name}は画像ファイルではありません。`);
+          return false;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          alert(`${file.name}は5MBを超えています。`);
+          return false;
+        }
+        return true;
+      });
 
-      if (file.size > 5 * 1024 * 1024) {
-        alert('画像は5MB以下にしてください。');
-        return;
-      }
+      setSelectedImages(prev => [...prev, ...validFiles]);
 
-      setSelectedImage(file);
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      validFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImagePreviews(prev => [...prev, e.target?.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
     }
+  };
+
+  const removeSelectedImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
   };
 
   // 🔹 フォームをクリア
   const clearForm = () => {
-    setNewOkashi({ name: '', description: '', image: '' });
+    setNewGift({ name: '', description: '', image: '' });
     setNewSizes([{ size: '', stock: 0, price: 0 }]);
-    setSelectedImage(null);
-    setImagePreview(null);
+    setSelectedImages([]);
+    setImagePreviews([]);
+    setExistingImages([]);
   };
 
-  // 🔹 新しいお菓子を追加
-  const handleAddOkashi = async (e: React.FormEvent) => {
+  // 🔹 新しいギフトを追加
+  const handleAddGift = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       setUploading(true);
 
-      if (!newOkashi.name.trim()) {
-        alert('お菓子名は必須です');
+      if (!newGift.name.trim()) {
+        alert('ギフト名は必須です');
         setUploading(false);
         return;
       }
 
       const formData = new FormData();
 
-      formData.append('name', newOkashi.name.trim());
-      formData.append('description', newOkashi.description?.trim() || '');
+      formData.append('name', newGift.name.trim());
+      formData.append('description', newGift.description?.trim() || '');
 
       const validSizes = newSizes.filter(size => size.size.trim() !== '');
       formData.append('sizes', JSON.stringify(validSizes));
 
-      if (selectedImage) {
-        formData.append('image', selectedImage);
+      if (selectedImages.length > 0) {
+        selectedImages.forEach(file => {
+          formData.append('images', file);
+        });
       }
 
-      console.log('📦 Enviando FormData (Okashi):');
-      console.log('📦 name:', newOkashi.name);
+      console.log('📦 Enviando FormData (Gift):');
+      console.log('📦 name:', newGift.name);
       console.log('📦 sizes:', JSON.stringify(validSizes));
-      console.log('📦 image:', selectedImage?.name);
+      console.log('📦 images:', selectedImages.length);
 
-      const token = localStorage.getItem('store_token');
-      const response = await fetch(`${API_URL}/api/okashi`, {
+      const token = sessionStorage.getItem('store_token');
+      const response = await fetch(`${API_URL}/api/gift`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -141,53 +159,53 @@ export default function OkashiManagement() {
       const data = await response.json();
 
       if (data.success) {
-        alert('お菓子が正常に追加されました！');
+        alert('ギフトが正常に追加されました！');
         clearForm();
         setActiveTab('list');
-        fetchOkashi();
+        fetchGifts();
       } else {
-        throw new Error(data.error || 'お菓子の追加に失敗しました');
+        throw new Error(data.error || 'ギフトの追加に失敗しました');
       }
     } catch (err) {
       console.error('❌ Erro:', err);
-      alert(err instanceof Error ? err.message : 'お菓子の追加に失敗しました');
+      alert(err instanceof Error ? err.message : 'ギフトの追加に失敗しました');
     } finally {
       setUploading(false);
     }
   };
 
-  // 🔹 お菓子を更新
-  const handleUpdateOkashi = async (e: React.FormEvent) => {
+  // 🔹 ギフトを更新
+  const handleUpdateGift = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!editingOkashi) return;
+    if (!editingGift) return;
 
     try {
       setUploading(true);
 
       const formData = new FormData();
 
-      formData.append('name', newOkashi.name.trim());
-      formData.append('description', newOkashi.description?.trim() || '');
+      formData.append('name', newGift.name.trim());
+      formData.append('description', newGift.description?.trim() || '');
 
       const validSizes = newSizes.filter(size => size.size.trim() !== '');
       formData.append('sizes', JSON.stringify(validSizes));
+      formData.append('existingImages', JSON.stringify(existingImages));
 
-      if (newOkashi.image && !selectedImage) {
-        formData.append('existingImage', newOkashi.image);
+      if (selectedImages.length > 0) {
+        selectedImages.forEach(file => {
+          formData.append('images', file);
+        });
       }
 
-      if (selectedImage) {
-        formData.append('image', selectedImage);
-      }
-
-      console.log('📦 Update FormData (Okashi):');
-      console.log('📦 name:', newOkashi.name);
+      console.log('📦 Update FormData (Gift):');
+      console.log('📦 name:', newGift.name);
       console.log('📦 sizes:', JSON.stringify(validSizes));
-      console.log('📦 new image:', selectedImage?.name);
+      console.log('📦 existing images:', existingImages.length);
+      console.log('📦 new images:', selectedImages.length);
 
-      const token = localStorage.getItem('store_token');
-      const response = await fetch(`${API_URL}/api/okashi/${editingOkashi.id}`, {
+      const token = sessionStorage.getItem('store_token');
+      const response = await fetch(`${API_URL}/api/gift/${editingGift.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -198,17 +216,17 @@ export default function OkashiManagement() {
       const data = await response.json();
 
       if (data.success) {
-        alert('お菓子が正常に更新されました！');
-        setEditingOkashi(null);
+        alert('ギフトが正常に更新されました！');
+        setEditingGift(null);
         clearForm();
         setActiveTab('list');
-        fetchOkashi();
+        fetchGifts();
       } else {
-        throw new Error(data.error || 'お菓子の更新に失敗しました');
+        throw new Error(data.error || 'ギフトの更新に失敗しました');
       }
     } catch (err) {
       console.error('❌ Erro:', err);
-      alert(err instanceof Error ? err.message : 'お菓子の更新に失敗しました');
+      alert(err instanceof Error ? err.message : 'ギフトの更新に失敗しました');
     } finally {
       setUploading(false);
     }
@@ -227,7 +245,7 @@ export default function OkashiManagement() {
   };
 
   // 🔹 サイズを更新
-  const updateSize = (index: number, field: keyof Omit<OkashiSize, 'id'>, value: string | number) => {
+  const updateSize = (index: number, field: keyof Omit<GiftSize, 'id'>, value: string | number) => {
     setNewSizes(prev =>
       prev.map((size, i) =>
         i === index ? { ...size, [field]: field === 'size' ? value : Number(value) || 0 } : size
@@ -235,13 +253,13 @@ export default function OkashiManagement() {
     );
   };
 
-  // 🔹 お菓子を削除
-  const handleDeleteOkashi = async (okashiId: number) => {
-    if (!confirm('このお菓子を削除してもよろしいですか？')) return;
+  // 🔹 ギフトを削除
+  const handleDeleteGift = async (giftId: number) => {
+    if (!confirm('このギフトを削除してもよろしいですか？')) return;
 
     try {
-      const token = localStorage.getItem('store_token');
-      const response = await fetch(`${API_URL}/api/okashi/${okashiId}`, {
+      const token = sessionStorage.getItem('store_token');
+      const response = await fetch(`${API_URL}/api/gift/${giftId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -251,76 +269,77 @@ export default function OkashiManagement() {
       const data = await response.json();
 
       if (data.success) {
-        alert('お菓子が正常に削除されました！');
-        fetchOkashi();
+        alert('ギフトが正常に削除されました！');
+        fetchGifts();
       } else {
-        throw new Error(data.error || 'お菓子の削除に失敗しました');
+        throw new Error(data.error || 'ギフトの削除に失敗しました');
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'お菓子の削除に失敗しました');
+      alert(err instanceof Error ? err.message : 'ギフトの削除に失敗しました');
     }
   };
 
-  // 🔹 お菓子を編集
-  const handleEditOkashi = (okashi: Okashi) => {
-    setEditingOkashi(okashi);
-    setNewOkashi({
-      name: okashi.name,
-      description: okashi.description || '',
-      image: okashi.image || ''
+  // 🔹 ギフトを編集
+  const handleEditGift = (gift: Gift) => {
+    setEditingGift(gift);
+    setNewGift({
+      name: gift.name,
+      description: gift.description || '',
+      image: gift.image || ''
     });
-    setNewSizes(okashi.sizes.length > 0 ? okashi.sizes : [{ size: '', stock: 0, price: 0 }]);
-    setImagePreview(okashi.image ? `${API_URL}/image/${FOLDER_URL}/${okashi.image}` : null);
-    setSelectedImage(null);
+    setNewSizes(gift.sizes.length > 0 ? gift.sizes : [{ size: '', stock: 0, price: 0 }]);
+    setExistingImages(gift.images || []);
+    setImagePreviews([]);
+    setSelectedImages([]);
     setActiveTab('add');
   };
 
-  if (loading) return <div className="loading">お菓子を読み込み中...</div>;
+  if (loading) return <div className="loading">ギフトを読み込み中...</div>;
   if (error) return <div className="error">エラー: {error}</div>;
 
   return (
-    <div className="okashi-management">
-      <h1>🍪 お菓子管理</h1>
+    <div className="gift-management">
+      <h1>🍪 ギフト管理</h1>
 
       {/* ナビゲーションタブ */}
-      <div className="okashi-tabs">
+      <div className="gift-tabs">
         <button
           className={`tab-button ${activeTab === 'list' ? 'active' : ''}`}
           onClick={() => setActiveTab('list')}
         >
-          📋 お菓子一覧
+          📋 ギフト一覧
         </button>
         <button
           className={`tab-button ${activeTab === 'add' ? 'active' : ''}`}
           onClick={() => {
             setActiveTab('add');
-            setEditingOkashi(null);
+            setEditingGift(null);
             clearForm();
           }}
         >
-          ➕ {editingOkashi ? 'お菓子を編集' : 'お菓子を追加'}
+          ➕ {editingGift ? 'ギフトを編集' : 'ギフトを追加'}
         </button>
       </div>
 
       {/* タブの内容 */}
       <div className="tab-content">
         {activeTab === 'list' && (
-          <div className="okashi-list-admin">
-            <h2>登録済みお菓子一覧</h2>
+          <div className="gift-list-admin">
+            <h2>登録済みギフト一覧</h2>
 
-            {okashiList.length === 0 ? (
-              <p className="no-okashi">登録されているお菓子がありません。</p>
+            {giftList.length === 0 ? (
+              <p className="no-gift">登録されているギフトがありません。</p>
             ) : (
-              <div className="okashi-grid">
-                {okashiList.map(okashi => (
-                  <div key={okashi.id} className="okashi-card">
-                    <div className="okashi-image">
-                      {okashi.image ? (
+              <div className="gift-grid">
+                {giftList.map(gift => (
+                  <div key={gift.id} className="gift-card">
+                    <div className="gift-image">
+                      {gift.image ? (
                         <img
-                          src={`${API_URL}/image/myvision88/${okashi.image}`}
-                          alt={okashi.name}
+                          src={`${API_URL}/image/myvision88/${gift.image}`}
+                          alt={gift.name}
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/default-okashi.jpg';
+                            (e.target as HTMLImageElement).src = '/default-gift.jpg';
                           }}
                         />
                       ) : (
@@ -328,20 +347,20 @@ export default function OkashiManagement() {
                       )}
                     </div>
 
-                    <div className='okashi-info-actions'>
-                      <div className="okashi-info">
-                        <h3>{okashi.name}</h3>
-                        {okashi.description && (
-                          <p className="okashi-description">{okashi.description}</p>
+                    <div className='gift-info-actions'>
+                      <div className="gift-info">
+                        <h3>{gift.name}</h3>
+                        {gift.description && (
+                          <p className="gift-description">{gift.description}</p>
                         )}
 
-                        <div className="okashi-sizes">
+                        <div className="gift-sizes">
                           <h4>サイズ/種類:</h4>
-                          {okashi.sizes.length === 0 ? (
+                          {gift.sizes.length === 0 ? (
                             <p className="no-sizes">登録されているサイズがありません</p>
                           ) : (
                             <ul>
-                              {okashi.sizes.map(size => (
+                              {gift.sizes.map(size => (
                                 <li key={size.id}>
                                   <span className="size-name">{size.size}</span>
                                   <span className="size-details">
@@ -354,16 +373,16 @@ export default function OkashiManagement() {
                         </div>
                       </div>
 
-                      <div className="okashi-actions">
+                      <div className="gift-actions">
                         <button
                           className="edit-btn"
-                          onClick={() => handleEditOkashi(okashi)}
+                          onClick={() => handleEditGift(gift)}
                         >
                           ✏️ 編集
                         </button>
                         <button
                           className="delete-btn"
-                          onClick={() => handleDeleteOkashi(okashi.id)}
+                          onClick={() => handleDeleteGift(gift.id)}
                         >
                           🗑️ 削除
                         </button>
@@ -377,17 +396,17 @@ export default function OkashiManagement() {
         )}
 
         {activeTab === 'add' && (
-          <div className="okashi-form-container">
-            <h2>{editingOkashi ? 'お菓子を編集' : '新しいお菓子を追加'}</h2>
+          <div className="gift-form-container">
+            <h2>{editingGift ? 'ギフトを編集' : '新しいギフトを追加'}</h2>
 
-            <form onSubmit={editingOkashi ? handleUpdateOkashi : handleAddOkashi} className="okashi-form" encType="multipart/form-data">
+            <form onSubmit={editingGift ? handleUpdateGift : handleAddGift} className="gift-form" encType="multipart/form-data">
               <div className="form-group">
-                <label htmlFor="name">お菓子名 *</label>
+                <label htmlFor="name">ギフト名 *</label>
                 <input
                   type="text"
                   id="name"
-                  value={newOkashi.name}
-                  onChange={(e) => setNewOkashi(prev => ({ ...prev, name: e.target.value }))}
+                  value={newGift.name}
+                  onChange={(e) => setNewGift(prev => ({ ...prev, name: e.target.value }))}
                   required
                   placeholder="例: マカロン, フィナンシェ, クッキー"
                 />
@@ -397,63 +416,75 @@ export default function OkashiManagement() {
                 <label htmlFor="description">説明</label>
                 <textarea
                   id="description"
-                  value={newOkashi.description}
-                  onChange={(e) => setNewOkashi(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="お菓子の説明（任意）"
+                  value={newGift.description}
+                  onChange={(e) => setNewGift(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="ギフトの説明（任意）"
                   rows={3}
                 />
               </div>
 
               {/* 🔹 画像セクション */}
               <div className="form-group">
-                <label htmlFor="image">お菓子画像</label>
+                <label>ギフト画像</label>
 
-                {/* 画像プレビュー */}
-                {(imagePreview || (editingOkashi && newOkashi.image && !selectedImage)) && (
-                  <div className="image-preview">
-                    <img
-                      src={imagePreview || `${API_URL}/image/${FOLDER_URL}/${newOkashi.image}`}
-                      alt="プレビュー"
-                    />
-                    <button
-                      type="button"
-                      className="remove-image-btn"
-                      onClick={() => {
-                        setImagePreview(null);
-                        setSelectedImage(null);
-                        setNewOkashi(prev => ({ ...prev, image: '' }));
-                      }}
-                    >
-                      ❌ 画像を削除
-                    </button>
-                  </div>
-                )}
+                <div className="images-preview-grid">
+                  {/* 既存の画像 */}
+                  {existingImages.map((img, index) => (
+                    <div key={`existing-${index}`} className="image-preview-item">
+                      <img
+                        src={`${API_URL}/image/${FOLDER_URL}/${img}`}
+                        alt={`既存画像 ${index + 1}`}
+                      />
+                      <button
+                        type="button"
+                        className="remove-image-btn"
+                        onClick={() => removeExistingImage(index)}
+                      >
+                        ❌
+                      </button>
+                    </div>
+                  ))}
+
+                  {/* 新しく選択された画像 */}
+                  {imagePreviews.map((preview, index) => (
+                    <div key={`new-${index}`} className="image-preview-item">
+                      <img src={preview} alt={`新規画像 ${index + 1}`} />
+                      <button
+                        type="button"
+                        className="remove-image-btn"
+                        onClick={() => removeSelectedImage(index)}
+                      >
+                        ❌
+                      </button>
+                    </div>
+                  ))}
+                </div>
 
                 {/* ファイル入力 */}
                 <input
                   type="file"
                   id="image-upload"
                   accept="image/*"
+                  multiple
                   onChange={handleImageSelect}
                   className="image-upload-input"
                 />
                 <label htmlFor="image-upload" className="image-upload-label">
-                  📁 {selectedImage ? '画像が選択されました' : '画像を選択'}
+                  📁 画像を追加 (複数選択可)
                 </label>
 
-                {selectedImage && (
+                {selectedImages.length > 0 && (
                   <div className="file-info">
-                    <small>ファイル: {selectedImage.name}</small>
-                    <small>サイズ: {(selectedImage.size / 1024 / 1024).toFixed(2)} MB</small>
+                    <small>{selectedImages.length} 個の新しい画像が選択されています</small>
                   </div>
                 )}
 
                 <small className="help-text">
-                  対応形式: JPG, PNG, GIF。最大サイズ: 5MB
+                  対応形式: JPG, PNG, GIF。最大サイズ: 5MB/枚
                 </small>
               </div>
 
-              {/* お菓子のサイズ/種類 */}
+              {/* ギフトのサイズ/種類 */}
               <div className="sizes-section">
                 <div className="sizes-header">
                   <h3>サイズ/種類と価格 *</h3>
@@ -516,13 +547,13 @@ export default function OkashiManagement() {
                   className="submit-btn"
                   disabled={uploading}
                 >
-                  {uploading ? '⏳ 処理中...' : editingOkashi ? '💾 お菓子を更新' : '➕ お菓子を追加'}
+                  {uploading ? '⏳ 処理中...' : editingGift ? '💾 ギフトを更新' : '➕ ギフトを追加'}
                 </button>
                 <button
                   type="button"
                   onClick={() => {
                     setActiveTab('list');
-                    setEditingOkashi(null);
+                    setEditingGift(null);
                     clearForm();
                   }}
                   className="cancel-btn"

@@ -141,3 +141,21 @@ export interface StoreInfo {
   use_admin_date: 's' | 'n';
   use_admin_download: 's' | 'n';
 }
+// ------------------ 🎁 Gift (Okashi) ------------------
+
+export type GiftSize = {
+  id: number;
+  gift_id: number;
+  size: string;
+  stock: number;
+  price: number;
+};
+
+export type Gift = {
+  id: number;
+  name: string;
+  description: string | null;
+  image: string | null; // Principal image for backward compatibility
+  images: string[];     // Array of all images
+  sizes: GiftSize[];
+};

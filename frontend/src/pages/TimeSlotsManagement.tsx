@@ -259,7 +259,7 @@ const handleDeselectAllDays = (): void => {
   // Função auxiliar para deletar um slot de tempo
   const deleteTimeSlot = async (slotId: number): Promise<boolean> => {
     try {
-      const token = localStorage.getItem('store_token');
+      const token = sessionStorage.getItem('store_token');
       const response = await fetch(`${API_BASE_URL}/${slotId}`, {
         method: 'DELETE',
         headers: {
@@ -283,7 +283,7 @@ const handleDeselectAllDays = (): void => {
   const loadExistingData = async () => {
     try {
       setIsLoadingExisting(true);
-      const token = localStorage.getItem('store_token');
+      const token = sessionStorage.getItem('store_token');
       const response = await fetch(`${API_BASE_URL}/`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -404,7 +404,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
 
       console.log(`Enviando lote para datas: ${dates.join(', ')} com horários: ${times.join(', ')}`);
 
-      const token = localStorage.getItem('store_token');
+      const token = sessionStorage.getItem('store_token');
       const response = await fetch(`${API_BASE_URL}/batch`, {
         method: 'POST',
         headers: { 
@@ -457,7 +457,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
   const fetchTimeSlots = async () => {
     try {
       setIsLoadingTimes(true);
-      const token = localStorage.getItem('store_token');
+      const token = sessionStorage.getItem('store_token');
       const response = await fetch(`${API_BASE_URL}/times`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -504,7 +504,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
     setIsAddingTime(true);
 
     try {
-      const token = localStorage.getItem('store_token');
+      const token = sessionStorage.getItem('store_token');
       const response = await fetch(`${API_BASE_URL}/times`, {
         method: 'POST',
         headers: { 
@@ -568,7 +568,7 @@ const handleSaveAllMonth = async (e: React.FormEvent): Promise<void> => {
     }
 
     try {
-      const token = localStorage.getItem('store_token');
+      const token = sessionStorage.getItem('store_token');
       const response = await fetch(`${API_BASE_URL}/times/${timeId}`, {
         method: 'DELETE',
         headers: {

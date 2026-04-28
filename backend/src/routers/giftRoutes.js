@@ -52,7 +52,7 @@ const storage = multer.diskStorage({
         console.log('⚠️ Nome do produto não fornecido, usando timestamp');
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const ext = path.extname(file.originalname).toLowerCase();
-        return cb(null, 'okashi-' + uniqueSuffix + ext);
+        return cb(null, 'gift-' + uniqueSuffix + ext);
       }
       
       const ext = path.extname(file.originalname).toLowerCase();
@@ -79,7 +79,7 @@ const storage = multer.diskStorage({
       console.error('❌ Erro no filename:', error);
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       const ext = path.extname(file.originalname).toLowerCase();
-      cb(null, 'okashi-' + uniqueSuffix + ext);
+      cb(null, 'gift-' + uniqueSuffix + ext);
     }
   }
 });
@@ -91,7 +91,7 @@ const upload = multer({
   fileFilter: function (req, file, cb) {
     // console.log('📸 Arquivo recebido:', file.fieldname, file.originalname);
     
-    if (file.fieldname === 'image') {
+    if (file.fieldname === 'images') {
       if (file.mimetype.startsWith('image/')) {
         cb(null, true);
       } else {
@@ -101,7 +101,7 @@ const upload = multer({
       cb(new Error('Campo inesperado: ' + file.fieldname), false);
     }
   }
-}).single('image'); // .single('image') processa apenas o campo 'image' e coloca os campos de texto no req.body
+}).array('images', 10); // Permite até 10 imagens por produto
 
 // 🔹 Rota para criar produto com imagem
 router.post('/', (req, res, next) => {
@@ -122,7 +122,7 @@ router.post('/', (req, res, next) => {
     // console.log('📦 req.body após multer:', req.body);
     // console.log('📦 req.file:', req.file);
     
-    // Agora processa a criação do okashi
+    // Agora processa a criação do gift
     next();
   });
 }, async (req, res) => {
@@ -144,19 +144,28 @@ router.post('/', (req, res, next) => {
       });
     }
 
-    // Pega o nome do arquivo
-    const imageFilename = req.file ? req.file.filename : '';
+    // Pega os nomes dos arquivos
+    const images = req.files ? req.files.map(f => f.filename) : [];
+    const mainImage = images.length > 0 ? images[0] : '';
     
-    // console.log(`🖼️ Nome da imagem salva: ${imageFilename}`);
-    // console.log(`📝 Nome do okashi: ${name}`);
+    // console.log(`🖼️ Imagens salvas: ${images.join(', ')}`);
+    // console.log(`📝 Nome do gift: ${name}`);
 
-    // Insere no banco
-    const [okashiResult] = await connection.query(
-      'INSERT INTO okashi (name, description, image) VALUES (?, ?, ?)',
-      [String(name).trim(), description?.trim() || '', imageFilename]
+    // Insere no banco (gift principal)
+    const [giftResult] = await connection.query(
+      'INSERT INTO gift (name, description, image) VALUES (?, ?, ?)',
+      [String(name).trim(), description?.trim() || '', mainImage]
     );
 
-    const okashiId = okashiResult.insertId;
+    const giftId = giftResult.insertId;
+
+    // Insere todas as imagens na tabela gift_images
+    for (const img of images) {
+      await connection.query(
+        'INSERT INTO gift_images (gift_id, image_path) VALUES (?, ?)',
+        [giftId, img]
+      );
+    }
 
     // Processa sizes se existir
     if (sizes) {
@@ -173,8 +182,8 @@ router.post('/', (req, res, next) => {
       if (Array.isArray(sizesArray) && sizesArray.length > 0) {
         for (const size of sizesArray) {
           await connection.query(
-            'INSERT INTO okashi_sizes (okashi_id, size, stock, price) VALUES (?, ?, ?, ?)',
-            [okashiId, size.size, size.stock || 0, size.price || 0]
+            'INSERT INTO gift_sizes (gift_id, size, stock, price) VALUES (?, ?, ?, ?)',
+            [giftId, size.size, size.stock || 0, size.price || 0]
           );
         }
       }
@@ -184,14 +193,14 @@ router.post('/', (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      okashiId: okashiId,
-      image: imageFilename,
+      giftId: giftId,
+      images: images,
       message: 'お菓子が正常に作成されました！'
     });
 
   } catch (err) {
     await connection.rollback();
-    console.error('❌ Erro ao criar okashi:', err);
+    console.error('❌ Erro ao criar gift:', err);
     res.status(500).json({ 
       success: false, 
       error: 'お菓子の作成中にエラーが発生しました: ' + err.message 
@@ -225,18 +234,18 @@ router.put('/:id', (req, res, next) => {
   try {
     await connection.beginTransaction();
 
-    const okashiId = req.params.id;
-    const { name, description, sizes, existingImage } = req.body;
+    const giftId = req.params.id;
+    const { name, description, sizes, existingImages } = req.body;
 
-    // console.log('📦 Update - Dados:', { okashiId, name, description, sizes, existingImage });
+    // console.log('📦 Update - Dados:', { giftId, name, description, sizes, existingImages });
 
-    // Verifica se o okashi existe
-    const [existingOkashis] = await connection.query(
-      'SELECT * FROM okashi WHERE id = ?', 
-      [okashiId]
+    // Verifica se o gift existe
+    const [existingGifts] = await connection.query(
+      'SELECT * FROM gift WHERE id = ?', 
+      [giftId]
     );
     
-    if (existingOkashis.length === 0) {
+    if (existingGifts.length === 0) {
       await connection.rollback();
       return res.status(404).json({ 
         success: false, 
@@ -252,32 +261,50 @@ router.put('/:id', (req, res, next) => {
       });
     }
 
-    // Determina o nome da imagem
-    let imageFilename = existingImage || existingOkashis[0].image || '';
-    
-    // Se nova imagem foi enviada
-    if (req.file) {
-      imageFilename = req.file.filename;
-      
-      // Deleta imagem antiga
-      if (existingOkashis[0].image && existingOkashis[0].image !== imageFilename) {
-        // const oldImagePath = path.join(__dirname, '../../image', existingOkashis[0].image);
-        const oldImagePath = path.join(UPLOAD_DIR, existingOkashis[0].image);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
-          // console.log(`🗑️ Imagem antiga deletada: ${existingOkashis[0].image}`);
-        }
+    // Processa imagens existentes (as que devem ser mantidas)
+    let imagesToKeep = [];
+    if (existingImages) {
+      imagesToKeep = Array.isArray(existingImages) ? existingImages : JSON.parse(existingImages);
+    }
+
+    // Busca imagens atuais no banco para saber quais deletar do disco
+    const [currentImages] = await connection.query('SELECT image_path FROM gift_images WHERE gift_id = ?', [giftId]);
+    const imagesToDelete = currentImages
+      .map(img => img.image_path)
+      .filter(img => !imagesToKeep.includes(img));
+
+    // Deleta arquivos do disco
+    for (const imgName of imagesToDelete) {
+      const imgPath = path.join(UPLOAD_DIR, imgName);
+      if (fs.existsSync(imgPath)) {
+        fs.unlinkSync(imgPath);
       }
     }
 
-    // Atualiza okashi
+    // Atualiza gift_images (remove as que não devem ser mantidas)
+    await connection.query('DELETE FROM gift_images WHERE gift_id = ?', [giftId]);
+    for (const imgPath of imagesToKeep) {
+      await connection.query('INSERT INTO gift_images (gift_id, image_path) VALUES (?, ?)', [giftId, imgPath]);
+    }
+
+    // Adiciona novas imagens se enviadas
+    const newImages = req.files ? req.files.map(f => f.filename) : [];
+    for (const imgPath of newImages) {
+      await connection.query('INSERT INTO gift_images (gift_id, image_path) VALUES (?, ?)', [giftId, imgPath]);
+    }
+
+    // Atualiza a imagem principal (usa a primeira mantida ou a primeira nova)
+    const allImages = [...imagesToKeep, ...newImages];
+    const mainImage = allImages.length > 0 ? allImages[0] : '';
+
+    // Atualiza gift
     await connection.query(
-      'UPDATE okashi SET name = ?, description = ?, image = ? WHERE id = ?',
-      [String(name).trim(), description?.trim() || '', imageFilename, okashiId]
+      'UPDATE gift SET name = ?, description = ?, image = ? WHERE id = ?',
+      [String(name).trim(), description?.trim() || '', mainImage, giftId]
     );
 
     // Remove sizes antigos
-    await connection.query('DELETE FROM okashi_sizes WHERE okashi_id = ?', [okashiId]);
+    await connection.query('DELETE FROM gift_sizes WHERE gift_id = ?', [giftId]);
 
     // Insere novos sizes
     if (sizes) {
@@ -294,8 +321,8 @@ router.put('/:id', (req, res, next) => {
       if (Array.isArray(sizesArray) && sizesArray.length > 0) {
         for (const size of sizesArray) {
           await connection.query(
-            'INSERT INTO okashi_sizes (okashi_id, size, stock, price) VALUES (?, ?, ?, ?)',
-            [okashiId, size.size, size.stock || 0, size.price || 0]
+            'INSERT INTO gift_sizes (gift_id, size, stock, price) VALUES (?, ?, ?, ?)',
+            [giftId, size.size, size.stock || 0, size.price || 0]
           );
         }
       }
@@ -305,13 +332,13 @@ router.put('/:id', (req, res, next) => {
 
     res.json({
       success: true,
-      image: imageFilename,
+      images: allImages,
       message: 'お菓子が正常に更新されました！'
     });
 
   } catch (err) {
     await connection.rollback();
-    console.error('❌ Erro ao atualizar okashi:', err);
+    console.error('❌ Erro ao atualizar gift:', err);
     res.status(500).json({ 
       success: false, 
       error: 'お菓子の更新中にエラーが発生しました: ' + err.message 
@@ -348,15 +375,17 @@ router.post('/upload', upload, async (req, res) => {
 // 🔹 Todas as outras rotas (GET, DELETE, etc)
 router.get('/', async (req, res) => {
   try {
-    const [okashi] = await pool.query('SELECT * FROM okashi ORDER BY id');
-    const [sizes] = await pool.query('SELECT * FROM okashi_sizes ORDER BY id');
+    const [gift] = await pool.query('SELECT * FROM gift ORDER BY id');
+    const [sizes] = await pool.query('SELECT * FROM gift_sizes ORDER BY id');
+    const [images] = await pool.query('SELECT * FROM gift_images ORDER BY id');
 
-    const result = okashi.map(okashi => ({
-      ...okashi,
-      sizes: sizes.filter(s => s.okashi_id === okashi.id).sort((a, b) => a.id - b.id)
+    const result = gift.map(gift => ({
+      ...gift,
+      sizes: sizes.filter(s => s.gift_id === gift.id).sort((a, b) => a.id - b.id),
+      images: images.filter(img => img.gift_id === gift.id).map(img => img.image_path)
     }));
 
-    res.json({ success: true, okashi: result });
+    res.json({ success: true, gift: result });
   } catch (err) {
     console.error(err);
     res.status(500).json({ 
@@ -368,11 +397,11 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const okashiId = req.params.id;
+    const giftId = req.params.id;
     
-    const [okashi] = await pool.query('SELECT * FROM okashi WHERE id = ?', [okashiId]);
+    const [gift] = await pool.query('SELECT * FROM gift WHERE id = ?', [giftId]);
     
-    if (okashi.length === 0) {
+    if (gift.length === 0) {
       return res.status(404).json({ 
         success: false, 
         error: 'お菓子が見つかりません' 
@@ -380,16 +409,22 @@ router.get('/:id', async (req, res) => {
     }
 
     const [sizes] = await pool.query(
-      'SELECT * FROM okashi_sizes WHERE okashi_id = ? ORDER BY id', 
-      [okashiId]
+      'SELECT * FROM gift_sizes WHERE gift_id = ? ORDER BY id', 
+      [giftId]
+    );
+
+    const [images] = await pool.query(
+      'SELECT image_path FROM gift_images WHERE gift_id = ? ORDER BY id',
+      [giftId]
     );
 
     const result = {
-      ...okashi[0],
-      sizes: sizes
+      ...gift[0],
+      sizes: sizes,
+      images: images.map(img => img.image_path)
     };
 
-    res.json({ success: true, okashi: result });
+    res.json({ success: true, gift: result });
   } catch (err) {
     console.error(err);
     res.status(500).json({ 
@@ -405,14 +440,14 @@ router.delete('/:id', async (req, res) => {
   try {
     await connection.beginTransaction();
 
-    const okashiId = req.params.id;
+    const giftId = req.params.id;
 
-    const [existingOkashis] = await connection.query(
-      'SELECT * FROM okashi WHERE id = ?', 
-      [okashiId]
+    const [existingGifts] = await connection.query(
+      'SELECT * FROM gift WHERE id = ?', 
+      [giftId]
     );
     
-    if (existingOkashis.length === 0) {
+    if (existingGifts.length === 0) {
       await connection.rollback();
       return res.status(404).json({ 
         success: false, 
@@ -420,18 +455,17 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
-    // Deleta imagem
-    if (existingOkashis[0].image) {
-      // const imagePath = path.join(__dirname, '../../image', existingOkashis[0].image);
-      const imagePath = path.join(UPLOAD_DIR, existingOkashis[0].image);
+    // Deleta imagens do disco
+    const [images] = await connection.query('SELECT image_path FROM gift_images WHERE gift_id = ?', [giftId]);
+    for (const img of images) {
+      const imagePath = path.join(UPLOAD_DIR, img.image_path);
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
-        // console.log(`🗑️ Imagem deletada: ${existingOkashis[0].image}`);
       }
     }
 
-    await connection.query('DELETE FROM okashi_sizes WHERE okashi_id = ?', [okashiId]);
-    await connection.query('DELETE FROM okashi WHERE id = ?', [okashiId]);
+    await connection.query('DELETE FROM gift_sizes WHERE gift_id = ?', [giftId]);
+    await connection.query('DELETE FROM gift WHERE id = ?', [giftId]);
 
     await connection.commit();
 
@@ -442,7 +476,7 @@ router.delete('/:id', async (req, res) => {
 
   } catch (err) {
     await connection.rollback();
-    console.error('❌ Erro ao deletar okashi:', err);
+    console.error('❌ Erro ao deletar gift:', err);
     res.status(500).json({ 
       success: false, 
       error: 'お菓子の削除中にエラーが発生しました' 

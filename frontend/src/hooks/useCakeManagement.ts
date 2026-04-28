@@ -28,7 +28,7 @@ export const useCakeManagement = () => {
 
   // Helper para requisições protegidas
   const protectedFetch = useCallback(async (url: string, options: RequestInit = {}) => {
-    const token = localStorage.getItem('store_token');
+    const token = sessionStorage.getItem('store_token');
     const headers = {
       ...options.headers,
       'Authorization': `Bearer ${token}`

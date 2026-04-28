@@ -73,7 +73,7 @@ export default function ListOrder() {
         ? `${import.meta.env.VITE_API_URL}/api/list?search=${encodeURIComponent(search)}`
         : `${import.meta.env.VITE_API_URL}/api/list`;
 
-      const token = localStorage.getItem('store_token');
+      const token = sessionStorage.getItem('store_token');
       fetch(searchUrl, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -273,7 +273,7 @@ export default function ListOrder() {
     setUpdatingOrderId(id);
 
     try {
-      const token = localStorage.getItem('store_token');
+      const token = sessionStorage.getItem('store_token');
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/reservar/${id}`, {
         method: "PUT",
         headers: {
@@ -361,7 +361,7 @@ export default function ListOrder() {
     setIsSavingEdit(true);
 
     try {
-      const token = localStorage.getItem('store_token');
+      const token = sessionStorage.getItem('store_token');
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${updatedOrder.id_order}`, {
         method: "PUT",
         headers: {
