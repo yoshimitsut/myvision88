@@ -13,7 +13,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import TimeSlotsManagement from './pages/TimeSlotsManagement';
 import CakeManagement from './pages/CakeManagement';
-import OkashiManagement from './pages/OkashiManagement';
+import GiftManagement from './pages/GiftManagement';
+import Gift from './pages/Gift';
 import StoreManagement from './pages/StoreManagement';
 import NewsletterManagement from './pages/NewsletterManagement';
 import Newsletter from './pages/Newsletter';
@@ -29,6 +30,7 @@ function App() {
         <Route path="/cakeinformationsize" element={<CakeInformationSize />} />
         <Route path="/order" element={<OrderCake />} />
         <Route path="/newsletter" element={<Newsletter />} />
+        <Route path="/gift" element={<Gift />} />
 
         <Route path="/orderstore" element={
           <ProtectedRoute>
@@ -60,9 +62,9 @@ function App() {
           </ProtectedRoute>
         } />
 
-        <Route path="/admin/okashi" element={
+        <Route path="/admin/gift" element={
           <ProtectedRoute>
-            <OkashiManagement />
+            <GiftManagement />
           </ProtectedRoute>
         } />
 
