@@ -11,7 +11,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation();
 
   useEffect(() => {
-    const token = localStorage.getItem('store_token');
+    const token = sessionStorage.getItem('store_token');
     const authStatus = sessionStorage.getItem('store_authenticated') === 'true';
     
     // Se temos o token, consideramos autenticado (o backend validará o resto)

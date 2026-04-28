@@ -27,10 +27,10 @@ export default function StoreLogin() {
       if (data.success) {
         // Limpar estados antigos para evitar conflitos
         sessionStorage.clear();
-        localStorage.removeItem('store_token');
+        sessionStorage.removeItem('store_token');
         
-        localStorage.setItem('store_token', data.token);
-        localStorage.setItem('store_user', JSON.stringify(data.user));
+        sessionStorage.setItem('store_token', data.token);
+        sessionStorage.setItem('store_user', JSON.stringify(data.user));
         sessionStorage.setItem('store_authenticated', 'true');
         
         const from = location.state?.from?.pathname || '/list';

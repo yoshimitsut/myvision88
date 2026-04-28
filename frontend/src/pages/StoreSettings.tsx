@@ -17,7 +17,7 @@ export default function StoreSettings() {
 
   const fetchStoreInfo = async () => {
     try {
-      const token = localStorage.getItem('store_token');
+      const token = sessionStorage.getItem('store_token');
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/storeinfo`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -63,7 +63,7 @@ export default function StoreSettings() {
     setMessage({ type: '', text: '' });
 
     try {
-      const token = localStorage.getItem('store_token');
+      const token = sessionStorage.getItem('store_token');
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/storeinfo`, {
         method: 'PUT',
         headers: { 

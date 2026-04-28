@@ -15,7 +15,7 @@ setInterval(() => {
 // Importar Routers
 const cakeRoutes = require('./routers/cakeRoutes');
 const orderRoutes = require('./routers/orderRoutes');
-const okashiRoutes = require('./routers/okashiRoutes');
+const giftRoutes = require('./routers/giftRoutes');
 const timeslotRoutes = require('./routers/timeslotRoutes');
 const newsletterRoutes = require('./routers/newsletter');
 const storeInfo = require('./routers/storeInfo');
@@ -71,19 +71,21 @@ app.get('/api/test', async (req, res) => {
 // Define o que é público e o que precisa de Token
 const selectiveAuth = (req, res, next) => {
   // Rotas Públicas
-  // No caso de cake/okashi/timeslots, o path que o middleware vê é '/' quando montado no prefixo
+  // Verificamos a URL original para evitar problemas com rotas montadas
   const isPublicGet = req.method === 'GET' && (
-    req.path === '/' ||
-    req.path === '/cake' ||
-    req.path === '/okashi' ||
-    req.path === '/timeslots' ||
-    req.path === '/times'
+    req.originalUrl.startsWith('/api/cake') ||
+    req.originalUrl.startsWith('/api/gift') ||
+    req.originalUrl.startsWith('/api/timeslots') ||
+    req.originalUrl.startsWith('/api/storeinfo') ||
+    req.originalUrl.startsWith('/api/newsletters')
   );
 
-  const isPublicPost = req.method === 'POST' && req.path === '/reservar';
+  const isPublicPost = req.method === 'POST' && (
+    req.originalUrl === '/api/reservar' ||
+    req.originalUrl.startsWith('/api/newsletters')
+  );
 
   if (isPublicGet || isPublicPost) {
-    console.log(`🔓 [PUBLIC] ${req.method} ${req.path}`);
     return next();
   }
 
@@ -98,7 +100,7 @@ app.use("/api", stripeRoutes);
 
 // Aplicar roteadores com proteção seletiva e caminhos corretos
 app.use('/api/cake', selectiveAuth, cakeRoutes);
-app.use('/api/okashi', selectiveAuth, okashiRoutes);
+app.use('/api/gift', selectiveAuth, giftRoutes);
 app.use('/api/timeslots', selectiveAuth, timeslotRoutes);
 app.use('/api/newsletters', selectiveAuth, newsletterRoutes);
 app.use('/api/storeinfo', selectiveAuth, storeInfo);

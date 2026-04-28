@@ -34,7 +34,7 @@ router.post('/login', async (req, res) => {
     // 3. Gerar Token
     const token = jwt.sign(
       { id: user.id, username: user.username },
-      process.env.JWT_SECRET || 'fallback_secret_for_dev_only',
+      'my_vision_88_fixed_secret_2026',
       { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
     );
 
