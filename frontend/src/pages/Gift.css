@@ -15,15 +15,15 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at center, #ffffff 0%, #7398b5 100%);
+  background: radial-gradient(circle at center, #ffffff 0%, #454538 100%);
   opacity: 0.8;
   z-index: -1;
 }
 
 /* Header */
 .gift-header {
-  height: 100px;
-  background: rgba(115, 152, 181, 0.9);
+  height: 40px;
+  background: #454538;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -41,10 +41,9 @@
 }
 
 .logo-img {
-  height: 60px;
   cursor: pointer;
-  filter: brightness(0) invert(1);
-  /* Logo em branco */
+  filter: none;
+  height: 30px !important;
 }
 
 .header-right {
@@ -54,8 +53,9 @@
 }
 
 .instagram-link img {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
+  filter: none;
 }
 
 .menu-toggle {
@@ -77,8 +77,9 @@
 /* Main Content */
 .gift-main {
   max-width: 1000px;
-  margin: 60px auto;
+  margin: 0px auto;
   padding: 0 20px;
+  background: white;
 }
 
 @keyframes zoomFadeIn {
@@ -95,7 +96,7 @@
 
 .gift-main-image {
   width: 100vw;
-  height: calc(100vh - 100px);
+  height: calc(100vh + 25px);
   margin-left: calc(50% - 50vw);
   margin-top: -60px;
   /* Counteract the margin-top of .gift-main */
@@ -169,7 +170,8 @@
   /* Espaço mínimo para a borda branca */
   background-color: white;
   /* Cor da borda */
-  border: 2px solid white;
+  /* border: 2px solid white; */
+  padding-bottom: 15px;
 }
 
 .gift-item {
@@ -198,7 +200,7 @@
 }
 
 .gift-label-bar {
-  background-color: #7398b5;
+  background-color: #454538;
   padding: 15px 10px;
   text-align: center;
   color: white;
@@ -223,48 +225,51 @@
 
 /* Footer */
 .gift-footer {
-  margin-top: 100px;
-  background-color: #7398b5;
-  padding: 60px 20px;
+  background-color: #454538;
+  padding: 15px 0px;
   text-align: center;
   color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .footer-nav {
-  max-width: 600px;
-  margin: 0 auto 60px;
+  /* max-width: 600px; */
+  /* margin: 0 auto 60px; */
 }
 
 .footer-links-box {
-  border: 10px solid white;
-  padding: 40px 20px;
+  /* border: px solid white; */
+  /* padding: 40px 20px; */
   display: flex;
-  flex-direction: column;
-  gap: 15px;
+  flex-direction: row;
+  gap: 5px;
 }
 
 .footer-links-box a {
   color: white;
   text-decoration: none;
   font-family: 'Playfair Display', 'Noto Serif JP', serif;
-  font-size: 1.8rem;
+  /* font-size: 1.8rem; */
   letter-spacing: 0.1em;
   transition: opacity 0.3s;
 }
 
 .footer-links-box a:hover {
   opacity: 0.7;
+  cursor: pointer;
 }
 
 .footer-divider {
-  width: 30px;
+  width: 10px;
   height: 1px;
   background-color: white;
-  margin: 0 auto;
+  margin: 10px 5px;
 }
 
 .footer-logo {
-  height: 40px;
+  height: 30px;
   filter: brightness(0) invert(1);
   margin-top: 20px;
 }
@@ -301,7 +306,6 @@
   width: 100%;
   max-width: 900px;
   max-height: 90vh;
-  border-radius: 12px;
   position: relative;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -365,7 +369,7 @@
 }
 
 .gift-modal-thumbnails img.active-thumb {
-  border-color: #7398b5;
+  border-color: #454538;
 }
 
 .gift-modal-details {
@@ -565,7 +569,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 /* --- Cart Drawer --- */
@@ -575,7 +579,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 3000;
   opacity: 0;
   pointer-events: none;
@@ -598,7 +602,7 @@
   z-index: 3001;
   display: flex;
   flex-direction: column;
-  box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+  box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
   transition: right 0.3s ease;
 }
 
@@ -772,16 +776,17 @@
 @media (max-width: 600px) {
   .gift-header {
     padding: 0 15px;
-    height: 80px;
+    /* height: 40px; */
   }
 
   .header-center .logo-img {
-    height: 40px;
+    height: 35px;
   }
 
   .instagram-link img {
     width: 24px;
     height: 24px;
+    filter: none !important;
   }
 
   .gift-main-overlay h2 {
@@ -841,7 +846,7 @@
     height: 60px;
     font-size: 1.6rem;
   }
-  
+
   .floating-cart-icon {
     width: 28px;
     height: 28px;

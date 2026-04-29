@@ -333,7 +333,7 @@ export default function Gift() {
               <span>合計</span>
               <span className="cart-total-price">¥{cartTotal.toLocaleString()}</span>
             </div>
-            <button className="cart-checkout-btn" onClick={() => navigate('/order')}>
+            <button className="cart-checkout-btn" onClick={() => navigate('/gift/order')}>
               レジに進む
             </button>
           </div>
