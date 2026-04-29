@@ -15,6 +15,7 @@ import TimeSlotsManagement from './pages/TimeSlotsManagement';
 import CakeManagement from './pages/CakeManagement';
 import GiftManagement from './pages/GiftManagement';
 import Gift from './pages/Gift';
+import OrderGift from './pages/OrderGift';
 import StoreManagement from './pages/StoreManagement';
 import NewsletterManagement from './pages/NewsletterManagement';
 import Newsletter from './pages/Newsletter';
@@ -31,6 +32,7 @@ function App() {
         <Route path="/order" element={<OrderCake />} />
         <Route path="/newsletter" element={<Newsletter />} />
         <Route path="/gift" element={<Gift />} />
+        <Route path="/gift/order" element={<OrderGift />} />
 
         <Route path="/orderstore" element={
           <ProtectedRoute>

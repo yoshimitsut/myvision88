@@ -40,6 +40,9 @@ export default function GiftManagement() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [dragSource, setDragSource] = useState<'existing' | 'new' | null>(null);
 
   // ギフトを読み込む
   const fetchGifts = async () => {
@@ -104,6 +107,77 @@ export default function GiftManagement() {
 
   const removeExistingImage = (index: number) => {
     setExistingImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // 🔹 画像の並び替え (Drag & Drop)
+  const handleDragStart = (index: number, source: 'existing' | 'new') => {
+    setDragIndex(index);
+    setDragSource(source);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
+    setDragSource(null);
+  };
+
+  const handleDropExisting = (dropIndex: number) => {
+    if (dragIndex === null || dragSource !== 'existing') return;
+    setExistingImages(prev => {
+      const updated = [...prev];
+      const [moved] = updated.splice(dragIndex, 1);
+      updated.splice(dropIndex, 0, moved);
+      return updated;
+    });
+    handleDragEnd();
+  };
+
+  const handleDropNew = (dropIndex: number) => {
+    if (dragIndex === null || dragSource !== 'new') return;
+    setSelectedImages(prev => {
+      const updated = [...prev];
+      const [moved] = updated.splice(dragIndex, 1);
+      updated.splice(dropIndex, 0, moved);
+      return updated;
+    });
+    setImagePreviews(prev => {
+      const updated = [...prev];
+      const [moved] = updated.splice(dragIndex, 1);
+      updated.splice(dropIndex, 0, moved);
+      return updated;
+    });
+    handleDragEnd();
+  };
+
+  // 🔹 ボタンで並び替え
+  const moveExistingImage = (index: number, direction: -1 | 1) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= existingImages.length) return;
+    setExistingImages(prev => {
+      const updated = [...prev];
+      [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+      return updated;
+    });
+  };
+
+  const moveNewImage = (index: number, direction: -1 | 1) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= imagePreviews.length) return;
+    setSelectedImages(prev => {
+      const updated = [...prev];
+      [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+      return updated;
+    });
+    setImagePreviews(prev => {
+      const updated = [...prev];
+      [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+      return updated;
+    });
   };
 
   // 🔹 フォームをクリア
@@ -430,35 +504,107 @@ export default function GiftManagement() {
                 <div className="images-preview-grid">
                   {/* 既存の画像 */}
                   {existingImages.map((img, index) => (
-                    <div key={`existing-${index}`} className="image-preview-item">
+                    <div
+                      key={`existing-${img}`}
+                      className={`image-preview-item${
+                        dragSource === 'existing' && dragIndex === index ? ' dragging' : ''
+                      }${dragSource === 'existing' && dragOverIndex === index ? ' drag-over' : ''}`}
+                      draggable
+                      onDragStart={() => handleDragStart(index, 'existing')}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDragLeave={() => setDragOverIndex(null)}
+                      onDrop={() => handleDropExisting(index)}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <div className="image-order-badge">{index + 1}</div>
                       <img
                         src={`${API_URL}/image/${FOLDER_URL}/${img}`}
                         alt={`既存画像 ${index + 1}`}
                       />
-                      <button
-                        type="button"
-                        className="remove-image-btn"
-                        onClick={() => removeExistingImage(index)}
-                      >
-                        ❌
-                      </button>
+                      <div className="image-controls">
+                        <button
+                          type="button"
+                          className="move-btn"
+                          onClick={() => moveExistingImage(index, -1)}
+                          disabled={index === 0}
+                          title="左へ移動"
+                        >
+                          ◀
+                        </button>
+                        <button
+                          type="button"
+                          className="remove-image-btn"
+                          onClick={() => removeExistingImage(index)}
+                        >
+                          ❌
+                        </button>
+                        <button
+                          type="button"
+                          className="move-btn"
+                          onClick={() => moveExistingImage(index, 1)}
+                          disabled={index === existingImages.length - 1}
+                          title="右へ移動"
+                        >
+                          ▶
+                        </button>
+                      </div>
                     </div>
                   ))}
 
                   {/* 新しく選択された画像 */}
                   {imagePreviews.map((preview, index) => (
-                    <div key={`new-${index}`} className="image-preview-item">
+                    <div
+                      key={`new-${index}`}
+                      className={`image-preview-item${
+                        dragSource === 'new' && dragIndex === index ? ' dragging' : ''
+                      }${dragSource === 'new' && dragOverIndex === index ? ' drag-over' : ''}`}
+                      draggable
+                      onDragStart={() => handleDragStart(index, 'new')}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDragLeave={() => setDragOverIndex(null)}
+                      onDrop={() => handleDropNew(index)}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <div className="image-order-badge new">
+                        {existingImages.length + index + 1}
+                      </div>
                       <img src={preview} alt={`新規画像 ${index + 1}`} />
-                      <button
-                        type="button"
-                        className="remove-image-btn"
-                        onClick={() => removeSelectedImage(index)}
-                      >
-                        ❌
-                      </button>
+                      <div className="image-controls">
+                        <button
+                          type="button"
+                          className="move-btn"
+                          onClick={() => moveNewImage(index, -1)}
+                          disabled={index === 0}
+                          title="左へ移動"
+                        >
+                          ◀
+                        </button>
+                        <button
+                          type="button"
+                          className="remove-image-btn"
+                          onClick={() => removeSelectedImage(index)}
+                        >
+                          ❌
+                        </button>
+                        <button
+                          type="button"
+                          className="move-btn"
+                          onClick={() => moveNewImage(index, 1)}
+                          disabled={index === imagePreviews.length - 1}
+                          title="右へ移動"
+                        >
+                          ▶
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
+
+                {(existingImages.length > 0 || imagePreviews.length > 0) && (
+                  <small className="help-text" style={{ marginTop: '5px' }}>
+                    💡 ドラッグ＆ドロップ、または矢印ボタンで画像の順番を変更できます。1番目の画像がメイン画像になります。
+                  </small>
+                )}
 
                 {/* ファイル入力 */}
                 <input
