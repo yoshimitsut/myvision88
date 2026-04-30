@@ -16,6 +16,7 @@ setInterval(() => {
 const cakeRoutes = require('./routers/cakeRoutes');
 const orderRoutes = require('./routers/orderRoutes');
 const giftRoutes = require('./routers/giftRoutes');
+const giftOrderRoutes = require('./routers/giftOrderRoutes');
 const timeslotRoutes = require('./routers/timeslotRoutes');
 const newsletterRoutes = require('./routers/newsletter');
 const storeInfo = require('./routers/storeInfo');
@@ -82,6 +83,7 @@ const selectiveAuth = (req, res, next) => {
 
   const isPublicPost = req.method === 'POST' && (
     req.originalUrl === '/api/reservar' ||
+    req.originalUrl === '/api/gift-orders/reservar' ||
     req.originalUrl.startsWith('/api/newsletters')
   );
 
@@ -107,6 +109,7 @@ app.use('/api/storeinfo', selectiveAuth, storeInfo);
 
 // OrderRoutes é montado na raiz /api porque já contém /reservar e /list internamente
 app.use('/api', selectiveAuth, orderRoutes);
+app.use('/api/gift-orders', selectiveAuth, giftOrderRoutes);
 
 
 app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));

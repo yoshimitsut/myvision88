@@ -136,8 +136,8 @@ export default function OrderGift() {
 
     // Validate delivery address if shipping
     if (deliveryMethod === 'shipping') {
-      if (!shippingAddress.postalCode || !shippingAddress.prefecture || 
-          !shippingAddress.city || !shippingAddress.address1) {
+      if (!shippingAddress.postalCode || !shippingAddress.prefecture ||
+        !shippingAddress.city || !shippingAddress.address1) {
         alert('配送先住所を入力してください。');
         setIsSubmitting(false);
         return;
@@ -159,13 +159,46 @@ export default function OrderGift() {
   };
 
   const handleStorePayment = async () => {
-    // TODO: Backend integration
     try {
-      alert('ご注文ありがとうございます！\n店頭でのお支払いとなります。');
-      sessionStorage.removeItem('gift_cart');
-      navigate('/gift', {
-        state: { orderSuccess: true }
+      const orderPayload = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        tel: formData.tel,
+        email: formData.email,
+        delivery_method: deliveryMethod,
+        postal_code: deliveryMethod === 'shipping' ? shippingAddress.postalCode : null,
+        prefecture: deliveryMethod === 'shipping' ? shippingAddress.prefecture : null,
+        city: deliveryMethod === 'shipping' ? shippingAddress.city : null,
+        address1: deliveryMethod === 'shipping' ? shippingAddress.address1 : null,
+        address2: deliveryMethod === 'shipping' ? shippingAddress.address2 : null,
+        status: 'b',
+        message: formData.message,
+        total_amount: totalAmount,
+        items: cartItems.map(item => ({
+          gift_id: item.gift_id,
+          size: item.size,
+          amount: item.amount,
+          price: item.price
+        }))
+      };
+
+      const res = await fetch(`${API_URL}/api/gift-orders/reservar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload)
       });
+
+      const result = await res.json();
+
+      if (result.success) {
+        sessionStorage.removeItem('gift_cart');
+        navigate('/gift', {
+          state: { orderSuccess: true, orderId: result.id }
+        });
+      } else {
+        alert('注文の保存に失敗しました。');
+        console.error(result.error);
+      }
     } catch (error) {
       alert('エラーが発生しました。');
       console.error(error);
@@ -174,14 +207,60 @@ export default function OrderGift() {
     }
   };
 
-  const handlePaymentSuccess = async (_paymentResult: StripePaymentResponse) => {
-    // TODO: Backend integration
+  const formatPostalCode = (value: string) => {
+    const numbers = value.replace(/\D/g, '').slice(0, 7);
+
+    if (numbers.length <= 3) return numbers;
+
+    return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+  };
+
+  const cleanPostalCode = shippingAddress.postalCode.replace('-', '');
+
+  const handlePaymentSuccess = async (paymentResult: StripePaymentResponse) => {
+    setIsSubmitting(true);
+
     try {
-      alert('お支払いが完了しました！ありがとうございます。');
-      sessionStorage.removeItem('gift_cart');
-      navigate('/gift', {
-        state: { orderSuccess: true, paymentSuccess: true }
+      const orderPayload = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        tel: formData.tel,
+        email: formData.email,
+        delivery_method: deliveryMethod,
+        postal_code: deliveryMethod === 'shipping' ? shippingAddress.postalCode : null,
+        prefecture: deliveryMethod === 'shipping' ? shippingAddress.prefecture : null,
+        city: deliveryMethod === 'shipping' ? shippingAddress.city : null,
+        address1: deliveryMethod === 'shipping' ? shippingAddress.address1 : null,
+        address2: deliveryMethod === 'shipping' ? shippingAddress.address2 : null,
+        status: 'f',
+        message: formData.message,
+        total_amount: totalAmount,
+        payment_intent_id: paymentResult.paymentIntent.id,
+        items: cartItems.map(item => ({
+          gift_id: item.gift_id,
+          size: item.size,
+          amount: item.amount,
+          price: item.price
+        }))
+      };
+
+      const res = await fetch(`${API_URL}/api/gift-orders/reservar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload)
       });
+
+      const result = await res.json();
+
+      if (result.success) {
+        sessionStorage.removeItem('gift_cart');
+        navigate('/gift', {
+          state: { orderSuccess: true, paymentSuccess: true, orderId: result.id }
+        });
+      } else {
+        alert('予約の保存に失敗しましたが、支払いは完了しています。管理者に連絡してください。');
+        console.error(result.error);
+      }
     } catch (error) {
       alert('エラーが発生しました。');
       console.error(error);
@@ -224,13 +303,13 @@ export default function OrderGift() {
 
   // ==================== PREFECTURES ====================
   const PREFECTURES = [
-    '北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県',
-    '茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県',
-    '新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県',
-    '静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県',
-    '奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県',
-    '徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県',
-    '熊本県','大分県','宮崎県','鹿児島県','沖縄県'
+    '北海道', '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
+    '茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県',
+    '新潟県', '富山県', '石川県', '福井県', '山梨県', '長野県', '岐阜県',
+    '静岡県', '愛知県', '三重県', '滋賀県', '京都府', '大阪府', '兵庫県',
+    '奈良県', '和歌山県', '鳥取県', '島根県', '岡山県', '広島県', '山口県',
+    '徳島県', '香川県', '愛媛県', '高知県', '福岡県', '佐賀県', '長崎県',
+    '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県'
   ];
 
   // ==================== RENDER ====================
@@ -246,7 +325,7 @@ export default function OrderGift() {
 
         {paymentStep === 'form' ? (
           <form className="order-gift-form" onSubmit={handleSubmit}>
-            
+
             {/* ==================== 商品一覧 ==================== */}
             <div className="og-section">
               <label className="og-section-title">ご注文内容</label>
@@ -255,9 +334,9 @@ export default function OrderGift() {
                   <div key={item.id} className="og-cart-item">
                     <div className="og-item-image">
                       {item.image ? (
-                        <img 
-                          src={`${API_URL}/image/${FOLDER_URL}/${item.image}`} 
-                          alt={item.name} 
+                        <img
+                          src={`${API_URL}/image/${FOLDER_URL}/${item.image}`}
+                          alt={item.name}
                         />
                       ) : (
                         <div className="og-no-image">画像なし</div>
@@ -268,18 +347,18 @@ export default function OrderGift() {
                       <p className="og-item-size">{item.size}</p>
                       <p className="og-item-price">¥{item.price.toLocaleString()}</p>
                       <div className="og-item-quantity">
-                        <button 
+                        <button
                           type="button"
-                          className="og-qty-btn" 
+                          className="og-qty-btn"
                           onClick={() => updateItemAmount(item.id, item.amount - 1)}
                           disabled={item.amount <= 1}
                         >
                           −
                         </button>
                         <span className="og-qty-value">{item.amount}</span>
-                        <button 
+                        <button
                           type="button"
-                          className="og-qty-btn" 
+                          className="og-qty-btn"
                           onClick={() => updateItemAmount(item.id, item.amount + 1)}
                         >
                           +
@@ -290,8 +369,8 @@ export default function OrderGift() {
                       <span className="og-subtotal-price">
                         ¥{(item.price * item.amount).toLocaleString()}
                       </span>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         className="og-remove-btn"
                         onClick={() => removeCartItem(item.id)}
                       >
@@ -399,9 +478,13 @@ export default function OrderGift() {
                         <input
                           type="text"
                           id="postalCode"
+                          maxLength={8} // 123-4567
                           placeholder="例: 123-4567"
                           value={shippingAddress.postalCode}
-                          onChange={handleAddressChange}
+                          onChange={(e) => {
+                            const formatted = formatPostalCode(e.target.value);
+                            setShippingAddress(prev => ({ ...prev, postalCode: formatted }));
+                          }}
                           required
                         />
                       </div>
@@ -543,8 +626,8 @@ export default function OrderGift() {
                 className="og-submit-btn"
                 disabled={isSubmitting}
               >
-                {isSubmitting 
-                  ? '処理中...' 
+                {isSubmitting
+                  ? '処理中...'
                   : `お支払いに進む (¥${totalAmount.toLocaleString()})`
                 }
               </button>

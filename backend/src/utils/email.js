@@ -1,6 +1,8 @@
 const { Resend } = require('resend');
 const QRCode = require('qrcode');
 const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
 const { loadStoreConfig, getStoreConfig } = require('../config/storeConfig');
 
 /**
@@ -369,7 +371,7 @@ async function sendOrderCompletedNotification(order) {
                         <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">
                             <strong style="font-size: large;">${config.store_name}</strong><br>
                             OPEN ${config.open_hour}<br>
-                            TEL: <a href="tel:${config.tel}" style="color: #007bff;">${config.tel}</a>
+                            TEL: <a href="tel:${config.tel}" style="color: #007bff; text-decoration: none;">${config.tel}</a>
                         </p>
                         <p style="margin: 0; font-size: 12px; color: #999;">
                             このメールは自動送信されています
@@ -388,9 +390,148 @@ async function sendOrderCompletedNotification(order) {
 }
 
 
+/**
+ * Envia confirmação de novo pedido de Gift
+ */
+async function sendNewGiftOrderConfirmation(newOrder, orderId) {
+    try {
+        const QRCode = require('qrcode');
+        const qrCodeBuffer = await QRCode.toBuffer(`G-${String(orderId)}`, { type: 'png', width: 400 });
+        const qrCodeContentId = 'qrcode_gift_order_id';
+        
+        const config = await loadStoreConfig();
+        const resend = await getResendInstance();
+
+        const totalGeral = newOrder.items.reduce((total, item) => {
+            return total + (item.price * item.amount);
+        }, 0);
+
+        const deliveryLabel = newOrder.delivery_method === 'shipping' ? '配送' : '店舗受取';
+        
+        const addressHtml = newOrder.delivery_method === 'shipping' ? `
+            <div style="background: #f0f8ff; padding: 12px; border-radius: 6px; margin: 10px 0;">
+                <p style="margin: 5px 0;"><strong>配送先住所:</strong></p>
+                <p style="margin: 3px 0;">〒${newOrder.postal_code || ''}</p>
+                <p style="margin: 3px 0;">${newOrder.prefecture || ''} ${newOrder.city || ''}</p>
+                <p style="margin: 3px 0;">${newOrder.address1 || ''}</p>
+                ${newOrder.address2 ? `<p style="margin: 3px 0;">${newOrder.address2}</p>` : ''}
+            </div>
+        ` : '';
+
+        // Preparar anexos e CIDs para as imagens dos produtos
+        const attachments = [
+            {
+                filename: 'qrcode.png',
+                content: qrCodeBuffer,
+                contentDisposition: 'inline',
+                contentId: qrCodeContentId
+            }
+        ];
+
+        // Mapear itens para incluir o CID da imagem
+        const itemsWithCid = newOrder.items.map((item, index) => {
+            const cid = `item_image_${index}`;
+            // Pasta de upload padrão é 'myvision88' se config.folder_img não estiver definido ou for diferente
+            const folder = config.folder_img || 'myvision88';
+            const imagePath = path.join(process.cwd(), 'uploads', folder, item.image);
+            
+            if (item.image && fs.existsSync(imagePath)) {
+                attachments.push({
+                    filename: item.image,
+                    content: fs.readFileSync(imagePath),
+                    contentDisposition: 'inline',
+                    contentId: cid
+                });
+                return { ...item, cid };
+            }
+            return { ...item, cid: null };
+        });
+
+        const htmlContent = `
+        <div style="border: 1px solid #ddd; padding: 20px; max-width: 400px; margin: 0 auto; font-family: Arial, sans-serif;">  
+            <h2>🎁 ギフト注文ありがとうございます！</h2>
+            <p>お名前: ${newOrder.first_name} ${newOrder.last_name}</p>
+            <p>受付番号: <strong>G-${String(orderId).padStart(4, "0")}</strong></p>
+            <p>電話番号: ${newOrder.tel}</p>
+            <p>配送方法: ${deliveryLabel}</p>
+            ${addressHtml}
+            <p>メッセージ: ${newOrder.message || '無し'}</p>
+
+            <h3 style="border-bottom: 2px solid #333; padding-bottom: 5px;">ご注文商品</h3>
+                    
+            ${itemsWithCid.map(item => {
+                const itemTotal = item.price * item.amount;
+                const imgSrc = item.cid ? `cid:${item.cid}` : `${config.site_back}/image/${config.folder_img}/${item.image}`;
+                
+                return `
+                    <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
+                        <tr>
+                            <td style="width: 120px; padding: 15px 0px 15px 15px; vertical-align: top;">
+                                <img src="${imgSrc}" 
+                                    alt="${item.name}" 
+                                    width="100" 
+                                    style="border-radius: 6px; border: 1px solid #ddd;">
+                            </td>
+                            <td style="padding: 15px 10px 15px 0px; vertical-align: top;">
+                                <h3 style="margin: 0 0 10px 0;">${item.name}</h3>
+                                ${item.size ? `<p style="margin: 5px 0;"><strong>サイズ:</strong> ${item.size}</p>` : ''}
+                                <p style="margin: 5px 0;"><strong>個数:</strong> ${item.amount}個</p>
+                                <p style="margin: 5px 0;"><strong>価格:</strong> ¥${Math.trunc(item.price).toLocaleString("ja-JP")}</p>
+                                <hr/>
+                                <strong>小計 ¥${Math.trunc(itemTotal).toLocaleString("ja-JP")}</strong>
+                            </td>
+                        </tr>
+                    </table>
+                `;
+            }).join('')}
+
+            <div style="max-width: 400px; background: #ddd; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                <h3 style="margin: 0; color: #000;">合計金額</h3>
+                <p style="font-size: 24px; font-weight: bold; margin: 10px 0 0 0;">
+                    ¥${Math.trunc(totalGeral).toLocaleString("ja-JP")}
+                    <span style="font-size: 14px; font-weight: normal;">(税込)</span>
+                </p>
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <p><strong>受付用QRコード</strong></p>
+                <p><strong style="color: red;">受け取り時にご提示ください。</strong></p>
+                <img src="cid:${qrCodeContentId}" width="300" style="display: block; margin: 0 auto;" />
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 20px;">
+                <p style="margin: 0; font-size: 14px;">上記の内容に相違がございましたら、お手数をお掛けしますが、</p>
+                <p style="margin: 5px 0 0 0; font-size: 14px;">ご連絡をお願いいたします。</p>
+                <p style="margin: 10px 0 0 0;"><strong style="font-size: large;">${config.store_name}</strong></p>
+                <p style="margin: 5px 0;">OPEN ${config.open_hour}</p>
+                <p style="margin: 5px 0;">TEL: <a href="tel:${config.tel}" style="color: #007bff; text-decoration: none;">${config.tel}</a></p>
+            </div>
+            <p style="text-align: center; margin-top: 20px; font-style: italic;">宜しくお願いいたします。</p>
+        </div>
+        `;
+
+        const result = await resend.emails.send({
+            from: `"${config.store_name}" <order@yoyaku.myvision88.com>`,
+            to: [newOrder.email, config.mail_store],
+            subject: `🎁 ギフト注文確認 - 受付番号 G-${String(orderId).padStart(4, "0")}`,
+            html: htmlContent,
+            attachments: attachments
+        });
+
+        return { success: true, result };
+    } catch (error) {
+        console.error('Erro em sendNewGiftOrderConfirmation:', error);
+        throw error;
+    }
+}
+
+
+
+
 module.exports = {
     sendNewOrderConfirmation,
     sendOrderUpdateNotification,
     sendCancellationNotification,
-    sendOrderCompletedNotification
+    sendOrderCompletedNotification,
+    sendNewGiftOrderConfirmation
 };
