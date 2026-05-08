@@ -4,26 +4,26 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { addDays, isSameDay, format, endOfMonth, getDay } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
-import type { OrderCake, SizeOption } from "../types/types";
+import type { OrderCake, SizeOption } from "../../types/types";
 
-import { PaymentFormStripe } from '../components/PaymentFormStripe';
+import { PaymentFormStripe } from '../../components/order/PaymentFormStripe';
 
 import "react-datepicker/dist/react-datepicker.css";
 import "./OrderCakeStore.css";
 
 // ==================== HOOKS PERSONALIZADOS ====================
-import Input from '../components/forms/Input';
+import Input from '../../components/shared/forms/Input';
 
-import { useCakesData } from '../hooks/useCakesData';
-import { useTimeSlots } from '../hooks/useTimeSlots';
-import { useExcludedDates } from '../hooks/useExcludedDates';
-import { useHoursOptions } from '../hooks/useHoursOptions';
-import { useOrderForm } from '../hooks/useOrderForm';
-import { useDateValidation } from '../hooks/useDateValidation';
+import { useCakesData } from '../../hooks/useCakesData';
+import { useTimeSlots } from '../../hooks/useTimeSlots';
+import { useExcludedDates } from '../../hooks/useExcludedDates';
+import { useHoursOptions } from '../../hooks/useHoursOptions';
+import { useOrderForm } from '../../hooks/useOrderForm';
+import { useDateValidation } from '../../hooks/useDateValidation';
 
 // ==================== IMPORTS PARA PAGAMENTO ====================
-import { calculateTotalPrice } from '../utils/priceCalculator';
-import type { StripePaymentResponse, StripeError, OrderData, OrderStatus, PaymentStatus } from '../types/stripe';
+import { calculateTotalPrice } from '../../utils/priceCalculator';
+import type { StripePaymentResponse, StripeError, OrderData, OrderStatus, PaymentStatus } from '../../types/stripe';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;

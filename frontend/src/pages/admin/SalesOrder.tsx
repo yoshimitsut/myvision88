@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import "./SalesOrder.css";
-import type { Order } from "../types/types";
-import { STATUS_OPTIONS } from "../types/types";
+import type { Order } from "../../types/types";
+import { STATUS_OPTIONS } from "../../types/types";
 import { useNavigate } from "react-router-dom";
 
 // Interfaces para tipagem correta

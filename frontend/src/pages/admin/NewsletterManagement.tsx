@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import type { Newsletter } from "../types/types";
+import type { Newsletter } from "../../types/types";
 import "./NewsletterManagement.css";
 
-import { formatDateJP } from "../utils/formatDateJP";
+import { formatDateJP } from "../../utils/formatDateJP";
 
 const API_URL = import.meta.env.VITE_API_URL;
 

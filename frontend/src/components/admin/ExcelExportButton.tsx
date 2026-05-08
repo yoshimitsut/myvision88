@@ -1,7 +1,7 @@
 import React from 'react';
 import ExcelJS from 'exceljs';
 
-import type { Order, OrderCake } from '../types/types';
+import type { Order, OrderCake } from '../../types/types';
 
 type ExcelExportButtonProps = {
   data: Order[];

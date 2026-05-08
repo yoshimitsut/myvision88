@@ -1,26 +1,30 @@
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import ListOrder from './pages/ListOrder';
-import OrderCake from './pages/OrderCake';
-import SalesOrder from './pages/SalesOrder';
-import Check from './pages/Check';
-import Hero from './pages/Hero';
-import CakeInformation from './pages/CakeInformations';
-import CakeInformationSize from './pages/CakeInformationsSize';
-import OrderCakeStore from './pages/OrderCakeStore';
-import StoreLogin from './pages/StoreLogin';
-import ProtectedRoute from './components/ProtectedRoute';
 
-import TimeSlotsManagement from './pages/TimeSlotsManagement';
-import CakeManagement from './pages/CakeManagement';
-import GiftManagement from './pages/GiftManagement';
-import Gift from './pages/Gift';
-import OrderGift from './pages/OrderGift';
-import StoreManagement from './pages/StoreManagement';
-import NewsletterManagement from './pages/NewsletterManagement';
-import Newsletter from './pages/Newsletter';
+// Páginas Públicas
+import Hero from './pages/public/Hero';
+import CakeInformation from './pages/public/CakeInformations';
+import CakeInformationSize from './pages/public/CakeInformationsSize';
+import OrderCake from './pages/public/OrderCake';
+import Gift from './pages/public/Gift';
+import OrderGift from './pages/public/OrderGift';
+import Check from './pages/public/Check';
+import Newsletter from './pages/public/Newsletter';
 
-import StoreSettings from './pages/StoreSettings'
+// Páginas Admin
+import StoreLogin from './pages/admin/StoreLogin';
+import ListOrder from './pages/admin/ListOrder';
+import SalesOrder from './pages/admin/SalesOrder';
+import OrderCakeStore from './pages/admin/OrderCakeStore';
+import TimeSlotsManagement from './pages/admin/TimeSlotsManagement';
+import CakeManagement from './pages/admin/CakeManagement';
+import GiftManagement from './pages/admin/GiftManagement';
+import StoreManagement from './pages/admin/StoreManagement';
+import NewsletterManagement from './pages/admin/NewsletterManagement';
+import StoreSettings from './pages/admin/StoreSettings';
+
+// Componentes
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
   return (

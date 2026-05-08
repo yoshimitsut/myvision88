@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Input from '../components/forms/Input';
-import { PaymentFormStripe } from '../components/PaymentFormStripe';
-import type { StripePaymentResponse, StripeError, OrderSummaryData } from '../types/stripe';
+import Input from '../../components/shared/forms/Input';
+import { PaymentFormStripe } from '../../components/order/PaymentFormStripe';
+import type { StripePaymentResponse, StripeError, OrderSummaryData } from '../../types/stripe';
 import './OrderGift.css';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -215,7 +215,6 @@ export default function OrderGift() {
     return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
   };
 
-  const cleanPostalCode = shippingAddress.postalCode.replace('-', '');
 
   const handlePaymentSuccess = async (paymentResult: StripePaymentResponse) => {
     setIsSubmitting(true);

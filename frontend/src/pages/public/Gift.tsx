@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Gift } from "../types/types";
+import type { Gift } from "../../types/types";
 import "./Gift.css";
 
 const API_URL = import.meta.env.VITE_API_URL;

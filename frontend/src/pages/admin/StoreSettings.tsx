@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { StoreInfo } from '../types/types';
+import type { StoreInfo } from '../../types/types';
 import './StoreSettings.css';
 
 export default function StoreSettings() {

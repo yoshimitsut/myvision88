@@ -1,7 +1,7 @@
 // components/Header.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { HeaderConfig, HeaderButton } from '../types/header';
+import type { HeaderConfig, HeaderButton } from '../../types/header';
 
 type HeaderProps = HeaderConfig;
 

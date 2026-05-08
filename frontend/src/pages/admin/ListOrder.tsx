@@ -3,14 +3,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Html5Qrcode } from 'html5-qrcode';
 import Select from "react-select";
 
-import ExcelExportButton from '../components/ExcelExportButton';
-import EditOrderModal from "../components/EditOrderModal";
+import ExcelExportButton from '../../components/admin/ExcelExportButton';
+import EditOrderModal from "../../components/admin/EditOrderModal";
 
 import type { StylesConfig, SingleValue } from 'react-select';
-import type { Order, StatusOption } from '../types/types';
-import { STATUS_OPTIONS } from '../types/types';
+import type { Order, StatusOption } from '../../types/types';
+import { STATUS_OPTIONS } from '../../types/types';
 
-import { formatDateJP } from "../utils/formatDateJP";
+import { formatDateJP } from "../../utils/formatDateJP";
 
 import './ListOrder.css';
 

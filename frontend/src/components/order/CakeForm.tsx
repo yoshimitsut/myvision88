@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Cake, SizeOption } from '../types/types';
+import type { Cake, SizeOption } from '../../types/types';
 import './CakeForm.css';
 
 interface CakeFormProps {

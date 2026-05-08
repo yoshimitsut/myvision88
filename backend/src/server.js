@@ -12,16 +12,16 @@ setInterval(() => {
   // Apenas para manter o event loop ocupado
 }, 1000000);
 
-// Importar Routers
-const cakeRoutes = require('./routers/cakeRoutes');
-const orderRoutes = require('./routers/orderRoutes');
-const giftRoutes = require('./routers/giftRoutes');
-const giftOrderRoutes = require('./routers/giftOrderRoutes');
-const timeslotRoutes = require('./routers/timeslotRoutes');
-const newsletterRoutes = require('./routers/newsletter');
-const storeInfo = require('./routers/storeInfo');
-const stripeRoutes = require('./routers/stripe');
-const authRoutes = require('./routers/authRoutes');
+// Importar Routes
+const cakeRoutes = require('./routes/cakeRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const giftRoutes = require('./routes/giftRoutes');
+const giftOrderRoutes = require('./routes/giftOrderRoutes');
+const timeslotRoutes = require('./routes/timeslotRoutes');
+const newsletterRoutes = require('./routes/newsletter');
+const storeInfo = require('./routes/storeInfo');
+const stripeRoutes = require('./routes/stripe');
+const authRoutes = require('./routes/authRoutes');
 
 // Middleware de Autenticação
 const authMiddleware = require('./middleware/authMiddleware');

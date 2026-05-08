@@ -528,10 +528,135 @@ async function sendNewGiftOrderConfirmation(newOrder, orderId) {
 
 
 
+async function sendGiftCancellationNotification(order, itemsDetails) {
+    try {
+        const orderId = order.id_order;
+        const itemListHtml = itemsDetails.map(item => `
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.size || '-'}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.amount}個</td>
+            </tr>
+        `).join('');
+
+        const formattedDate = formatDateJP(order.created_at);
+        
+        const config = await loadStoreConfig();
+        const transporter = await getTransporter();
+
+        const mailOptions = {
+            from: `"${config.store_name}" <${config.mail_resend}>`,
+            to: [order.email, config.mail_store],
+            subject: `🎁 ギフト注文キャンセル完了 - 受付番号 G-${String(orderId).padStart(4, "0")}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #d32f2f;">ギフト注文がキャンセルされました</h2>
+                        <p style="color: #666;">以下の注文がキャンセル処理されました</p>
+                    </div>
+
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="margin: 0 0 10px 0; color: #333;">注文詳細</h3>
+                        <p><strong>受付番号：</strong> G-${String(orderId).padStart(4, "0")}</p>
+                        <p><strong>お名前：</strong> ${order.first_name} ${order.last_name}様</p>
+                        <p><strong>注文日：</strong> ${formattedDate}</p>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="color: #333; margin-bottom: 10px;">キャンセルされた商品</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f5f5f5;">
+                                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">商品名</th>
+                                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">サイズ</th>
+                                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #ddd;">数量</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemListHtml}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeaa7; margin-bottom: 20px;">
+                        <h4 style="color: #856404; margin: 0 0 10px 0;">📝 キャンセルについて</h4>
+                        <p style="color: #856404; margin: 0; font-size: 14px;">
+                            ギフト注文のキャンセルが完了しました。<br>
+                            ご不明な点がございましたら、下記までご連絡ください。
+                        </p>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                        <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">
+                            <strong style="font-size: large;">${config.store_name} </strong><br>
+                            OPEN ${config.open_hour}<br>
+                            TEL: <a href="tel:${config.tel}" style="color: #007bff;">${config.tel}</a>
+                        </p>
+                    </div>
+                </div>
+            `
+        };
+
+        const result = await transporter.sendMail(mailOptions);
+        return { success: true, result };
+    } catch (error) {
+        console.error('Erro em sendGiftCancellationNotification:', error);
+        throw error;
+    }
+}
+
+async function sendGiftCompletedNotification(order) {
+    try {
+        const config = await loadStoreConfig();
+        const transporter = await getTransporter();
+
+        const mailOptions = {
+            from: `"${config.store_name}" <${config.mail_store}>`,
+            to: order.email,
+            subject: `🎁 ギフト商品発送/お渡し完了 - 受付番号 G-${String(order.id_order).padStart(4, "0")}`,
+            html: `
+                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #2e7d32;">✅ ギフト商品の発送/お渡しが完了しました</h2>
+                        <p style="color: #666;">ご利用ありがとうございました</p>
+                    </div>
+
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="margin: 0 0 10px 0; color: #333;">注文詳細</h3>
+                        <p><strong>受付番号：</strong> G-${String(order.id_order).padStart(4, "0")}</p>
+                        <p><strong>お名前：</strong> ${order.first_name} ${order.last_name}様</p>
+                    </div>
+
+                    <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border: 1px solid #c8e6c9; margin-bottom: 20px; text-align: center;">
+                        <p style="color: #2e7d32; margin: 0; font-size: 16px;">
+                            またのご利用を心よりお待ちしております。🎁
+                        </p>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                        <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">
+                            <strong style="font-size: large;">${config.store_name}</strong><br>
+                            TEL: <a href="tel:${config.tel}" style="color: #007bff; text-decoration: none;">${config.tel}</a>
+                        </p>
+                    </div>
+                </div>
+            `
+        };
+
+        const result = await transporter.sendMail(mailOptions);
+        return { success: true, result };
+    } catch (error) {
+        console.error('Error em sendGiftCompletedNotification:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     sendNewOrderConfirmation,
     sendOrderUpdateNotification,
     sendCancellationNotification,
     sendOrderCompletedNotification,
-    sendNewGiftOrderConfirmation
+    sendNewGiftOrderConfirmation,
+    sendGiftCancellationNotification,
+    sendGiftCompletedNotification
 };

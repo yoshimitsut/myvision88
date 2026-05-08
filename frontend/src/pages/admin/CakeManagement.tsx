@@ -1,6 +1,6 @@
 import './CakeManagement.css';
-import CakeForm from '../components/CakeForm';
-import { useCakeManagement } from '../hooks/useCakeManagement';
+import CakeForm from '../../components/order/CakeForm';
+import { useCakeManagement } from '../../hooks/useCakeManagement';
 
 export default function CakeManagement() {
   const {

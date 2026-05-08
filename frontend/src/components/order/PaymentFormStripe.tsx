@@ -11,7 +11,7 @@ import type {
   PaymentFormProps,
   StripePaymentResponse,
   OrderSummaryData
-} from '../types/stripe';
+} from '../../types/stripe';
 import './PaymentForm.css';
 
 const API_URL = import.meta.env.VITE_API_URL;

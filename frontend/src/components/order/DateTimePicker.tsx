@@ -4,7 +4,7 @@ import DatePicker from "react-datepicker";
 import Select from "react-select";
 import { ja } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
-import type { TimeOptionType } from "../types/types";
+import type { TimeOptionType } from "../../types/types";
 import { addDays, isSameDay, endOfMonth, getDay, format } from "date-fns";
 
 export type DateTimePickerProps = {

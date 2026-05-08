@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const { sendNewGiftOrderConfirmation } = require('../utils/email');
+const { sendNewGiftOrderConfirmation, sendGiftCancellationNotification, sendGiftCompletedNotification } = require('../utils/email');
 const { cancelStripePayment } = require('../services/stripeService');
 
 // =============================================
@@ -215,15 +215,32 @@ router.put('/:id_order', async (req, res) => {
     // Atualizar status
     await conn.query('UPDATE gift_orders SET status=? WHERE id_order=?', [status, id_order]);
 
-    // Se for cancelamento, devolver estoque
+    // Se for cancelamento, devolver estoque e enviar email
     if (status === 'e' && previousStatus !== 'e') {
       const [orderItems] = await conn.query('SELECT * FROM gift_order_items WHERE order_id=?', [id_order]);
+      
+      // Devolver estoque
       for (const item of orderItems) {
         await conn.query(
           'UPDATE gift_sizes SET stock = stock + ? WHERE gift_id=? AND size=?',
           [item.amount, item.gift_id, item.size]
         );
       }
+
+      // Buscar detalhes dos itens para o email
+      const [itemsDetails] = await conn.query(`
+        SELECT goi.*, g.name 
+        FROM gift_order_items goi 
+        JOIN gift g ON goi.gift_id = g.id 
+        WHERE goi.order_id = ?
+      `, [id_order]);
+
+      await sendGiftCancellationNotification(order, itemsDetails);
+    }
+
+    // Se for conclusão, enviar email
+    if (status === 'd' && previousStatus !== 'd') {
+      await sendGiftCompletedNotification(order);
     }
 
     // Se for reativação, remover estoque novamente

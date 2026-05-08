@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import Select, { type SingleValue, type StylesConfig } from "react-select";
 import type { CSSObjectWithLabel, GroupBase } from "react-select";
-import DateTimePicker from "./DateTimePicker";
-import type { Order, Cake, OrderCake, SizeOption } from "../types/types";
-import { formatDateForBackend } from "../utils/dateUtils";
-import FruitOptionRadio from "./FruitOptionRadio";
+import DateTimePicker from "../order/DateTimePicker";
+import type { Order, Cake, OrderCake, SizeOption } from "../../types/types";
+import { formatDateForBackend } from "../../utils/dateUtils";
+import FruitOptionRadio from "../order/FruitOptionRadio";
 
 import './EditOrderModal.css';
 
