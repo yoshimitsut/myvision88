@@ -53,6 +53,11 @@
     font-size: 2rem;
     color: red;
   }
+  
+  .line5 {
+    font-size: 0.8rem;
+    color: red;
+  }
 
 
 /* OTIMIZAÇÃO PARA CELULAR (Media Query) */

@@ -120,6 +120,7 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
             <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 20px;">
                 <p style="margin: 0; font-size: 14px;">上記の内容に相違がございましたら、お手数をお掛けしますが、</p>
                 <p style="margin: 5px 0 0 0; font-size: 14px;">ご連絡をお願いいたします。</p>
+                <p style="margin: 5px 0 0 0; font-size: 10px; color: red; text-align: center;">※ご注文をキャンセルされる場合、商品受取日3日前までにお店にご連絡お願い致します。</p>
                 <p style="margin: 10px 0 0 0;"><strong style="font-size: large;">${config.store_name}</strong></p>
                 <p style="margin: 5px 0;">OPEN ${config.open_hour}</p>
                 <p style="margin: 5px 0;">TEL: <a href="tel:${config.tel}" style="color: #007bff; text-decoration: none;">${config.tel}</a></p>
@@ -225,6 +226,7 @@ async function sendOrderUpdateNotification(orderData) {
                     <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 20px;">
                         <p style="margin: 0; font-size: 14px;">上記の内容に相違がございましたら、お手数をお掛けしますが、</p>
                         <p style="margin: 5px 0 0 0; font-size: 14px;">ご連絡をお願いいたします。</p>
+                        <p style="margin: 5px 0 0 0; font-size: 10px; color: red; text-align: center;">※ご注文をキャンセルされる場合、商品受取日3日前までにお店にご連絡お願い致します。</p>
                         <p style="margin: 10px 0 0 0;"><strong style="font-size: large;">${config.store_name}</strong></p>
                         <p style="margin: 5px 0;">OPEN ${config.open_hour}</p>
                         <p style="margin: 5px 0;">TEL: <a href="tel:${config.tel}" style="color: #007bff; text-decoration: none;">${config.tel}</a></p>
@@ -502,6 +504,7 @@ async function sendNewGiftOrderConfirmation(newOrder, orderId) {
             <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 20px;">
                 <p style="margin: 0; font-size: 14px;">上記の内容に相違がございましたら、お手数をお掛けしますが、</p>
                 <p style="margin: 5px 0 0 0; font-size: 14px;">ご連絡をお願いいたします。</p>
+                <p style="margin: 5px 0 0 0; font-size: 10px; color: red; text-align: center;">※ご注文をキャンセルされる場合、商品受取日3日前までにお店にご連絡お願い致します。</p>
                 <p style="margin: 10px 0 0 0;"><strong style="font-size: large;">${config.store_name}</strong></p>
                 <p style="margin: 5px 0;">OPEN ${config.open_hour}</p>
                 <p style="margin: 5px 0;">TEL: <a href="tel:${config.tel}" style="color: #007bff; text-decoration: none;">${config.tel}</a></p>

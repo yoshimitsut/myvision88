@@ -8,7 +8,9 @@ export default function Verification() {
         <div className='line2'>ご注文ありがとうございます。</div>
         <div className='line3'>ご指定のメールアドレスに</div>
         <div className='line4'>確認メールを送らせていただきましたので</div>      
-        <div className='line4'>必ずご確認ください。</div>      
+        <div className='line4'>必ずご確認ください。</div>
+        <div className='line5'>※ご注文をキャンセルされる場合、商品受取日3日前までにお店にご連絡お願い致します。</div>
+
       </div>
     </div>
   )
