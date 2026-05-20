@@ -159,3 +159,34 @@ export type Gift = {
   images: string[];     // Array of all images
   sizes: GiftSize[];
 };
+
+export type OrderGiftItem = {
+  id: number;
+  gift_id: number;
+  name: string;
+  image: string | null;
+  size: string;
+  amount: number;
+  price: number;
+};
+
+export type GiftOrder = {
+  id_order: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  tel: string;
+  delivery_method: "pickup" | "shipping";
+  postal_code?: string;
+  prefecture?: string;
+  city?: string;
+  address1?: string;
+  address2?: string;
+  date_order: string;
+  message: string;
+  status: string;
+  payment_status: string;
+  payment_intent_id?: string;
+  total_amount: number;
+  items: OrderGiftItem[];
+};

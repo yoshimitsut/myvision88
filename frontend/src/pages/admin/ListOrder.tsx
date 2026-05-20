@@ -11,10 +11,12 @@ import type { Order, StatusOption } from '../../types/types';
 import { STATUS_OPTIONS } from '../../types/types';
 
 import { formatDateJP } from "../../utils/formatDateJP";
+import ListGiftOrder from "./ListGiftOrder";
 
 import './ListOrder.css';
 
 export default function ListOrder() {
+  const [viewType, setViewType] = useState<"cake" | "gift">("cake");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [showScanner, setShowScanner] = useState(false);
@@ -1368,149 +1370,172 @@ export default function ListOrder() {
 
   return (
     <div className='list-order-container'>
-      <div className="list-order-actions">
-        <input
-          type="text"
-          placeholder='検索：お名前、電話番号、受付番号などを入力'
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className='list-order-input'
-        />
-
-        <div className='btn-actions'>
-          <button onClick={() => navigate("/admin/date")} className='list-btn qrcode-btn'>
-            <img src="/icons/calendar_icon.png" alt="QRコードアイコン" />
-          </button>
-          <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
-          <button onClick={() => setShowScanner(true)} className='list-btn qrcode-btn'>
-            <img src="/icons/qr-code.ico" alt="QRコードアイコン" />
-          </button>
-          <button onClick={() => navigate("/ordertable")} className='list-btn'>
-            <img src="/icons/graph.ico" alt="グラフアイコン" />
-          </button>
-        </div>
-      </div>
-
-      {showScanner && (
-        <div style={{ position: 'relative', marginBottom: 20 }}>
-          <button
-            onClick={() => setShowScanner(false)}
-            style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              zIndex: 1000,
-              background: 'red',
-              color: 'white',
-              border: 'none',
-              borderRadius: '50%',
-              width: '30px',
-              height: '30px',
-              cursor: 'pointer'
-            }}
-          >
-            ×
-          </button>
-          <div id="reader" style={{ width: '100%', maxWidth: '300px' }}></div>
-        </div>
-      )}
-
-
-      {foundScannedOrder && (
-        <div style={{ border: '1px solid #007bff', padding: 12, marginBottom: 20 }}>
-          <strong>
-            <Select
-              options={statusOptions}
-              value={statusOptions.find((opt) => String(opt.value) === String(foundScannedOrder.status))}
-              onChange={(selected) =>
-                handleStatusChange(
-                  foundScannedOrder.id_order,
-                  selected?.value as "a" | "b" | "c" | "d" | "e"
-                )
-              }
-              isDisabled={isUpdating}
-              isLoading={isUpdating}
-              styles={customStyles}
-              isSearchable={false}
-            />
-          </strong>
-          <strong>受付番号: </strong> {String(foundScannedOrder.id_order).padStart(4, "0")}<br />
-          <strong>お名前: </strong> {foundScannedOrder.first_name} {foundScannedOrder.last_name}<br />
-          <strong>電話番号: </strong> {foundScannedOrder.tel}<br />
-          <strong>受取日: </strong> {formatDateJP(foundScannedOrder.date)} - {foundScannedOrder.pickupHour}<br />
-          <strong>ご注文のケーキ: </strong>
-          <ul className='cake-list'>
-            {foundScannedOrder.cakes.map((cake, index) => (
-              <li key={`${cake.cake_id}-${index}`}>
-                <span className='cake-name'>{cake.name}</span>
-                <span className='cake-amount'>¥{cake.price.toLocaleString()}</span>
-                <span className='cake-size'>サイズ: {cake.size}</span>
-                <span className='cake-quantity'>個数: {cake.amount}</span>
-                <span className='cake-fruitop'>フルーツ盛り: {cake.fruit_option}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {loading ? (
-        <p>読み込み中...</p>
-      ) : orders.length === 0 ? (
-        <p>注文が見つかりません。</p>
+      {viewType === "gift" ? (
+        <ListGiftOrder viewType={viewType} setViewType={setViewType} />
       ) : (
         <>
-          {/* 🔹 ABAS ATUALIZADAS - 5 ABAS AGORA */}
-          <div className="tabs-container">
-            <div className="tabs-header">
-              <button
-                className={`tab-button ${activeTab === "today" ? "active" : ""}`}
-                onClick={() => setActiveTab("today")}
-              >
-                🎂 本日お渡し予定分 ({todayOrders.length})
-              </button>
-              <button
-                className={`tab-button ${activeTab === "active" ? "active" : ""}`}
-                onClick={() => setActiveTab("active")}
-              >
-                📅 現在の注文 ({activeOrders.length})
-              </button>
-              <button
-                className={`tab-button ${activeTab === "past" ? "active" : ""}`}
-                onClick={() => setActiveTab("past")}
-              >
-                ⏰ 過去の日付 ({pastDateOrders.length})
-              </button>
-              <button
-                className={`tab-button ${activeTab === "completed" ? "active" : ""}`}
-                onClick={() => setActiveTab("completed")}
-              >
-                ✅ お渡し済み ({completedOrders.length})
-              </button>
-              <button
-                className={`tab-button ${activeTab === "cancelled" ? "active" : ""}`}
-                onClick={() => setActiveTab("cancelled")}
-              >
-                ❌ キャンセル ({cancelledOrders.length})
-              </button>
+          <div className="list-order-actions">
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
+              <input
+                type="text"
+                placeholder='検索：お名前、電話番号、受付番号などを入力'
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className='list-order-input'
+              />
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  onClick={() => setViewType("cake")}
+                  style={{ padding: '0.5rem 1rem', background: '#fdd111', color: '#000', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', whiteSpace: 'nowrap' }}
+                >
+                  🎂 ケーキ
+                </button>
+                <button
+                  onClick={() => setViewType("gift")}
+                  style={{ padding: '0.5rem 1rem', background: '#eee', color: '#666', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', whiteSpace: 'nowrap' }}
+                >
+                  🎁 ギフト
+                </button>
+              </div>
+
             </div>
 
-            <div className="tab-content">
-              {activeTab === "today" && <TodayOrdersTable />}
-              {activeTab === "active" && <ActiveOrdersTable />}
-              {activeTab === "past" && <PastDateOrdersTable />}
-              {activeTab === "completed" && <CompletedOrdersTable />}
-              {activeTab === "cancelled" && <CancelledOrdersTable />}
+            <div className='btn-actions'>
+              <button onClick={() => navigate("/admin/date")} className='list-btn qrcode-btn'>
+                <img src="/icons/calendar_icon.png" alt="QRコードアイコン" />
+              </button>
+              <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
+              <button onClick={() => setShowScanner(true)} className='list-btn qrcode-btn'>
+                <img src="/icons/qr-code.ico" alt="QRコードアイコン" />
+              </button>
+              <button onClick={() => navigate("/ordertable")} className='list-btn'>
+                <img src="/icons/graph.ico" alt="グラフアイコン" />
+              </button>
             </div>
           </div>
 
-          {/* Modal de edição */}
-          {editingOrder && (
-            <EditOrderModal
-              editingOrder={editingOrder}
-              setEditingOrder={setEditingOrder}
-              handleSaveEdit={handleSaveEdit}
-              isSaving={isSavingEdit}
-            />
+          {showScanner && (
+            <div style={{ position: 'relative', marginBottom: 20 }}>
+              <button
+                onClick={() => setShowScanner(false)}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  zIndex: 1000,
+                  background: 'red',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '30px',
+                  height: '30px',
+                  cursor: 'pointer'
+                }}
+              >
+                ×
+              </button>
+              <div id="reader" style={{ width: '100%', maxWidth: '300px' }}></div>
+            </div>
+          )}
+
+
+          {foundScannedOrder && (
+            <div style={{ border: '1px solid #007bff', padding: 12, marginBottom: 20 }}>
+              <strong>
+                <Select
+                  options={statusOptions}
+                  value={statusOptions.find((opt) => String(opt.value) === String(foundScannedOrder.status))}
+                  onChange={(selected) =>
+                    handleStatusChange(
+                      foundScannedOrder.id_order,
+                      selected?.value as "a" | "b" | "c" | "d" | "e"
+                    )
+                  }
+                  isDisabled={isUpdating}
+                  isLoading={isUpdating}
+                  styles={customStyles}
+                  isSearchable={false}
+                />
+              </strong>
+              <strong>受付番号: </strong> {String(foundScannedOrder.id_order).padStart(4, "0")}<br />
+              <strong>お名前: </strong> {foundScannedOrder.first_name} {foundScannedOrder.last_name}<br />
+              <strong>電話番号: </strong> {foundScannedOrder.tel}<br />
+              <strong>受取日: </strong> {formatDateJP(foundScannedOrder.date)} - {foundScannedOrder.pickupHour}<br />
+              <strong>ご注文のケーキ: </strong>
+              <ul className='cake-list'>
+                {foundScannedOrder.cakes.map((cake, index) => (
+                  <li key={`${cake.cake_id}-${index}`}>
+                    <span className='cake-name'>{cake.name}</span>
+                    <span className='cake-amount'>¥{cake.price.toLocaleString()}</span>
+                    <span className='cake-size'>サイズ: {cake.size}</span>
+                    <span className='cake-quantity'>個数: {cake.amount}</span>
+                    <span className='cake-fruitop'>フルーツ盛り: {cake.fruit_option}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {loading ? (
+            <p>読み込み中...</p>
+          ) : orders.length === 0 ? (
+            <p>注文が見つかりません。</p>
+          ) : (
+            <>
+              {/* 🔹 ABAS ATUALIZADAS - 5 ABAS AGORA */}
+              <div className="tabs-container">
+                <div className="tabs-header">
+                  <button
+                    className={`tab-button ${activeTab === "today" ? "active" : ""}`}
+                    onClick={() => setActiveTab("today")}
+                  >
+                    🎂 本日お渡し予定分 ({todayOrders.length})
+                  </button>
+                  <button
+                    className={`tab-button ${activeTab === "active" ? "active" : ""}`}
+                    onClick={() => setActiveTab("active")}
+                  >
+                    📅 現在の注文 ({activeOrders.length})
+                  </button>
+                  <button
+                    className={`tab-button ${activeTab === "past" ? "active" : ""}`}
+                    onClick={() => setActiveTab("past")}
+                  >
+                    ⏰ 過去の日付 ({pastDateOrders.length})
+                  </button>
+                  <button
+                    className={`tab-button ${activeTab === "completed" ? "active" : ""}`}
+                    onClick={() => setActiveTab("completed")}
+                  >
+                    ✅ お渡し済み ({completedOrders.length})
+                  </button>
+                  <button
+                    className={`tab-button ${activeTab === "cancelled" ? "active" : ""}`}
+                    onClick={() => setActiveTab("cancelled")}
+                  >
+                    ❌ キャンセル ({cancelledOrders.length})
+                  </button>
+                </div>
+
+                <div className="tab-content">
+                  {activeTab === "today" && <TodayOrdersTable />}
+                  {activeTab === "active" && <ActiveOrdersTable />}
+                  {activeTab === "past" && <PastDateOrdersTable />}
+                  {activeTab === "completed" && <CompletedOrdersTable />}
+                  {activeTab === "cancelled" && <CancelledOrdersTable />}
+                </div>
+              </div>
+
+              {/* Modal de edição */}
+              {editingOrder && (
+                <EditOrderModal
+                  editingOrder={editingOrder}
+                  setEditingOrder={setEditingOrder}
+                  handleSaveEdit={handleSaveEdit}
+                  isSaving={isSavingEdit}
+                />
+              )}
+            </>
           )}
         </>
       )}
