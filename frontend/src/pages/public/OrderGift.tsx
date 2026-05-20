@@ -472,20 +472,66 @@ export default function OrderGift() {
                   <h4 className="og-address-title">配送先住所</h4>
                   <div className="og-address-fields">
                     <div className="og-address-row">
-                      <div className="og-address-field">
-                        <label htmlFor="postalCode">*郵便番号</label>
-                        <input
-                          type="text"
-                          id="postalCode"
-                          maxLength={8} // 123-4567
-                          placeholder="例: 123-4567"
-                          value={shippingAddress.postalCode}
-                          onChange={(e) => {
-                            const formatted = formatPostalCode(e.target.value);
-                            setShippingAddress(prev => ({ ...prev, postalCode: formatted }));
+                      <div className="og-address-field zip-code" style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
+                        <div style={{ flex: 1 }}>
+                          <label htmlFor="postalCode">*郵便番号</label>
+                          <input
+                            type="text"
+                            id="postalCode"
+                            maxLength={8} // 123-4567
+                            placeholder="例: 123-4567"
+                            value={shippingAddress.postalCode}
+                            onChange={(e) => {
+                              const formatted = formatPostalCode(e.target.value);
+                              setShippingAddress(prev => ({ ...prev, postalCode: formatted }));
+                            }}
+                            required
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const cleanZip = shippingAddress.postalCode.replace('-', '');
+                            if (cleanZip.length !== 7) {
+                              alert('郵便番号を7桁で入力してください。');
+                              return;
+                            }
+                            try {
+                              const res = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${cleanZip}`);
+                              const data = await res.json();
+                              if (data.status === 200 && data.results) {
+                                const result = data.results[0];
+                                setShippingAddress(prev => ({
+                                  ...prev,
+                                  prefecture: result.address1,
+                                  city: result.address2,
+                                  address1: result.address3,
+                                }));
+                              } else {
+                                alert('郵便番号が見つかりませんでした。');
+                              }
+                            } catch (error) {
+                              console.error('Error fetching address:', error);
+                              alert('住所の検索に失敗しました。');
+                            }
                           }}
-                          required
-                        />
+                          style={{
+                            padding: '12px 16px',
+                            background: '#fdd111',
+                            color: '#000',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            whiteSpace: 'nowrap',
+                            height: '42px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            marginBottom: '4px'
+                          }}
+                        >
+                          住所検索
+                        </button>
                       </div>
                     </div>
 
