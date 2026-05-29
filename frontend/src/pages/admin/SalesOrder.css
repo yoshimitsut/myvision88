@@ -12,10 +12,9 @@
 .summary-table-container {
   padding: 20px;
   font-family: "Noto Sans JP", sans-serif;
-  /* max-height: 80vh;  */
-  /* overflow: auto; */
-  /* gap: 1em; */
-  display: inline-block;
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
   flex-direction: column;
 }
 
@@ -55,10 +54,10 @@
 
 .summary-table th:first-child,
 .summary-table td:first-child {
-  width: 180px; 
+  width: 180px;
 }
 
-.total-row {
+.sales-total-row {
   background-color: #e6e5e5 !important;
   font-weight: bold;
 }
@@ -70,7 +69,7 @@
 
 /* 🔹 Efeito hover: destaca a linha com borda mais grossa e leve sombra */
 .summary-table tbody tr:hover {
-  border: 2px solid #999; 
+  border: 2px solid #999;
   /* background-color: #f5f5f5;  */
   transition: all 0.15s ease-in-out;
   cursor: pointer;
@@ -83,37 +82,46 @@
 }
 
 /* 🔹 Mantém os totais em destaque fixo */
-.total-row:hover {
+.sales-total-row:hover {
   background-color: #e6e5e5 !important;
   border: none;
   cursor: default;
 }
 
 .table-order-actions {
-  /* border: 2px solid; */
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 0.5rem;
-  margin-bottom: 1rem;
-  /* cursor: pointer; */
-  /* background-color: #f8f9fa; */
-  padding-bottom: 0.1rem;
-
-  .btn-back {
-    cursor: pointer;
-    width: 100%;
-    background-color: transparent !important;
-    img {
-      /* height: 2rem; */
-      align-items: center;
-    }
-  }
+  padding: 12px 0;
+  margin-bottom: 20px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+  cursor: pointer;
 }
 
 .table-order-actions:hover {
-  background-color: #e6e5e5;
-  cursor: pointer;
+  background-color: #e9ecef;
+}
+
+.btn-actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-back {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background-color: transparent !important;
+}
+
+.btn-back img {
+  width: 24px;
+  height: 24px;
 }
 
 .title-未 {
@@ -222,7 +230,7 @@
   border-color: #e0e0e0;
   border-bottom-color: white;
   font-weight: 600;
-  box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* 🔹 Aba do mês atual */
@@ -252,8 +260,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Estilos das tabelas */
@@ -347,12 +362,12 @@
 }
 
 /* Linhas de total */
-.total-row {
+.sales-total-row {
   background: #e3f2fd !important;
   font-weight: 600;
 }
 
-.total-row td {
+.sales-total-row td {
   border-top: 2px solid #007bff;
 }
 
@@ -362,53 +377,30 @@
 }
 
 /* Cores para status */
-.title-入金済み { 
-  background: #d4edda !important; 
-  color: #155724 !important; 
+.title-入金済み {
+  background: #d4edda !important;
+  color: #155724 !important;
 }
 
-.title-未入金 { 
-  background: #fff3cd !important; 
-  color: #856404 !important; 
+.title-未入金 {
+  background: #fff3cd !important;
+  color: #856404 !important;
 }
 
-.title-キャンセル { 
-  background: #f8d7da !important; 
-  color: #721c24 !important; 
+.title-キャンセル {
+  background: #f8d7da !important;
+  color: #721c24 !important;
 }
 
 .cancel-row {
   background: #ffebee !important;
 }
 
-/* Botão de voltar */
-.table-order-actions {
-  margin-bottom: 20px;
-  cursor: pointer;
-}
-
-.btn-actions {
-  display: inline-block;
-}
-
-.btn-back {
-  padding: 10px;
-  background: #f8f9fa;
-  border-radius: 6px;
-  transition: background 0.3s ease;
-}
-
-.btn-back:hover {
-  background: #e9ecef;
-}
-
-.btn-back img {
-  width: 24px;
-  height: 24px;
-}
+/* Botão de voltar ajustado no início do arquivo */
 
 /* Mensagens de erro e loading */
-.error-container, .loading-container {
+.error-container,
+.loading-container {
   text-align: center;
   padding: 40px;
   font-size: 16px;
@@ -433,36 +425,36 @@
   .month-tabs {
     flex-direction: column;
   }
-  
+
   .tab-button {
     border-radius: 6px;
     margin-bottom: 4px;
     border: 1px solid #e0e0e0;
     text-align: center;
   }
-  
+
   .tab-button.active {
     border-bottom-color: #e0e0e0;
   }
-  
+
   .summary-table {
     font-size: 12px;
   }
-  
+
   .summary-table th:not(:first-child):not(:last-child) {
     min-width: 40px;
     max-width: 45px;
     font-size: 10px;
     padding: 6px 2px;
   }
-  
+
   .summary-table td:not(:first-child):not(:last-child) {
     min-width: 40px;
     max-width: 45px;
     padding: 6px 2px;
     font-size: 11px;
   }
-  
+
   .current-day::after {
     font-size: 7px;
     top: -4px;

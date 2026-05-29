@@ -55,7 +55,7 @@ export default function SalesOrder() {
   const isToday = (dateString: string): boolean => {
     const today = new Date();
     const targetDate = new Date(dateString);
-    
+
     return today.toDateString() === targetDate.toDateString();
   };
 
@@ -77,9 +77,14 @@ export default function SalesOrder() {
     // 🔹 CARREGAR TODOS OS BOLOS PRIMEIRO
     const fetchAllCakes = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cake`);
+        const token = sessionStorage.getItem('store_token');
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cake`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         const data = await response.json();
-        
+
         if (data.success && Array.isArray(data.cakes)) {
           // Ordenar bolos pelo ID
           const sortedCakes = data.cakes.sort((a: Cake, b: Cake) => a.id - b.id);
@@ -99,14 +104,19 @@ export default function SalesOrder() {
     const fetchOrdersAndProcess = async () => {
       try {
         const cakes = await fetchAllCakes();
-        
-        const ordersResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/list`);
+
+        const token = sessionStorage.getItem('store_token');
+        const ordersResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/list`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         const ordersData = await ordersResponse.json();
-        
+
         console.log("Resposta completa da API:", ordersData);
-        
+
         let ordersDataProcessed: Order[] = [];
-        
+
         if (Array.isArray(ordersData)) {
           ordersDataProcessed = ordersData;
         } else if (ordersData.orders && Array.isArray(ordersData.orders)) {
@@ -127,9 +137,9 @@ export default function SalesOrder() {
           const status = order.status?.toLowerCase() || '';
           const date = order.date;
           const monthKey = date.substring(0, 7); // YYYY-MM
-          
+
           allDates.add(date);
-          
+
           if (!monthlyDataMap.has(monthKey)) {
             monthlyDataMap.set(monthKey, {
               month: monthKey,
@@ -139,20 +149,20 @@ export default function SalesOrder() {
               statusDayCounts: {}
             });
           }
-          
+
           const monthData = monthlyDataMap.get(monthKey)!;
-          
+
           // Adicionar data se não existir
           if (!monthData.dates.includes(date)) {
             monthData.dates.push(date);
           }
-          
+
           // Inicializar contador de status para esta data
           if (!monthData.statusDayCounts[date]) {
             monthData.statusDayCounts[date] = {};
           }
           monthData.statusDayCounts[date][status] = (monthData.statusDayCounts[date][status] || 0) + 1;
-          
+
           // Processar bolos (excluir status "e")
           if (status !== "e") {
             order.cakes.forEach((cake) => {
@@ -169,12 +179,12 @@ export default function SalesOrder() {
                   days: {}
                 };
               }
-              
+
               // Atualizar stock se for o primeiro bolo encontrado
               if (monthData.summary[name][size].stock === 0 && stock > 0) {
                 monthData.summary[name][size].stock = stock;
               }
-              
+
               if (!monthData.summary[name][size].days[date]) {
                 monthData.summary[name][size].days[date] = 0;
               }
@@ -188,22 +198,22 @@ export default function SalesOrder() {
         monthlyDataMap.forEach((monthData) => {
           cakes.forEach((cake: Cake) => {
             const cakeName = cake.name.trim();
-            
+
             // Se o bolo não existe no summary, criar estrutura vazia
             if (!monthData.summary[cakeName]) {
               monthData.summary[cakeName] = {};
             }
-            
+
             // Garantir que todos os tamanhos do bolo apareçam
             cake.sizes.forEach(sizeInfo => {
               const size = sizeInfo.size.trim();
-              
+
               if (!monthData.summary[cakeName][size]) {
                 monthData.summary[cakeName][size] = {
                   stock: sizeInfo.stock,
                   days: {}
                 };
-                
+
                 // Inicializar todos os dias com 0
                 monthData.dates.forEach(date => {
                   monthData.summary[cakeName][size].days[date] = 0;
@@ -220,14 +230,14 @@ export default function SalesOrder() {
         })).sort((a, b) => a.month.localeCompare(b.month));
 
         console.log("Dados mensais processados:", processedMonthlyData);
-        
+
         // 🔹 ENCONTRAR O MÊS ATUAL AUTOMATICAMENTE
         const currentDate = new Date();
         const currentMonth = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
-        
+
         // Tentar encontrar o mês atual nos dados
         const foundCurrentMonth = processedMonthlyData.find(month => month.month === currentMonth);
-        
+
         // Se não encontrar, usar o último mês disponível
         const initialMonth = foundCurrentMonth ? currentMonth : (processedMonthlyData[processedMonthlyData.length - 1]?.month || "");
 
@@ -247,7 +257,7 @@ export default function SalesOrder() {
   }, []);
 
   // Encontrar dados do mês ativo
-  const activeMonthData = useMemo(() => 
+  const activeMonthData = useMemo(() =>
     monthlyData.find(month => month.month === activeMonth),
     [monthlyData, activeMonth]
   );
@@ -255,31 +265,31 @@ export default function SalesOrder() {
   // Cálculo dos valores por status para o mês ativo
   const statusValues = useMemo(() => {
     if (!activeMonthData) return {};
-    
+
     const values: { [status: string]: { [date: string]: number } } = {};
     const { dates } = activeMonthData;
-    
+
     statusOptions.forEach(({ value }) => {
       values[value] = {};
       dates.forEach(date => {
         values[value][date] = orders
           .filter(order => order.date === date && order.status === value)
           .reduce((sum: number, order: Order) => {
-            const orderTotal = order.cakes.reduce((cakeSum: number, cake) => 
+            const orderTotal = order.cakes.reduce((cakeSum: number, cake) =>
               cakeSum + (cake.price * cake.amount), 0
             );
             return sum + orderTotal;
           }, 0);
       });
     });
-    
+
     return values;
   }, [activeMonthData, orders, statusOptions]);
 
   // 🔹 Cálculo do total geral de todos os bolos por dia no mês ativo
   const totalGeralPorDia = useMemo(() => {
     if (!activeMonthData) return {};
-    
+
     return activeMonthData.dates.reduce((acc: Record<string, number>, date) => {
       let total = 0;
       Object.values(activeMonthData.summary).forEach((sizes) => {
@@ -297,7 +307,7 @@ export default function SalesOrder() {
   // 🔹 FUNÇÃO PARA OBTER BOLOS ORDENADOS POR ID
   const getCakesInOrder = useMemo(() => {
     if (!activeMonthData) return [];
-    
+
     // Criar array de bolos ordenados por ID
     const orderedCakes = allCakes
       // .filter(cake => {
@@ -306,7 +316,7 @@ export default function SalesOrder() {
       //   return activeMonthData.summary[cakeName] !== undefined;
       // })
       .sort((a, b) => a.id - b.id); // Ordenar por ID
-    
+
     // console.log("Bolos ordenados por ID:", orderedCakes);
     return orderedCakes;
   }, [activeMonthData, allCakes]);
@@ -360,8 +370,8 @@ export default function SalesOrder() {
                   <tr>
                     <th>日付毎の合計</th>
                     {activeMonthData.dates.map((date) => (
-                      <th 
-                        key={date} 
+                      <th
+                        key={date}
                         className={isToday(date) ? 'current-day' : ''}
                       >
                         {formatDayOnly(date)}
@@ -371,11 +381,11 @@ export default function SalesOrder() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="total-row">
+                  <tr className="sales-total-row">
                     <td></td>
                     {activeMonthData.dates.map((date) => (
-                      <td 
-                        key={date} 
+                      <td
+                        key={date}
                         className={isToday(date) ? 'data-current-day' : ''}
                       >
                         <strong>{totalGeralPorDia[date] || 0}</strong>
@@ -392,7 +402,7 @@ export default function SalesOrder() {
           {getCakesInOrder.map((cake) => {
             const cakeName = cake.name.trim();
             const sizes = activeMonthData.summary[cakeName] || {};
-            
+
             const totalPorDia = activeMonthData.dates.reduce((acc: Record<string, number>, date) => {
               let total = 0;
               Object.values(sizes).forEach((sizeData) => {
@@ -410,11 +420,11 @@ export default function SalesOrder() {
                   <thead>
                     <tr>
                       <th>{cakeName}
-                         {/* (ID: {cake.id}) */}
-                        </th>
+                        {/* (ID: {cake.id}) */}
+                      </th>
                       {activeMonthData.dates.map((date) => (
-                        <th 
-                          key={date} 
+                        <th
+                          key={date}
                           className={isToday(date) ? 'current-day' : ''}
                         >
                           {formatDayOnly(date)}
@@ -425,7 +435,7 @@ export default function SalesOrder() {
                   </thead>
                   <tbody>
                     {Object.entries(sizes).map(([size, sizeData]) => {
-                      const total = activeMonthData.dates.reduce((sum, date) => 
+                      const total = activeMonthData.dates.reduce((sum, date) =>
                         sum + (sizeData.days[date] || 0), 0
                       );
                       return (
@@ -434,7 +444,7 @@ export default function SalesOrder() {
                             {size}
                           </td>
                           {activeMonthData.dates.map((date) => (
-                            <td 
+                            <td
                               key={date}
                               className={isToday(date) ? 'data-current-day' : ''}
                             >
@@ -446,10 +456,10 @@ export default function SalesOrder() {
                       );
                     })}
 
-                    <tr className="total-row">
+                    <tr className="sales-total-row">
                       <td><strong>合計 →</strong></td>
                       {activeMonthData.dates.map((date) => (
-                        <td 
+                        <td
                           key={date}
                           className={isToday(date) ? 'data-current-day' : ''}
                         >
@@ -471,8 +481,8 @@ export default function SalesOrder() {
                 <tr>
                   <th>支払い状況</th>
                   {activeMonthData.dates.map((date) => (
-                    <th 
-                      key={date} 
+                    <th
+                      key={date}
                       className={isToday(date) ? 'current-day' : ''}
                     >
                       {formatDayOnly(date)}
@@ -488,7 +498,7 @@ export default function SalesOrder() {
                   .map(({ value, label }) => {
                     let totalStatus = 0;
                     let totalValue = 0;
-                    
+
                     return (
                       <tr key={value}>
                         <td className={`title-${label}`}>{label}</td>
@@ -497,9 +507,9 @@ export default function SalesOrder() {
                           const valueForDate = statusValues[value]?.[date] || 0;
                           totalStatus += count;
                           totalValue += valueForDate;
-                          
+
                           return (
-                            <td 
+                            <td
                               key={`${value}-${date}`}
                               className={isToday(date) ? 'data-current-day' : ''}
                             >
@@ -513,14 +523,14 @@ export default function SalesOrder() {
                     );
                   })}
 
-                <tr className="total-row">
+                <tr className="sales-total-row">
                   <td><strong>合計</strong></td>
                   {activeMonthData.dates.map((date) => {
                     const totalDay = statusOptions
                       .filter(({ label }) => label !== "キャンセル")
                       .reduce((sum, { value }) => sum + (activeMonthData.statusDayCounts[date]?.[value] || 0), 0);
                     return (
-                      <td 
+                      <td
                         key={`total-${date}`}
                         className={isToday(date) ? 'data-current-day' : ''}
                       >
@@ -548,8 +558,8 @@ export default function SalesOrder() {
                   </td>
                 </tr>
 
-                <br/><br/>
-                
+                <br /><br />
+
                 {statusOptions
                   .filter(({ label }) => label === "キャンセル")
                   .map(({ value, label }) => {
@@ -566,7 +576,7 @@ export default function SalesOrder() {
                           totalValue += valueForDate;
 
                           return (
-                            <td 
+                            <td
                               key={`${value}-${date}`}
                               className={isToday(date) ? 'data-current-day' : ''}
                             >
