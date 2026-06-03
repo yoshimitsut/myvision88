@@ -470,3 +470,38 @@
 .data-percentage {
   overflow-x: auto;
 }
+
+/* ── Botões de seleção Cake / Gift ───────────── */
+.sales-view-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.sales-view-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f8f9fa;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sales-view-tab:hover {
+  border-color: #bbb;
+  background: #eee;
+  color: #333;
+}
+
+.sales-view-tab--active {
+  background: #185495f5;
+  color: #fff;
+  border-color: #185495f5;
+  box-shadow: 0 2px 8px rgba(24, 84, 149, 0.25);
+}
