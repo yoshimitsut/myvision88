@@ -1370,6 +1370,22 @@ export default function ListOrder() {
 
   return (
     <div className='list-order-container'>
+      {/* ── Seletor Cake / Gift ── */}
+      <div className='sales-view-tabs' style={{ marginBottom: '12px' }}>
+        <button
+          className={`sales-view-tab ${viewType === "cake" ? "sales-view-tab--active" : ""}`}
+          onClick={() => setViewType("cake")}
+        >
+          🎂 ケーキ
+        </button>
+        <button
+          className={`sales-view-tab ${viewType === "gift" ? "sales-view-tab--active" : ""}`}
+          onClick={() => setViewType("gift")}
+        >
+          🎁 ギフト
+        </button>
+      </div>
+
       {viewType === "gift" ? (
         <ListGiftOrder viewType={viewType} setViewType={setViewType} />
       ) : (
@@ -1383,21 +1399,6 @@ export default function ListOrder() {
                 onChange={(e) => setSearch(e.target.value)}
                 className='list-order-input'
               />
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button
-                  onClick={() => setViewType("cake")}
-                  style={{ padding: '0.5rem 1rem', background: '#fdd111', color: '#000', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', whiteSpace: 'nowrap' }}
-                >
-                  🎂 ケーキ
-                </button>
-                <button
-                  onClick={() => setViewType("gift")}
-                  style={{ padding: '0.5rem 1rem', background: '#eee', color: '#666', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', whiteSpace: 'nowrap' }}
-                >
-                  🎁 ギフト
-                </button>
-              </div>
-
             </div>
 
             <div className='btn-actions'>
@@ -1412,6 +1413,8 @@ export default function ListOrder() {
                 <img src="/icons/graph.ico" alt="グラフアイコン" />
               </button>
             </div>
+
+
           </div>
 
           {showScanner && (
