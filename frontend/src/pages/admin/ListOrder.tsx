@@ -1405,7 +1405,7 @@ export default function ListOrder() {
       </div>
 
       {viewType === "gift" ? (
-        <ListGiftOrder viewType={viewType} setViewType={setViewType} />
+        <ListGiftOrder />
       ) : (
         <>
           {showScanner && (

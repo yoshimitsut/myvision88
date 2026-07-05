@@ -7,12 +7,7 @@ import { formatDateJP } from "../../utils/formatDateJP";
 
 import './ListOrder.css';
 
-type Props = {
-  viewType?: "cake" | "gift";
-  setViewType?: (v: "cake" | "gift") => void;
-};
-
-export default function ListGiftOrder({ viewType, setViewType }: Props) {
+export default function ListGiftOrder() {
   const [orders, setOrders] = useState<GiftOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -299,41 +294,6 @@ export default function ListGiftOrder({ viewType, setViewType }: Props) {
 
   return (
     <div className='list-order-gift-container'>
-      <div className="list-order-actions">
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
-          <input
-            type="text"
-            placeholder='検索：お名前、電話番号、受付番号などを入力'
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className='list-order-input'
-          />
-          {setViewType && (
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button
-                onClick={() => setViewType("cake")}
-                style={{ padding: '0.5rem 1rem', background: viewType === 'cake' ? '#fdd111' : '#eee', color: viewType === 'cake' ? '#000' : '#666', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', whiteSpace: 'nowrap' }}
-              >
-                🎂 ケーキ
-              </button>
-              <button
-                onClick={() => setViewType("gift")}
-                style={{ padding: '0.5rem 1rem', background: viewType === 'gift' ? '#fdd111' : '#eee', color: viewType === 'gift' ? '#000' : '#666', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', whiteSpace: 'nowrap' }}
-              >
-                🎁 ギフト
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Placeholder invisível para manter a altura e o layout idêntico ao ListOrder.tsx */}
-        <div className='btn-actions' style={{ visibility: 'hidden', pointerEvents: 'none' }}>
-          <button className='list-btn'>
-            <img src="/icons/calendar_icon.png" alt="placeholder" />
-          </button>
-        </div>
-      </div>
-
       {loading ? (
         <p>読み込み中...</p>
       ) : orders.length === 0 ? (
@@ -341,25 +301,39 @@ export default function ListGiftOrder({ viewType, setViewType }: Props) {
       ) : (
         <>
           <div className="tabs-container">
-            <div className="tabs-header">
-              <button
-                className={`tab-button ${activeTab === "active" ? "active" : ""}`}
-                onClick={() => setActiveTab("active")}
-              >
-                📅 現在の注文 ({activeOrders.length})
-              </button>
-              <button
-                className={`tab-button ${activeTab === "completed" ? "active" : ""}`}
-                onClick={() => setActiveTab("completed")}
-              >
-                ✅ お渡し済み/発送済 ({completedOrders.length})
-              </button>
-              <button
-                className={`tab-button ${activeTab === "cancelled" ? "active" : ""}`}
-                onClick={() => setActiveTab("cancelled")}
-              >
-                ❌ キャンセル ({cancelledOrders.length})
-              </button>
+            <div className="tabs-header-row">
+              <div className="tabs-header">
+                <button
+                  className={`tab-button ${activeTab === "active" ? "active" : ""}`}
+                  onClick={() => setActiveTab("active")}
+                >
+                  現在の注文 ({activeOrders.length})
+                </button>
+                <button
+                  className={`tab-button tab-completed ${activeTab === "completed" ? "active" : ""}`}
+                  onClick={() => setActiveTab("completed")}
+                >
+                  お渡し済み/発送済 ({completedOrders.length})
+                </button>
+                <button
+                  className={`tab-button tab-cancelled ${activeTab === "cancelled" ? "active" : ""}`}
+                  onClick={() => setActiveTab("cancelled")}
+                >
+                  <span style={{ marginRight: '4px' }}>✕</span> キャンセル ({cancelledOrders.length})
+                </button>
+              </div>
+
+              <div className="search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <span style={{ position: 'absolute', left: '10px', color: '#888' }}>🔍</span>
+                <input
+                  type="text"
+                  placeholder='名前・電話番号・受付番号で検索'
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className='list-order-input'
+                  style={{ paddingLeft: '32px', borderRadius: '4px', border: '1px solid #ddd', minWidth: '300px' }}
+                />
+              </div>
             </div>
 
             <div className="tab-content">
