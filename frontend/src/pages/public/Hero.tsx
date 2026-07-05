@@ -39,6 +39,7 @@ export default function Hero() {
 
   const handleReserve = () => {
     if (!selectedCake) return;
+    document.body.style.overflow = '';
     navigate(`/order?cake=${encodeURIComponent(selectedCake.name)}&size=${encodeURIComponent(selectedSize)}`);
   };
 
