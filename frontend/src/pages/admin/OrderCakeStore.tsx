@@ -139,9 +139,11 @@ export default function OrderCake() {
     setTotalAmount(total);
   }, [cakes, cakesData]);
 
+  const selectedCakeName = searchParams.get("cake");
+  const selectedSizeName = searchParams.get("size");
+
   // Efeito para inicializar bolo da URL
   useEffect(() => {
-    const selectedCakeName = searchParams.get("cake");
     if (!cakesData.length || !selectedCakeName) return;
 
     const selectedCake = cakesData.find(c =>
@@ -149,17 +151,25 @@ export default function OrderCake() {
     );
 
     if (selectedCake) {
-      setCakes([{
-        cake_id: selectedCake.id,
-        name: selectedCake.name,
-        amount: 1,
-        size: "",
-        price: 0,
-        message_cake: "",
-        fruit_option: "無し"
-      }]);
+      setCakes(prevCakes => {
+        if (prevCakes.length > 0 && prevCakes[0].cake_id === selectedCake.id && prevCakes[0].size === (selectedSizeName || "")) {
+          return prevCakes;
+        }
+
+        const sizeOption = selectedCake.sizes?.find(s => s.size === selectedSizeName);
+
+        return [{
+          cake_id: selectedCake.id,
+          name: selectedCake.name,
+          amount: 1,
+          size: sizeOption?.size || "",
+          price: sizeOption?.price || 0,
+          message_cake: "",
+          fruit_option: "無し"
+        }];
+      });
     }
-  }, [cakesData, searchParams, setCakes]);
+  }, [cakesData, selectedCakeName, selectedSizeName, setCakes]);
 
   // Resetar horário quando data muda
   useEffect(() => {
