@@ -193,27 +193,29 @@ ul {
 }
 
 .list-btn {
-  padding: 6px 8px;
+  padding: 8px;
   cursor: pointer;
-  background-color: #b4b4b4;
-  border: none;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 44px;
   min-height: 44px;
+  transition: background-color 0.2s;
 
   img {
-    width: 2rem;
-    height: 2rem;
+    width: 20px;
+    height: 20px;
     object-fit: contain;
     display: block;
+    filter: brightness(0); /* Make icons black if they aren't already */
   }
 }
 
 .list-btn:hover {
-  background-color: #888;
+  background-color: #f0f0f0;
 }
 
 .list-order-table th.situation-cell,
