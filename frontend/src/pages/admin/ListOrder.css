@@ -442,6 +442,11 @@ ul {
   gap: 16px;
 }
 
+.tabs-header-row .tabs-header {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
 .tab-button {
   padding: 0.5rem 0.75rem;
   background: none;
@@ -454,6 +459,17 @@ ul {
   transition: all 0.3s ease;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.tab-button:hover {
+  color: #007bff;
+  background-color: #f8f9fa;
+}
+
+.tab-button.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  background-color: #f8f9fa;
 }
 
 /* Custom Tab Colors */

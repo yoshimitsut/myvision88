@@ -1371,8 +1371,8 @@ export default function ListOrder() {
   return (
     <div className='list-order-container'>
       {/* ── Title and Action Buttons ── */}
-      <div className="list-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>予約管理</h2>
+      <div className="list-header-row">
+        <h2>予約管理</h2>
         
         <div className='btn-actions'>
           <button onClick={() => navigate("/admin/date")} className='list-btn'>
@@ -1478,8 +1478,8 @@ export default function ListOrder() {
             <>
               {/* 🔹 ABAS ATUALIZADAS - 5 ABAS AGORA */}
               <div className="tabs-container">
-                <div className="tabs-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ddd', paddingBottom: '0' }}>
-                  <div className="tabs-header" style={{ borderBottom: 'none', marginBottom: 0, display: 'flex' }}>
+                <div className="tabs-header-row">
+                  <div className="tabs-header">
                     <button
                       className={`tab-button tab-all ${activeTab === "all" ? "active" : ""}`}
                       onClick={() => setActiveTab("all")}
