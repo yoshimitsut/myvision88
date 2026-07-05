@@ -1489,31 +1489,31 @@ export default function ListOrder() {
               <div className="tabs-container">
                 <div className="tabs-header">
                   <button
-                    className={`tab-button ${activeTab === "today" ? "active" : ""}`}
+                    className={`tab-button tab-today ${activeTab === "today" ? "active" : ""}`}
                     onClick={() => setActiveTab("today")}
                   >
                     🎂 本日お渡し予定分 ({todayOrders.length})
                   </button>
                   <button
-                    className={`tab-button ${activeTab === "active" ? "active" : ""}`}
+                    className={`tab-button tab-active ${activeTab === "active" ? "active" : ""}`}
                     onClick={() => setActiveTab("active")}
                   >
                     📅 現在の注文 ({activeOrders.length})
                   </button>
                   <button
-                    className={`tab-button ${activeTab === "past" ? "active" : ""}`}
+                    className={`tab-button tab-past ${activeTab === "past" ? "active" : ""}`}
                     onClick={() => setActiveTab("past")}
                   >
                     ⏰ 過去の日付 ({pastDateOrders.length})
                   </button>
                   <button
-                    className={`tab-button ${activeTab === "completed" ? "active" : ""}`}
+                    className={`tab-button tab-completed ${activeTab === "completed" ? "active" : ""}`}
                     onClick={() => setActiveTab("completed")}
                   >
                     ✅ お渡し済み ({completedOrders.length})
                   </button>
                   <button
-                    className={`tab-button ${activeTab === "cancelled" ? "active" : ""}`}
+                    className={`tab-button tab-cancelled ${activeTab === "cancelled" ? "active" : ""}`}
                     onClick={() => setActiveTab("cancelled")}
                   >
                     ❌ キャンセル ({cancelledOrders.length})

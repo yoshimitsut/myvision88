@@ -434,6 +434,16 @@ ul {
   background-color: #f8f9fa;
 }
 
+/* Custom Tab Colors */
+.tab-past { color: #ffc107 !important; }
+.tab-past.active { border-bottom-color: #ffc107 !important; }
+
+.tab-completed { color: #28a745 !important; }
+.tab-completed.active { border-bottom-color: #28a745 !important; }
+
+.tab-cancelled { color: #dc3545 !important; }
+.tab-cancelled.active { border-bottom-color: #dc3545 !important; }
+
 .tab-content {
   min-height: 200px;
 }
