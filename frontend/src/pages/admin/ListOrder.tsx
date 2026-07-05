@@ -23,7 +23,7 @@ export default function ListOrder() {
   const [scannedOrderId, setScannedOrderId] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [viewMode] = useState<"date" | "order">("order");
-  const [activeTab, setActiveTab] = useState<"today" | "active" | "completed" | "cancelled" | "past">("today");
+  const [activeTab, setActiveTab] = useState<"all" | "today" | "active" | "completed" | "cancelled" | "past">("today");
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
@@ -1482,7 +1482,7 @@ export default function ListOrder() {
                   <div className="tabs-header" style={{ borderBottom: 'none', marginBottom: 0, display: 'flex' }}>
                     <button
                       className={`tab-button tab-all ${activeTab === "all" ? "active" : ""}`}
-                      onClick={() => setActiveTab("all" as any)}
+                      onClick={() => setActiveTab("all")}
                     >
                       すべて ({orders.length})
                     </button>
@@ -1532,6 +1532,7 @@ export default function ListOrder() {
                 </div>
 
                 <div className="tab-content">
+                  {activeTab === "all" && <ActiveOrdersTable />}
                   {activeTab === "today" && <TodayOrdersTable />}
                   {activeTab === "active" && <ActiveOrdersTable />}
                   {activeTab === "past" && <PastDateOrdersTable />}
