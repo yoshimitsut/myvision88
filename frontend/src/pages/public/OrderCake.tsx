@@ -157,18 +157,19 @@ export default function OrderCake() {
 
     if (selectedCake) {
       setCakes(prevCakes => {
+        const sizeOption = selectedCake.sizes?.find(s => s.size === selectedSizeName);
+        const resolvedSize = sizeOption?.size || "";
+
         // Prevent infinite loop by checking if we already set it
-        if (prevCakes.length > 0 && prevCakes[0].cake_id === selectedCake.id && prevCakes[0].size === (selectedSizeName || "")) {
+        if (prevCakes.length > 0 && prevCakes[0].cake_id === selectedCake.id && prevCakes[0].size === resolvedSize) {
           return prevCakes;
         }
-        
-        const sizeOption = selectedCake.sizes?.find(s => s.size === selectedSizeName);
 
         return [{
           cake_id: selectedCake.id,
           name: selectedCake.name,
           amount: 1,
-          size: sizeOption?.size || "",
+          size: resolvedSize,
           price: sizeOption?.price || 0,
           message_cake: "",
           fruit_option: "無し"
