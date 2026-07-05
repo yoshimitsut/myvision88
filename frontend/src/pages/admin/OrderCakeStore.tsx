@@ -133,6 +133,11 @@ export default function OrderCake() {
     resetForm
   } = useOrderForm([initialCake]);
 
+  // Rola para o topo ao carregar a página
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Calcular total do pedido
   useEffect(() => {
     const total = calculateTotalPrice(cakes, cakesData, FRUIT_OPTIONS);
