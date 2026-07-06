@@ -25,6 +25,13 @@ export default function Hero() {
       .catch((err) => console.error("Erro ao carregar bolos:", err));
   }, []);
 
+  // Adicione isso dentro do componente Hero para garantir que, se ele sumir da tela, o scroll volte ao normal
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   const openModal = (cake: Cake) => {
     setSelectedCake(cake);
     setSelectedSize(cake.sizes && cake.sizes.length > 0 ? cake.sizes[0].size : "");
@@ -39,8 +46,12 @@ export default function Hero() {
 
   const handleReserve = () => {
     if (!selectedCake) return;
-    document.body.style.overflow = '';
-    navigate(`/order?cake=${encodeURIComponent(selectedCake.name)}&size=${encodeURIComponent(selectedSize)}`);
+    document.body.style.overflow = ''; // Reseta
+
+    // Um microdelay garante que o Safari processe a liberação do scroll antes de mudar a rota
+    setTimeout(() => {
+      navigate(`/order?cake=${encodeURIComponent(selectedCake.name)}&size=${encodeURIComponent(selectedSize)}`);
+    }, 50);
   };
 
   return (
@@ -71,8 +82,8 @@ export default function Hero() {
       <main className="hero-main">
         <div className="hero-grid">
           {cakes.map((cake, index) => (
-            <div 
-              className="hero-item" 
+            <div
+              className="hero-item"
               key={`${cake.id ?? index}-${index}`}
               onClick={() => openModal(cake)}
             >

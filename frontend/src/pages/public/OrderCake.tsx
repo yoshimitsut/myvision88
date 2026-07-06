@@ -545,7 +545,7 @@ export default function OrderCake() {
                     {selectedCakeData && selectedCakeData.image && (
                       <img
                         className='img-cake-order'
-                        src={`${API_URL}/image/${FOLDER_URL}/${selectedCakeData.image}`}
+                        src={`${API_URL}/image/${FOLDER_URL}/${selectedCakeData.image}`.replace(/([^:]\/)\/+/g, "$1")}
                         alt={selectedCakeData.name}
                       />
                     )}
