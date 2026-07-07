@@ -183,30 +183,33 @@ export default function OrderCake() {
   //   }
   // }, [cakesData, selectedCakeName, selectedSizeName, setCakes]);
 
+  // ==================== CORREÇÃO ULTRA-SEGURA PARA IPHONE (NFC) ====================
   useEffect(() => {
     if (!cakesData.length || !selectedCakeName) return;
 
-    // Normaliza os parâmetros da URL para evitar problemas de NFC/NFD do iOS
-    const normalizedCakeParam = decodeURIComponent(selectedCakeName).normalize();
-    const normalizedSizeParam = selectedSizeName ? decodeURIComponent(selectedSizeName).normalize() : "";
+    // Força decodificação correta e normalização para o padrão NFC usado em bancos de dados/APIs
+    const normalizedCakeParam = decodeURIComponent(selectedCakeName).normalize("NFC");
+    const normalizedSizeParam = selectedSizeName ? decodeURIComponent(selectedSizeName).normalize("NFC") : "";
 
+    // Busca o bolo aplicando a normalização NFC em ambas as strings
     const selectedCake = cakesData.find(c => {
-      const nameNorm = c.name.normalize();
+      const nameNorm = c.name ? c.name.normalize("NFC") : "";
       const idStr = String(c.id);
       return idStr === normalizedCakeParam || nameNorm === normalizedCakeParam;
     });
 
     if (selectedCake) {
-      // Encontra o tamanho aplicando .normalize() em ambos os lados
-      const sizeOption = selectedCake.sizes?.find(s =>
-        s.size && s.size.normalize() === normalizedSizeParam
-      );
+      // Busca o tamanho aplicando rigidamente a normalização NFC
+      const sizeOption = selectedCake.sizes?.find(s => {
+        const sizeNorm = s.size ? s.size.normalize("NFC") : "";
+        return sizeNorm === normalizedSizeParam;
+      });
 
       const resolvedSize = sizeOption?.size || "";
       const resolvedPrice = sizeOption?.price || 0;
 
       setCakes(prevCakes => {
-        // Validação ultra segura para quebrar qualquer possibilidade de loop infinito
+        // Trava rigorosa anti-loop infinito para o Safari
         if (
           prevCakes.length === 1 &&
           prevCakes[0].cake_id === selectedCake.id &&
@@ -226,8 +229,8 @@ export default function OrderCake() {
         }];
       });
     }
-  }, [cakesData, selectedCakeName, selectedSizeName]); // Removido setCakes das dependências se ele não for estável
-
+    // Deixe setCakes fora das dependências para evitar loops causados por mutação de referência
+  }, [cakesData, selectedCakeName, selectedSizeName]);
   // Resetar horário quando data muda
   useEffect(() => {
     if (selectedDate && pickupHour !== "時間を選択") {
