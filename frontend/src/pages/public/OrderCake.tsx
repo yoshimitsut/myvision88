@@ -153,20 +153,65 @@ export default function OrderCake() {
   const selectedSizeName = searchParams.get("size");
 
   // Efeito para inicializar bolo da URL
+  // useEffect(() => {
+  //   if (!cakesData.length || !selectedCakeName) return;
+
+  //   const selectedCake = cakesData.find(c =>
+  //     String(c.id) === selectedCakeName || c.name === selectedCakeName
+  //   );
+
+  //   if (selectedCake) {
+  //     setCakes(prevCakes => {
+  //       const sizeOption = selectedCake.sizes?.find(s => s.size === selectedSizeName);
+  //       const resolvedSize = sizeOption?.size || "";
+
+  //       // Prevent infinite loop by checking if we already set it
+  //       if (prevCakes.length > 0 && prevCakes[0].cake_id === selectedCake.id && prevCakes[0].size === resolvedSize) {
+  //         return prevCakes;
+  //       }
+
+  //       return [{
+  //         cake_id: selectedCake.id,
+  //         name: selectedCake.name,
+  //         amount: 1,
+  //         size: resolvedSize,
+  //         price: sizeOption?.price || 0,
+  //         message_cake: "",
+  //         fruit_option: "無し"
+  //       }];
+  //     });
+  //   }
+  // }, [cakesData, selectedCakeName, selectedSizeName, setCakes]);
+
   useEffect(() => {
     if (!cakesData.length || !selectedCakeName) return;
 
-    const selectedCake = cakesData.find(c =>
-      String(c.id) === selectedCakeName || c.name === selectedCakeName
-    );
+    // Normaliza os parâmetros da URL para evitar problemas de NFC/NFD do iOS
+    const normalizedCakeParam = decodeURIComponent(selectedCakeName).normalize();
+    const normalizedSizeParam = selectedSizeName ? decodeURIComponent(selectedSizeName).normalize() : "";
+
+    const selectedCake = cakesData.find(c => {
+      const nameNorm = c.name.normalize();
+      const idStr = String(c.id);
+      return idStr === normalizedCakeParam || nameNorm === normalizedCakeParam;
+    });
 
     if (selectedCake) {
-      setCakes(prevCakes => {
-        const sizeOption = selectedCake.sizes?.find(s => s.size === selectedSizeName);
-        const resolvedSize = sizeOption?.size || "";
+      // Encontra o tamanho aplicando .normalize() em ambos os lados
+      const sizeOption = selectedCake.sizes?.find(s =>
+        s.size && s.size.normalize() === normalizedSizeParam
+      );
 
-        // Prevent infinite loop by checking if we already set it
-        if (prevCakes.length > 0 && prevCakes[0].cake_id === selectedCake.id && prevCakes[0].size === resolvedSize) {
+      const resolvedSize = sizeOption?.size || "";
+      const resolvedPrice = sizeOption?.price || 0;
+
+      setCakes(prevCakes => {
+        // Validação ultra segura para quebrar qualquer possibilidade de loop infinito
+        if (
+          prevCakes.length === 1 &&
+          prevCakes[0].cake_id === selectedCake.id &&
+          prevCakes[0].size === resolvedSize
+        ) {
           return prevCakes;
         }
 
@@ -175,13 +220,13 @@ export default function OrderCake() {
           name: selectedCake.name,
           amount: 1,
           size: resolvedSize,
-          price: sizeOption?.price || 0,
+          price: resolvedPrice,
           message_cake: "",
           fruit_option: "無し"
         }];
       });
     }
-  }, [cakesData, selectedCakeName, selectedSizeName, setCakes]);
+  }, [cakesData, selectedCakeName, selectedSizeName]); // Removido setCakes das dependências se ele não for estável
 
   // Resetar horário quando data muda
   useEffect(() => {
