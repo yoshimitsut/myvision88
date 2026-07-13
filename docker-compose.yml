@@ -19,6 +19,11 @@ services:
       - myvision88_yoyaku_mysql_data:/var/lib/mysql 
     networks:
       - myvision88_yoyaku-backend   # rede interna apena s
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   # ===========================
   # BACKEND (rede interna + proxy)
@@ -41,7 +46,8 @@ services:
     expose:
       - "3001"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - /var/www/uploads:/app/uploads
     networks:
