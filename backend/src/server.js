@@ -71,6 +71,10 @@ app.get('/api/test', async (req, res) => {
 // 🔹 MIDDLEWARE DE PROTEÇÃO SELETIVA
 // Define o que é público e o que precisa de Token
 const selectiveAuth = (req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+
   // Rotas Públicas
   // Verificamos a URL original para evitar problemas com rotas montadas
   const isPublicGet = req.method === 'GET' && (
