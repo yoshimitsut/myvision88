@@ -1372,32 +1372,37 @@ export default function ListOrder() {
     <div className='list-order-container'>
       {/* ── Title and Action Buttons ── */}
       <div className="list-header-row">
-        <h2>予約管理</h2>
-        
-        <div className='btn-actions'>
+        <div className="list-header-row-title">
+          <h2>予約管理</h2>
+        </div>
+
+        <div className='btn-actions-list'>
+          <button onClick={() => navigate("/admin/cake")} className='list-btn'>
+            <img src="/icons/cake_icon.png" alt="ケーキ" />
+          </button>
           <button onClick={() => navigate("/admin/date")} className='list-btn'>
-            <img src="/icons/calendar_icon.png" alt="カレンダー" />
+            <img src="/icons/calendar_icon.ico" alt="カレンダー" />
           </button>
           <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
           <button onClick={() => setShowScanner(true)} className='list-btn'>
-            <img src="/icons/qr-code.ico" alt="QRコード" />
+            <img className='icon-black' src="/icons/qr-code.ico" alt="QRコード" />
           </button>
           <button onClick={() => navigate("/ordertable")} className='list-btn'>
-            <img src="/icons/graph.ico" alt="グラフ" />
+            <img className='icon-black' src="/icons/graph.ico" alt="グラフ" />
           </button>
         </div>
       </div>
 
       {/* ── Seletor Cake / Gift ── */}
-      <div className='sales-view-tabs' style={{ marginBottom: '20px' }}>
+      <div className='sales-view-tabs-list' style={{ marginBottom: '20px' }}>
         <button
-          className={`sales-view-tab ${viewType === "cake" ? "sales-view-tab--active" : ""}`}
+          className={`sales-view-tab-list ${viewType === "cake" ? "sales-view-tab--active" : ""}`}
           onClick={() => setViewType("cake")}
         >
           🎂 ケーキ
         </button>
         <button
-          className={`sales-view-tab ${viewType === "gift" ? "sales-view-tab--active" : ""}`}
+          className={`sales-view-tab-list ${viewType === "gift" ? "sales-view-tab--active" : ""}`}
           onClick={() => setViewType("gift")}
         >
           🎁 ギフト
@@ -1481,37 +1486,37 @@ export default function ListOrder() {
                 <div className="tabs-header-row">
                   <div className="tabs-header">
                     <button
-                      className={`tab-button tab-all ${activeTab === "all" ? "active" : ""}`}
+                      className={`tab-button-list tab-all ${activeTab === "all" ? "active" : ""}`}
                       onClick={() => setActiveTab("all")}
                     >
                       すべて ({orders.length})
                     </button>
                     <button
-                      className={`tab-button tab-today ${activeTab === "today" ? "active" : ""}`}
+                      className={`tab-button-list tab-today ${activeTab === "today" ? "active" : ""}`}
                       onClick={() => setActiveTab("today")}
                     >
                       本日お渡し予定分 ({todayOrders.length})
                     </button>
                     <button
-                      className={`tab-button tab-active ${activeTab === "active" ? "active" : ""}`}
+                      className={`tab-button-list tab-active ${activeTab === "active" ? "active" : ""}`}
                       onClick={() => setActiveTab("active")}
                     >
                       現在の注文 ({activeOrders.length})
                     </button>
                     <button
-                      className={`tab-button tab-completed ${activeTab === "completed" ? "active" : ""}`}
+                      className={`tab-button-list tab-completed ${activeTab === "completed" ? "active" : ""}`}
                       onClick={() => setActiveTab("completed")}
                     >
                       お渡し済み ({completedOrders.length})
                     </button>
                     <button
-                      className={`tab-button tab-past ${activeTab === "past" ? "active" : ""}`}
+                      className={`tab-button-list tab-past ${activeTab === "past" ? "active" : ""}`}
                       onClick={() => setActiveTab("past")}
                     >
                       <span style={{ marginRight: '4px' }}>🕒</span> 過去の日付 ({pastDateOrders.length})
                     </button>
                     <button
-                      className={`tab-button tab-cancelled ${activeTab === "cancelled" ? "active" : ""}`}
+                      className={`tab-button-list tab-cancelled ${activeTab === "cancelled" ? "active" : ""}`}
                       onClick={() => setActiveTab("cancelled")}
                     >
                       <span style={{ marginRight: '4px' }}>✕</span> キャンセル ({cancelledOrders.length})

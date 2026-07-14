@@ -1,5 +1,3 @@
-
-
 /* Scanner QR Code */
 #reader {
   border: 2px solid #007bff !important;
@@ -14,6 +12,32 @@
 
 #reader__dashboard_section_csr span {
   color: #333;
+}
+
+.sales-view-tabs-list {
+  display: flex;
+}
+
+.sales-view-tab-list--active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+  box-shadow: 0 2px 8px rgba(24, 84, 149, 0.25);
+}
+
+.sales-view-tab-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f8f9fa;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 /* Botão de fechar */
@@ -49,14 +73,14 @@ ul {
   margin-bottom: 0.5rem;
 }
 
-.btn-actions {
+.btn-actions-list {
   gap: 8px;
   display: flex;
   align-items: center;
   flex-shrink: 0;
 }
 
-.cake-btn{
+.cake-btn {
   img {
     padding: 2px;
   }
@@ -90,6 +114,10 @@ ul {
   flex-shrink: 0;
 }
 
+.list-header-row-title {
+  display: flex;
+}
+
 .list-order-input {
   /* margin-bottom: 20px; */
   padding: 8px;
@@ -117,6 +145,7 @@ ul {
 .list-order-table ul {
   margin: 0;
 }
+
 .list-order-table th,
 .list-order-table td {
   border: 1px solid #ccc;
@@ -148,7 +177,8 @@ ul {
   /* overflow: auto; */
   white-space: normal;
   flex-wrap: wrap;
-  scrollbar-width: thin; /* Firefox */
+  scrollbar-width: thin;
+  /* Firefox */
   scrollbar-color: #888 #f0f0f0;
   word-break: break-word;
 
@@ -162,6 +192,7 @@ ul {
 .list-order-table td.message-cell::-webkit-scrollbar {
   width: 8px;
 }
+
 .list-order-table td.message-cell::-webkit-scrollbar-thumb {
   background-color: #888;
   border-radius: 4px;
@@ -194,20 +225,22 @@ ul {
 
 
 .list-order-table thead {
-  background-color: #185495f5;
+  background-color: #000;
   color: white;
 }
 
 .list-order-table tbody tr:nth-child(odd) {
-  background-color: #ffffff; /* branco */
+  background-color: #ffffff;
+  /* branco */
 }
 
 .list-order-table tbody tr:nth-child(even) {
-  background-color: #f9f9f9; /* cinza claro */
+  background-color: #f9f9f9;
+  /* cinza claro */
 }
 
 .day-summary {
-  padding-bottom: 30px  ;
+  padding-bottom: 30px;
 }
 
 .list-btn {
@@ -228,7 +261,10 @@ ul {
     height: 20px;
     object-fit: contain;
     display: block;
-    filter: brightness(0); /* Make icons black if they aren't already */
+  }
+
+  img.icon-black {
+    filter: brightness(0);
   }
 }
 
@@ -238,7 +274,7 @@ ul {
 
 .list-order-table th.situation-cell,
 .list-order-table td.situation-cell {
-  min-width: 161px; 
+  min-width: 161px;
 }
 
 .id-cell {
@@ -256,18 +292,23 @@ ul {
 
 .scroll-wrapper {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* scroll suave no iOS */
-  white-space: nowrap; /* evita quebra de linha */
+  -webkit-overflow-scrolling: touch;
+  /* scroll suave no iOS */
+  white-space: nowrap;
+  /* evita quebra de linha */
 }
 
 /* Webkit (Chrome, Safari, iOS Safari) */
 .scroll-wrapper::-webkit-scrollbar {
-  height: 8px; /* altura da barra horizontal */
+  height: 8px;
+  /* altura da barra horizontal */
 }
+
 .scroll-wrapper::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 4px;
 }
+
 .scroll-wrapper::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
@@ -280,10 +321,12 @@ ul {
 .table-order-container::-webkit-scrollbar {
   height: 8px;
 }
+
 .table-order-container::-webkit-scrollbar-thumb {
   background: #999;
   border-radius: 4px;
 }
+
 .table-order-container::-webkit-scrollbar-track {
   background: #eee;
 }
@@ -292,6 +335,7 @@ ul {
   display: flex;
   flex-direction: column;
 }
+
 .table-wrapper {
   display: block;
   width: 100%;
@@ -300,13 +344,16 @@ ul {
   overflow-y: auto;
   white-space: nowrap;
   /* Remova ou ajuste esses paddings problemáticos */
-  padding-bottom: 0;  /* Já está ok, mas... */
-  padding-right: 0;   /* Mude de 2rem para 0 */
+  padding-bottom: 0;
+  /* Já está ok, mas... */
+  padding-right: 0;
+  /* Mude de 2rem para 0 */
   -webkit-overflow-scrolling: touch;
   height: fit-content;
   scrollbar-width: none;
   /* Adicione margin-bottom negativo para compensar o ::after */
-  margin-bottom: -24px; /* Ajuste conforme necessário */
+  margin-bottom: -24px;
+  /* Ajuste conforme necessário */
 }
 
 .table-wrapper table {
@@ -330,11 +377,11 @@ ul {
 }
 
 .table-wrapper::-webkit-scrollbar-track {
-  background: #f0f0f0; 
+  background: #f0f0f0;
 }
 
 .table-wrapper::-webkit-scrollbar-thumb {
-  background: #888; 
+  background: #888;
   border-radius: 6px;
 }
 
@@ -343,7 +390,8 @@ ul {
 }
 
 .table-wrapper {
-  scrollbar-width: auto;      /* "thin" para mais fina */
+  scrollbar-width: auto;
+  /* "thin" para mais fina */
   scrollbar-color: #888 #f0f0f0;
 }
 
@@ -398,7 +446,7 @@ ul {
   padding: 12px;
   margin-bottom: 1rem;
   background: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .order-header {
@@ -419,6 +467,11 @@ ul {
   transition: opacity 0.3s;
 }
 
+.sales-view-tab--active {
+  color: #fff !important;
+  background-color: #000 !important;
+
+}
 
 /* Estilos para as abas */
 .tabs-container {
@@ -447,10 +500,10 @@ ul {
   margin-bottom: 0;
 }
 
-.tab-button {
-  padding: 0.5rem 0.75rem;
+.tab-button-list {
+  padding: 0.5rem 1.5rem;
   background: none;
-  border: none;
+  border: 1px solid;
   border-bottom: 3px solid transparent;
   cursor: pointer;
   font-size: 0.9rem;
@@ -461,26 +514,41 @@ ul {
   flex-shrink: 0;
 }
 
-.tab-button:hover {
-  color: #007bff;
+.tab-button-list:hover {
+  color: #474a4d;
   background-color: #f8f9fa;
 }
 
-.tab-button.active {
-  color: #007bff;
-  border-bottom-color: #007bff;
-  background-color: #f8f9fa;
+.tab-button-list.active {
+  border-bottom-color: #000 !important;
+  background-color: #000;
+  color: #fff !important;
 }
 
 /* Custom Tab Colors */
-.tab-past { color: #ffc107 !important; }
-.tab-past.active { border-bottom-color: #ffc107 !important; }
+.tab-past {
+  color: #000 !important;
+}
 
-.tab-completed { color: #28a745 !important; }
-.tab-completed.active { border-bottom-color: #28a745 !important; }
+.tab-past.active {
+  border-bottom-color: #000 !important;
+}
 
-.tab-cancelled { color: #dc3545 !important; }
-.tab-cancelled.active { border-bottom-color: #dc3545 !important; }
+.tab-completed {
+  color: #000 !important;
+}
+
+.tab-completed.active {
+  border-bottom-color: #000 !important;
+}
+
+.tab-cancelled {
+  color: #000 !important;
+}
+
+.tab-cancelled.active {
+  border-bottom-color: #000 !important;
+}
 
 .tab-content {
   min-height: 200px;
@@ -491,16 +559,16 @@ ul {
   .tabs-header {
     flex-direction: column;
   }
-  
-  .tab-button {
+
+  .tab-button-list {
     width: 100%;
     text-align: center;
     border-bottom: 1px solid #ddd;
     border-radius: 0;
   }
-  
-  .tab-button.active {
-    border-bottom: 3px solid #007bff;
+
+  .tab-button-list.active {
+    border-bottom: 3px solid #000;
   }
 }
 
@@ -509,31 +577,37 @@ ul {
   .list-order-input {
     max-width: 98vw !important;
   }
+
   .list-order-actions {
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;
   }
-  .btn-actions {
+
+  .btn-actions-list {
     flex-direction: row;
     justify-content: flex-end;
   }
+
   .table-wrapper {
     display: none;
   }
+
   .mobile-orders {
     display: block;
   }
+
   .excel-btn {
     display: none;
   }
+
   .list-btn {
     min-width: 48px !important;
     min-height: 48px !important;
+
     img {
       width: 1.8rem !important;
       height: 1.8rem !important;
     }
   }
 }
-
