@@ -97,7 +97,7 @@ const ExcelExportButton: React.FC<ExcelExportButtonProps> = ({
       onClick={() => handleExport(data, filename, sheetName)}
       className="list-btn excel-btn"
     >
-      <img src="/icons/file-download.ico" alt="excel icon" />
+      <img className='icon-black' src="/icons/file-download.ico" alt="excel icon" />
     </button>
   );
 };

@@ -81,7 +81,15 @@ export default function ListOrder() {
           'Authorization': `Bearer ${token}`
         }
       })
-        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === 401) {
+            sessionStorage.removeItem('store_token');
+            sessionStorage.removeItem('store_authenticated');
+            window.location.href = '/store-login';
+            throw new Error('Não autorizado');
+          }
+          return res.json();
+        })
         .then((data) => {
           const normalized = Array.isArray(data) ? data : (data.orders || []);
           setOrders(normalized);
