@@ -18,6 +18,7 @@ import SalesOrder from './pages/admin/SalesOrder';
 import OrderCakeStore from './pages/admin/OrderCakeStore';
 import TimeSlotsManagement from './pages/admin/TimeSlotsManagement';
 import CakeManagement from './pages/admin/CakeManagement';
+import SameDayCakeManagement from './pages/admin/SameDayCakeManagement';
 import GiftManagement from './pages/admin/GiftManagement';
 import StoreManagement from './pages/admin/StoreManagement';
 import NewsletterManagement from './pages/admin/NewsletterManagement';
@@ -65,6 +66,12 @@ function App() {
         <Route path="/admin/cake" element={
           <ProtectedRoute>
             <CakeManagement />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/same-day-cake" element={
+          <ProtectedRoute>
+            <SameDayCakeManagement />
           </ProtectedRoute>
         } />
 

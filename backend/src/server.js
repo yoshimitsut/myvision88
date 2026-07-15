@@ -14,6 +14,7 @@ setInterval(() => {
 
 // Importar Routes
 const cakeRoutes = require('./routes/cakeRoutes');
+const sameDayCakeRoutes = require('./routes/sameDayCakeRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const giftRoutes = require('./routes/giftRoutes');
 const giftOrderRoutes = require('./routes/giftOrderRoutes');
@@ -79,6 +80,7 @@ const selectiveAuth = (req, res, next) => {
   // Verificamos a URL original para evitar problemas com rotas montadas
   const isPublicGet = req.method === 'GET' && (
     req.originalUrl.startsWith('/api/cake') ||
+    req.originalUrl.startsWith('/api/samedaycake') ||
     req.originalUrl.startsWith('/api/gift') ||
     req.originalUrl.startsWith('/api/timeslots') ||
     req.originalUrl.startsWith('/api/storeinfo') ||
@@ -106,6 +108,7 @@ app.use("/api", stripeRoutes);
 
 // Aplicar roteadores com proteção seletiva e caminhos corretos
 app.use('/api/cake', selectiveAuth, cakeRoutes);
+app.use('/api/samedaycake', selectiveAuth, sameDayCakeRoutes);
 app.use('/api/gift', selectiveAuth, giftRoutes);
 app.use('/api/timeslots', selectiveAuth, timeslotRoutes);
 app.use('/api/newsletters', selectiveAuth, newsletterRoutes);

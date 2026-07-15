@@ -1388,6 +1388,9 @@ export default function ListOrder() {
           <button onClick={() => navigate("/admin/cake")} className='list-btn'>
             <img src="/icons/cake_icon.png" alt="ケーキ" />
           </button>
+          <button onClick={() => navigate("/admin/same-day-cake")} className='list-btn' title="当日受取ケーキ管理">
+            <img src="/icons/cake_icon.png" alt="当日受取" style={{ filter: 'sepia(1) saturate(3) hue-rotate(200deg)' }} />
+          </button>
           <button onClick={() => navigate("/admin/date")} className='list-btn'>
             <img src="/icons/calendar_icon.ico" alt="カレンダー" />
           </button>
