@@ -29,7 +29,6 @@ export default function ListGiftOrder() {
   const handleSearch = useRef<number | null>(null);
 
   useEffect(() => {
-    setLoading(true);
     if (handleSearch.current) {
       clearTimeout(handleSearch.current);
     }
@@ -294,56 +293,56 @@ export default function ListGiftOrder() {
 
   return (
     <div className='list-order-gift-container'>
-      {loading ? (
-        <p>読み込み中...</p>
-      ) : orders.length === 0 ? (
-        <p>注文が見つかりません。</p>
-      ) : (
-        <>
-          <div className="tabs-container">
-            <div className="tabs-header-row">
-              <div className="tabs-header">
-                <button
-                  className={`tab-button ${activeTab === "active" ? "active" : ""}`}
-                  onClick={() => setActiveTab("active")}
-                >
-                  現在の注文 ({activeOrders.length})
-                </button>
-                <button
-                  className={`tab-button tab-completed ${activeTab === "completed" ? "active" : ""}`}
-                  onClick={() => setActiveTab("completed")}
-                >
-                  お渡し済み/発送済 ({completedOrders.length})
-                </button>
-                <button
-                  className={`tab-button tab-cancelled ${activeTab === "cancelled" ? "active" : ""}`}
-                  onClick={() => setActiveTab("cancelled")}
-                >
-                  <span style={{ marginRight: '4px' }}>✕</span> キャンセル ({cancelledOrders.length})
-                </button>
-              </div>
+      <div className="tabs-container">
+        <div className="tabs-header-row">
+          <div className="tabs-header">
+            <button
+              className={`tab-button ${activeTab === "active" ? "active" : ""}`}
+              onClick={() => setActiveTab("active")}
+            >
+              現在の注文 ({activeOrders.length})
+            </button>
+            <button
+              className={`tab-button tab-completed ${activeTab === "completed" ? "active" : ""}`}
+              onClick={() => setActiveTab("completed")}
+            >
+              お渡し済み/発送済 ({completedOrders.length})
+            </button>
+            <button
+              className={`tab-button tab-cancelled ${activeTab === "cancelled" ? "active" : ""}`}
+              onClick={() => setActiveTab("cancelled")}
+            >
+              <span style={{ marginRight: '4px' }}>✕</span> キャンセル ({cancelledOrders.length})
+            </button>
+          </div>
 
-              <div className="search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <span style={{ position: 'absolute', left: '10px', color: '#888' }}>🔍</span>
-                <input
-                  type="text"
-                  placeholder='名前・電話番号・受付番号で検索'
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className='list-order-input'
-                  style={{ paddingLeft: '32px', borderRadius: '4px', border: '1px solid #ddd', minWidth: '300px' }}
-                />
-              </div>
-            </div>
+          <div className="search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <span style={{ position: 'absolute', left: '10px', color: '#888' }}>🔍</span>
+            <input
+              type="text"
+              placeholder='名前・電話番号・受付番号で検索'
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className='list-order-input'
+              style={{ paddingLeft: '32px', borderRadius: '4px', border: '1px solid #ddd', minWidth: '300px' }}
+            />
+          </div>
+        </div>
 
-            <div className="tab-content">
+        <div className="tab-content">
+          {loading ? (
+            <p style={{ padding: '20px 0' }}>読み込み中...</p>
+          ) : orders.length === 0 ? (
+            <p style={{ padding: '20px 0' }}>注文が見つかりません。</p>
+          ) : (
+            <>
               {activeTab === "active" && renderTable(activeOrders)}
               {activeTab === "completed" && renderTable(completedOrders)}
               {activeTab === "cancelled" && renderTable(cancelledOrders)}
-            </div>
-          </div>
-        </>
-      )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

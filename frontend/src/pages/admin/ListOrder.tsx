@@ -65,7 +65,6 @@ export default function ListOrder() {
 
   // Efeito para carregar pedidos
   useEffect(() => {
-    setLoading(true);
     if (handleSearch.current) {
       clearTimeout(handleSearch.current);
     }
@@ -236,6 +235,51 @@ export default function ListOrder() {
   // Pedidos Cancelados: status e (キャンセル)
   const cancelledOrders = useMemo(() => {
     return orders.filter(o => o.status === "e");
+  }, [orders]);
+
+  const sortedTodayOrders = useMemo(() => {
+    return [...todayOrders].sort((a, b) => {
+      const timeA = a.pickupHour || "";
+      const timeB = b.pickupHour || "";
+      return timeA.localeCompare(timeB, "ja");
+    });
+  }, [todayOrders]);
+
+  const sortedPastDateOrders = useMemo(() => {
+    return [...pastDateOrders].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      if (dateA !== dateB) return dateB - dateA;
+      const timeA = a.pickupHour || "";
+      const timeB = b.pickupHour || "";
+      return timeA.localeCompare(timeB, "ja");
+    });
+  }, [pastDateOrders]);
+
+  const sortedCompletedOrders = useMemo(() => {
+    return [...completedOrders].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      if (dateA !== dateB) return dateB - dateA;
+      const timeA = a.pickupHour || "";
+      const timeB = b.pickupHour || "";
+      return timeA.localeCompare(timeB, "ja");
+    });
+  }, [completedOrders]);
+
+  const sortedCancelledOrders = useMemo(() => {
+    return [...cancelledOrders].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      if (dateA !== dateB) return dateB - dateA;
+      const timeA = a.pickupHour || "";
+      const timeB = b.pickupHour || "";
+      return timeA.localeCompare(timeB, "ja");
+    });
+  }, [cancelledOrders]);
+
+  const sortedAllOrders = useMemo(() => {
+    return [...orders].sort((a, b) => b.id_order - a.id_order);
   }, [orders]);
 
   const formatDate = (isoString: string) => {
@@ -502,16 +546,124 @@ export default function ListOrder() {
     }),
   };
 
+  // 🔹 COMPONENTE PARA TODOS OS PEDIDOS
+  const renderAllOrdersTable = () => (
+    <>
+      {sortedAllOrders.length === 0 ? (
+        <p>該当する注文はありません。</p>
+      ) : (
+        <div className="table-wrapper scroll-cell table-order-container">
+          <table className="list-order-table table-order">
+            <thead>
+              <tr>
+                <th className='id-cell'>受付番号</th>
+                <th className='situation-cell'>お会計</th>
+                <th>お名前</th>
+                <th>受取希望日時</th>
+                <th>ご注文のケーキ</th>
+                <th>個数</th>
+                <th>フルーツ盛り</th>
+                <th className='message-cell'>メッセージプレート</th>
+                <th className='message-cell'>その他メッセージ</th>
+                <th>電話番号</th>
+                <th>メールアドレス</th>
+                <th>編集</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedAllOrders
+                .filter((order) => {
+                  const matchesStatus = statusFilter === "すべて" || order.status === statusFilter;
+                  const matchesCake = cakeFilter === "すべて" || (order.cakes && order.cakes.some(cake => cake.name === cakeFilter));
+                  const matchesDate = dateFilter === "すべて" || formatDateJP(order.date) === formatDateJP(dateFilter);
+                  const matchesHour = hourFilter === "すべて" || order.pickupHour === hourFilter;
+
+                  return matchesStatus && matchesCake && matchesDate && matchesHour;
+                })
+                .map((order) => (
+                  <tr key={order.id_order}>
+                    <td>{String(order.id_order).padStart(4, "0")}</td>
+                    <td className='situation-cell'>
+                      <Select<StatusOption, false>
+                        options={statusOptions}
+                        value={statusOptions.find((opt) => opt.value === order.status)}
+                        onChange={(selected: SingleValue<StatusOption>) => {
+                          if (selected) handleStatusChange(order.id_order, selected.value);
+                        }}
+                        styles={customStyles}
+                        isSearchable={false}
+                        isDisabled={isUpdating}
+                        isLoading={isUpdating && updatingOrderId === order.id_order}
+                      />
+                    </td>
+                    <td>{order.first_name} {order.last_name}</td>
+                    <td>{formatDateJP(order.date)} {order.pickupHour}</td>
+                    <td>
+                      <ul>
+                        {order.cakes && order.cakes.map((cake, index) => (
+                          <li key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                            {cake.name} {cake.size} - ¥{cake.price}
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td style={{ textAlign: "left" }}>
+                      <ul>
+                        {order.cakes && order.cakes.map((cake, index) => (
+                          <li key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                            {cake.amount}
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td style={{ textAlign: "left" }}>
+                      <ul>
+                        {order.cakes && order.cakes.map((cake, index) => (
+                          <li key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                            {cake.fruit_option}
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td className='message-cell' style={{ textAlign: "left" }}>
+                      <ul>
+                        {order.cakes && order.cakes.map((cake, index) => (
+                          <li key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                            {cake.message_cake}
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td className='message-cell'>{order.message || " "}</td>
+                    <td>{order.tel}</td>
+                    <td>{order.email}</td>
+                    <td>
+                      <button
+                        onClick={() => setEditingOrder(order)}
+                        style={{
+                          padding: "0.25rem 0.5rem",
+                          backgroundColor: "#007bff",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          fontSize: "0.8rem"
+                        }}
+                      >
+                        編集
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
+  );
+
   // 🔹 COMPONENTE PARA PEDIDOS DE HOJE
-  const TodayOrdersTable = () => {
-    const sortedTodayOrders = useMemo(() => {
-      return [...todayOrders].sort((a, b) => {
-        // Ordena por horário de retirada
-        const timeA = a.pickupHour || "";
-        const timeB = b.pickupHour || "";
-        return timeA.localeCompare(timeB, "ja");
-      });
-    }, [todayOrders]);
+  const renderTodayOrdersTable = () => {
 
     return (
       <>
@@ -684,7 +836,7 @@ export default function ListOrder() {
   };
 
   // 🔹 COMPONENTE PARA PEDIDOS ATIVOS
-  const ActiveOrdersTable = () => (
+  const renderActiveOrdersTable = () => (
     <>
       {activeOrders.length === 0 ? (
         <p>現在の注文はありません。</p>
@@ -964,21 +1116,7 @@ export default function ListOrder() {
   );
 
   // 🔹 COMPONENTE PARA PEDIDOS COM DATA ANTERIOR (COM MOBILE)
-  const PastDateOrdersTable = () => {
-    const sortedPastDateOrders = useMemo(() => {
-      return [...pastDateOrders].sort((a, b) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-
-        if (dateA !== dateB) {
-          return dateB - dateA;
-        }
-
-        const timeA = a.pickupHour || "";
-        const timeB = b.pickupHour || "";
-        return timeA.localeCompare(timeB, "ja");
-      });
-    }, [pastDateOrders]);
+  const renderPastDateOrdersTable = () => {
 
     return (
       <>
@@ -1138,21 +1276,7 @@ export default function ListOrder() {
   };
 
   // 🔹 COMPONENTE PARA PEDIDOS FINALIZADOS (COM MOBILE)
-  const CompletedOrdersTable = () => {
-    const sortedCompletedOrders = useMemo(() => {
-      return [...completedOrders].sort((a, b) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-
-        if (dateA !== dateB) {
-          return dateB - dateA;
-        }
-
-        const timeA = a.pickupHour || "";
-        const timeB = b.pickupHour || "";
-        return timeA.localeCompare(timeB, "ja");
-      });
-    }, [completedOrders]);
+  const renderCompletedOrdersTable = () => {
 
     return (
       <>
@@ -1258,21 +1382,7 @@ export default function ListOrder() {
   };
 
   // 🔹 COMPONENTE PARA PEDIDOS CANCELADOS (COM MOBILE)
-  const CancelledOrdersTable = () => {
-    const sortedCancelledOrders = useMemo(() => {
-      return [...cancelledOrders].sort((a, b) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-
-        if (dateA !== dateB) {
-          return dateB - dateA;
-        }
-
-        const timeA = a.pickupHour || "";
-        const timeB = b.pickupHour || "";
-        return timeA.localeCompare(timeB, "ja");
-      });
-    }, [cancelledOrders]);
+  const renderCancelledOrdersTable = () => {
 
     return (
       <>
@@ -1486,87 +1596,92 @@ export default function ListOrder() {
             </div>
           )}
 
-          {loading ? (
-            <p>読み込み中...</p>
-          ) : orders.length === 0 ? (
-            <p>注文が見つかりません。</p>
-          ) : (
-            <>
-              {/* 🔹 ABAS ATUALIZADAS - 5 ABAS AGORA */}
-              <div className="tabs-container">
-                <div className="tabs-header-row">
-                  <div className="tabs-header">
-                    <button
-                      className={`tab-button-list tab-all ${activeTab === "all" ? "active" : ""}`}
-                      onClick={() => setActiveTab("all")}
-                    >
-                      すべて ({orders.length})
-                    </button>
-                    <button
-                      className={`tab-button-list tab-today ${activeTab === "today" ? "active" : ""}`}
-                      onClick={() => setActiveTab("today")}
-                    >
-                      本日お渡し予定分 ({todayOrders.length})
-                    </button>
-                    <button
-                      className={`tab-button-list tab-active ${activeTab === "active" ? "active" : ""}`}
-                      onClick={() => setActiveTab("active")}
-                    >
-                      現在の注文 ({activeOrders.length})
-                    </button>
-                    <button
-                      className={`tab-button-list tab-completed ${activeTab === "completed" ? "active" : ""}`}
-                      onClick={() => setActiveTab("completed")}
-                    >
-                      お渡し済み ({completedOrders.length})
-                    </button>
-                    <button
-                      className={`tab-button-list tab-past ${activeTab === "past" ? "active" : ""}`}
-                      onClick={() => setActiveTab("past")}
-                    >
-                      <span style={{ marginRight: '4px' }}>🕒</span> 過去の日付 ({pastDateOrders.length})
-                    </button>
-                    <button
-                      className={`tab-button-list tab-cancelled ${activeTab === "cancelled" ? "active" : ""}`}
-                      onClick={() => setActiveTab("cancelled")}
-                    >
-                      <span style={{ marginRight: '4px' }}>✕</span> キャンセル ({cancelledOrders.length})
-                    </button>
-                  </div>
-
-                  <div className="search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <span style={{ position: 'absolute', left: '10px', color: '#888' }}>🔍</span>
-                    <input
-                      type="text"
-                      placeholder='名前・電話番号・受付番号で検索'
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      className='list-order-input'
-                      style={{ paddingLeft: '32px', borderRadius: '4px', border: '1px solid #ddd', minWidth: '300px' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="tab-content">
-                  {activeTab === "all" && <ActiveOrdersTable />}
-                  {activeTab === "today" && <TodayOrdersTable />}
-                  {activeTab === "active" && <ActiveOrdersTable />}
-                  {activeTab === "past" && <PastDateOrdersTable />}
-                  {activeTab === "completed" && <CompletedOrdersTable />}
-                  {activeTab === "cancelled" && <CancelledOrdersTable />}
-                </div>
+          <div className="tabs-container">
+            <div className="tabs-header-row">
+              <div className="tabs-header">
+                <button
+                  className={`tab-button-list tab-all ${activeTab === "all" ? "active" : ""}`}
+                  onClick={() => setActiveTab("all")}
+                >
+                  すべて ({orders.length})
+                </button>
+                <button
+                  className={`tab-button-list tab-today ${activeTab === "today" ? "active" : ""}`}
+                  onClick={() => setActiveTab("today")}
+                >
+                  本日お渡し予定分 ({todayOrders.length})
+                </button>
+                <button
+                  className={`tab-button-list tab-active ${activeTab === "active" ? "active" : ""}`}
+                  onClick={() => setActiveTab("active")}
+                >
+                  現在の注文 ({activeOrders.length})
+                </button>
+                <button
+                  className={`tab-button-list tab-completed ${activeTab === "completed" ? "active" : ""}`}
+                  onClick={() => setActiveTab("completed")}
+                >
+                  お渡し済み ({completedOrders.length})
+                </button>
+                <button
+                  className={`tab-button-list tab-past ${activeTab === "past" ? "active" : ""}`}
+                  onClick={() => setActiveTab("past")}
+                >
+                  <span style={{ marginRight: '4px' }}>🕒</span> 過去の日付 ({pastDateOrders.length})
+                </button>
+                <button
+                  className={`tab-button-list tab-cancelled ${activeTab === "cancelled" ? "active" : ""}`}
+                  onClick={() => setActiveTab("cancelled")}
+                >
+                  <span style={{ marginRight: '4px' }}>✕</span> キャンセル ({cancelledOrders.length})
+                </button>
               </div>
 
-              {/* Modal de edição */}
-              {editingOrder && (
-                <EditOrderModal
-                  editingOrder={editingOrder}
-                  setEditingOrder={setEditingOrder}
-                  handleSaveEdit={handleSaveEdit}
-                  isSaving={isSavingEdit}
+              <div className="search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <span style={{ position: 'absolute', left: '10px', color: '#888' }}>🔍</span>
+                <input
+                  type="text"
+                  placeholder='名前・電話番号・受付番号で検索'
+                  value={search}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSearch(val);
+                    if (val.trim() !== '' && activeTab !== 'all') {
+                      setActiveTab('all');
+                    }
+                  }}
+                  className='list-order-input'
+                  style={{ paddingLeft: '32px', borderRadius: '4px', border: '1px solid #ddd', minWidth: '300px' }}
                 />
+              </div>
+            </div>
+
+            <div className="tab-content">
+              {loading ? (
+                <p style={{ padding: '20px 0' }}>読み込み中...</p>
+              ) : orders.length === 0 ? (
+                <p style={{ padding: '20px 0' }}>注文が見つかりません。</p>
+              ) : (
+                <>
+                  {activeTab === "all" && renderAllOrdersTable()}
+                  {activeTab === "today" && renderTodayOrdersTable()}
+                  {activeTab === "active" && renderActiveOrdersTable()}
+                  {activeTab === "past" && renderPastDateOrdersTable()}
+                  {activeTab === "completed" && renderCompletedOrdersTable()}
+                  {activeTab === "cancelled" && renderCancelledOrdersTable()}
+                </>
               )}
-            </>
+            </div>
+          </div>
+
+          {/* Modal de edição */}
+          {editingOrder && (
+            <EditOrderModal
+              editingOrder={editingOrder}
+              setEditingOrder={setEditingOrder}
+              handleSaveEdit={handleSaveEdit}
+              isSaving={isSavingEdit}
+            />
           )}
         </>
       )}
