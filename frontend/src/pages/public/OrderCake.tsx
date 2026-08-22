@@ -565,8 +565,13 @@ export default function OrderCake() {
   return (
     <div className='reservation-main'>
       <div className="container">
-        <h2 className='cake-title-h2'>デコレーションケーキ</h2>
-        <h2 className='cake-title-h2'>予約フォーム</h2>
+        {/* Title Header */}
+        <h1 className='order-form-title'>オーダーフォーム</h1>
+        <div className="order-form-divider">
+          <span className="divider-line"></span>
+          <span className="infinity-symbol">∞</span>
+          <span className="divider-line"></span>
+        </div>
 
         {paymentStep === 'form' ? (
           <form className="form-order" onSubmit={handleSubmit}>
@@ -578,7 +583,6 @@ export default function OrderCake() {
                   value: s.size || '',
                   label: s.size ? `${s.size} ￥${s.price.toLocaleString()}` : '',
                 })) || [];
-                const selectedSize = sizeOptions.find(s => s.size === item.size);
 
                 return (
                   <div className="box-cake" key={`${item.cake_id}-${index}`}>
@@ -590,15 +594,26 @@ export default function OrderCake() {
                       </div>
                     )}
 
-                    {selectedCakeData && selectedCakeData.image && (
-                      <img
-                        className='img-cake-order'
-                        src={`${API_URL}/image/${FOLDER_URL}/${selectedCakeData.image}`.replace(/([^:]\/)\/+/g, "$1")}
-                        alt={selectedCakeData.name}
-                      />
-                    )}
+                    {/* Top Hero Cake Image Banner */}
+                    <div className="order-cake-hero-banner">
+                      {selectedCakeData && selectedCakeData.image ? (
+                        <img
+                          src={`${API_URL}/image/${FOLDER_URL}/${selectedCakeData.image}`.replace(/([^:]\/)\/+/g, "$1")}
+                          alt={selectedCakeData.name}
+                        />
+                      ) : (
+                        <div className="order-cake-no-img">
+                          <span>🎂 ケーキ画像</span>
+                        </div>
+                      )}
+                    </div>
 
-                    <div className='input-group'>
+                    {/* 1. 商品名 (Cake Select) */}
+                    <div className='order-field-group'>
+                      <div className="field-label-row">
+                        <span className="field-label-text">商品名</span>
+                        <span className="field-required-badge">必須</span>
+                      </div>
                       <Select<CustomOptionType, false>
                         options={cakesData?.map(c => ({
                           value: String(c.id),
@@ -640,54 +655,14 @@ export default function OrderCake() {
                         isSearchable={false}
                         styles={customStylesCake}
                       />
-                      <label className='select-group'>*ケーキ名:</label>
                     </div>
 
-                    {selectedCakeData && (
-                      <div className='input-group'>
-                        <Select<SizeOption, false>
-                          options={sizeOptions}
-                          value={selectedSize || null}
-                          onChange={(selected) => {
-                            if (selected && selected.size) {
-                              updateCake(index, "size", selected.size);
-                              updateCake(index, "price", selected.price);
-                            }
-                          }}
-                          placeholder='サイズを選択'
-                          isSearchable={false}
-                          classNamePrefix='react-select'
-                          required
-                          styles={customStylesSize}
-                        />
-                        <label className='select-group'>*ケーキのサイズ</label>
+                    {/* 2. 個数 (Quantity Select) */}
+                    <div className='order-field-group'>
+                      <div className="field-label-row">
+                        <span className="field-label-text">個数</span>
+                        <span className="field-required-badge">必須</span>
                       </div>
-                    )}
-
-                    <div className="input-group-radio">
-                      <div className="pill-group">
-                        {FRUIT_OPTIONS.map(option => (
-                          <label
-                            key={option.value}
-                            className={`pill ${item.fruit_option === option.value ? "active" : ""}`}
-                          >
-                            <input
-                              className='radio-input-fruit'
-                              type="radio"
-                              name={`fruit-option-${index}`}
-                              value={option.value}
-                              checked={item.fruit_option === option.value}
-                              onChange={() => updateCake(index, "fruit_option", option.value)}
-                            />
-                            <span style={{ width: "120px", textAlign: "start" }}>{option.label}</span>
-                            <span style={{ width: "5rem", textAlign: "end" }}>{option.priceText}</span>
-                          </label>
-                        ))}
-                      </div>
-                      <label className='select-group-radio'>*フルーツ盛り</label>
-                    </div>
-
-                    <div className='input-group'>
                       <Select<OptionType, false>
                         options={Array.from({ length: 10 }, (_, i) => ({
                           value: String(i + 1),
@@ -704,112 +679,192 @@ export default function OrderCake() {
                         styles={customStyles}
                         required
                       />
-                      <label className='select-group'>*個数:</label>
                     </div>
 
-                    <div className='input-group'>
-                      <label htmlFor={`message_cake_${index}`}>メッセージプレート</label>
-                      <textarea
-                        id={`message_cake_${index}`}
-                        name="message_cake"
-                        placeholder="ご要望がある場合のみご記入ください。"
-                        value={item.message_cake || ""}
-                        onChange={(e) => updateCake(index, "message_cake", e.target.value)}
-                      />
+                    {/* 3. サイズ (Size Pills Grid) */}
+                    {selectedCakeData && selectedCakeData.sizes && (
+                      <div className='order-field-group'>
+                        <div className="field-label-row">
+                          <span className="field-label-text">サイズ</span>
+                          <span className="field-required-badge">必須</span>
+                        </div>
+                        <div className="option-pills-grid">
+                          {selectedCakeData.sizes.map((s, sIdx) => {
+                            const isSelected = item.size === s.size;
+                            return (
+                              <div
+                                key={sIdx}
+                                className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  updateCake(index, "size", s.size);
+                                  updateCake(index, "price", s.price);
+                                }}
+                              >
+                                {isSelected && <span className="option-pill-checkmark">✓</span>}
+                                <span className="option-pill-title">{s.size}</span>
+                                <span className="option-pill-price">¥{s.price.toLocaleString()}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 4. フルーツ盛り (Fruit Option Pills Grid) */}
+                    <div className='order-field-group'>
+                      <div className="field-label-row">
+                        <span className="field-label-text">フルーツ盛り</span>
+                        <span className="field-required-badge">必須</span>
+                      </div>
+                      <div className="option-pills-grid">
+                        {FRUIT_OPTIONS.map(option => {
+                          const isSelected = item.fruit_option === option.value;
+                          return (
+                            <div
+                              key={option.value}
+                              className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                              onClick={() => updateCake(index, "fruit_option", option.value)}
+                            >
+                              {isSelected && <span className="option-pill-checkmark">✓</span>}
+                              <span className="option-pill-title">{option.label}</span>
+                              <span className="option-pill-price">{option.priceText}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
 
-                    <div className='btn-div'>
-                      <button type='button' onClick={addCake} className='btn btn-add-cake'>
-                        ➕ 別のケーキを追加
-                      </button>
+                    {/* 5. メッセージプレート (Message Plate Option Pills Grid) */}
+                    <div className='order-field-group'>
+                      <div className="field-label-row">
+                        <span className="field-label-text">メッセージプレート</span>
+                        <span className="field-required-badge">必須</span>
+                      </div>
+                      <div className="option-pills-grid">
+                        {[
+                          { value: "お名前＋おたんじょうびおめでとう", label: "お名前＋おたんじょうびおめでとう", priceText: "+¥0" },
+                          { value: "お名前＋Happy Birthday", label: "お名前＋Happy Birthday", priceText: "+¥0" },
+                          { value: "その他", label: "その他", priceText: "+¥0" }
+                        ].map(pOpt => {
+                          const currentPlateType = (item as any).plate_type || "お名前＋おたんじょうびおめでとう";
+                          const isSelected = currentPlateType === pOpt.value;
+                          return (
+                            <div
+                              key={pOpt.value}
+                              className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                              onClick={() => {
+                                updateCake(index, "plate_type" as any, pOpt.value);
+                                if (pOpt.value !== "その他" && !item.message_cake) {
+                                  updateCake(index, "message_cake", pOpt.label);
+                                }
+                              }}
+                            >
+                              {isSelected && <span className="option-pill-checkmark">✓</span>}
+                              <span className="option-pill-title">{pOpt.label}</span>
+                              <span className="option-pill-price">{pOpt.priceText}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="plate-message-input-box" style={{ marginTop: '10px' }}>
+                        <input
+                          type="text"
+                          className="order-styled-input"
+                          placeholder="お名前・メッセージをご記入ください (例: たろうくん お誕生日おめでとう)"
+                          value={item.message_cake || ""}
+                          onChange={(e) => updateCake(index, "message_cake", e.target.value)}
+                        />
+                      </div>
                     </div>
+
+                    {/* 6. キャンドル (Candles Option Pills Grid) */}
+                    <div className='order-field-group'>
+                      <div className="field-label-row">
+                        <span className="field-label-text">キャンドル</span>
+                        <span className="field-required-badge">必須</span>
+                      </div>
+                      <div className="option-pills-grid">
+                        {[
+                          { value: "ノーマル", label: "ノーマル", priceText: "¥0" },
+                          { value: "ナンバーキャンドル", label: "ナンバーキャンドル", priceText: "有料" },
+                          { value: "なし", label: "なし", priceText: "" }
+                        ].map(cOpt => {
+                          const isSelected = (item as any).candle_option === cOpt.value || (cOpt.value === "ノーマル" && !(item as any).candle_option);
+                          return (
+                            <div
+                              key={cOpt.value}
+                              className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                              onClick={() => updateCake(index, "candle_option" as any, cOpt.value)}
+                            >
+                              {isSelected && <span className="option-pill-checkmark">✓</span>}
+                              <span className="option-pill-title">{cOpt.label}</span>
+                              {cOpt.priceText && <span className="option-pill-price">{cOpt.priceText}</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {cakes.length > 1 && (
+                      <div className='btn-div'>
+                        <button type='button' onClick={addCake} className='btn btn-add-cake'>
+                          ➕ 別のケーキを追加
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
 
+            <div className="order-section-divider"></div>
+
+            {/* Customer Details & Pickup Information */}
             <div className="client-information">
-              <label className='title-information'>お客様情報</label>
-              <div className="full-name">
-                <Input
-                  id="firstName"
-                  label="*姓(カタカナ)"
-                  placeholder="ヒガ"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  onBlur={handleKatakanaBlur}
-                  lang="ja"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  required
-                />
-
-                <Input
-                  id="lastName"
-                  label="*名(カタカナ)"
-                  placeholder="タロウ"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  onBlur={handleKatakanaBlur}
-                  required
-                />
-
-                <Input
-                  id="email"
-                  label="*メールアドレス"
-                  type="email"
-                  placeholder="必須"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-
-                <Input
-                  id="tel"
-                  label="*お電話番号"
-                  type="tel"
-                  placeholder="ハイフン不要"
-                  value={formData.tel}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="date-information">
-              <label className='title-information'>*受取日時</label>
-              <div className='input-group'>
-                <label htmlFor="datepicker" className='datepicker'>*受け取り希望日</label>
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
-                  minDate={today}
-                  maxDate={maxDate}
-                  excludeDates={excludedDates}
-                  filterDate={isDateAllowed}
-                  dateFormat="yyyy年MM月dd日"
-                  locale={ja}
-                  placeholderText="日付を選択"
-                  dayClassName={(date) => {
-                    if (isSameDay(date, today)) return "hoje-azul";
-                    if (getDay(date) === 0) return "domingo-vermelho";
-                    return "";
-                  }}
-                  className="react-datepicker"
-                  calendarClassName="datepicker-calendar"
-                  calendarContainer={CustomCalendarContainer}
-                  required
-                  renderDayContents={(day, date) => (
-                    <DayCell
-                      day={day}
-                      date={date!}
-                      isSelectable={isDateAllowed(date!)}
-                    />
-                  )}
-                />
+              {/* 受取日 */}
+              <div className='order-field-group'>
+                <div className="field-label-row">
+                  <span className="field-label-text">受取日</span>
+                  <span className="field-required-badge">必須</span>
+                </div>
+                <div className="datepicker-input-wrapper">
+                  <DatePicker
+                    selected={selectedDate}
+                    onChange={(date) => setSelectedDate(date)}
+                    minDate={today}
+                    maxDate={maxDate}
+                    excludeDates={excludedDates}
+                    filterDate={isDateAllowed}
+                    dateFormat="yyyy年MM月dd日"
+                    locale={ja}
+                    placeholderText="日付を選択"
+                    dayClassName={(date) => {
+                      if (isSameDay(date, today)) return "hoje-azul";
+                      if (getDay(date) === 0) return "domingo-vermelho";
+                      return "";
+                    }}
+                    className="order-styled-input react-datepicker"
+                    calendarClassName="datepicker-calendar"
+                    calendarContainer={CustomCalendarContainer}
+                    required
+                    renderDayContents={(day, date) => (
+                      <DayCell
+                        day={day}
+                        date={date!}
+                        isSelectable={isDateAllowed(date!)}
+                      />
+                    )}
+                  />
+                  <span className="calendar-icon-indicator">📅</span>
+                </div>
               </div>
 
-              <div className='input-group'>
+              {/* 受け取り希望時間 */}
+              <div className='order-field-group'>
+                <div className="field-label-row">
+                  <span className="field-label-text">受け取り希望時間</span>
+                  <span className="field-required-badge">必須</span>
+                </div>
                 <Select<TimeOptionType, false>
                   options={hoursOptions}
                   value={hoursOptions.find(h => h.value === pickupHour)}
@@ -821,16 +876,76 @@ export default function OrderCake() {
                   isDisabled={!selectedDate || hoursOptions.length === 0}
                   required
                 />
-                <label htmlFor="pickupHour" className='select-group'>受け取り希望時間</label>
               </div>
 
-              <div className='input-group' style={{ display: 'none' }}>
-                <label htmlFor="message">その他</label>
-                <textarea
-                  id="message"
-                  value={formData.message}
+              {/* セイ (カタカナ) */}
+              <div className='order-field-group'>
+                <div className="field-label-row">
+                  <span className="field-label-text">セイ（カタカナ）</span>
+                  <span className="field-required-badge">必須</span>
+                </div>
+                <input
+                  id="firstName"
+                  className="order-styled-input"
+                  placeholder="例）ヒガ"
+                  value={formData.firstName}
                   onChange={handleInputChange}
-                  placeholder=""
+                  onBlur={handleKatakanaBlur}
+                  lang="ja"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  required
+                />
+              </div>
+
+              {/* メイ (カタカナ) */}
+              <div className='order-field-group'>
+                <div className="field-label-row">
+                  <span className="field-label-text">メイ（カタカナ）</span>
+                  <span className="field-required-badge">必須</span>
+                </div>
+                <input
+                  id="lastName"
+                  className="order-styled-input"
+                  placeholder="例）タロウ"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  onBlur={handleKatakanaBlur}
+                  required
+                />
+              </div>
+
+              {/* メールアドレス */}
+              <div className='order-field-group'>
+                <div className="field-label-row">
+                  <span className="field-label-text">メールアドレス</span>
+                  <span className="field-required-badge">必須</span>
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  className="order-styled-input"
+                  placeholder="例）example@example.com"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              {/* 電話番号 */}
+              <div className='order-field-group'>
+                <div className="field-label-row">
+                  <span className="field-label-text">電話番号</span>
+                  <span className="field-required-badge">必須</span>
+                </div>
+                <input
+                  id="tel"
+                  type="tel"
+                  className="order-styled-input"
+                  placeholder="例）09012345678"
+                  value={formData.tel}
+                  onChange={handleInputChange}
+                  required
                 />
               </div>
             </div>
@@ -860,14 +975,15 @@ export default function OrderCake() {
               onChange={setPaymentMethod}
             />
 
+            {/* Bottom Submit CTA Button */}
             <div className='btn-div'>
               <button
                 type='submit'
-                className='send btn'
+                className='order-submit-btn'
                 disabled={isSubmitting}
                 style={{ opacity: isSubmitting ? 0.6 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
               >
-                {isSubmitting ? '処理中...' : `お支払いに進む (￥${totalAmount.toLocaleString()})`}
+                {isSubmitting ? '処理中...' : '入力内容を確認する  ›'}
               </button>
             </div>
           </form>

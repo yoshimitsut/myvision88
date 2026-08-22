@@ -2,6 +2,351 @@
   width: 4rem;
 }
 
+/* ==================== JAPANESE ELEGANT ORDER FORM STYLES ==================== */
+.order-form-title {
+  font-family: 'Playfair Display', 'Noto Serif JP', serif;
+  font-size: 2.2rem;
+  font-weight: 500;
+  color: #5d6655;
+  text-align: center;
+  margin: 20px 0 10px;
+  letter-spacing: 0.15em;
+}
+
+.order-form-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 35px;
+  color: #999;
+}
+
+.order-form-divider .divider-line {
+  width: 60px;
+  height: 1px;
+  background-color: #ccc;
+}
+
+.order-form-divider .infinity-symbol {
+  font-size: 1rem;
+  color: #888;
+}
+
+/* Cake Hero Banner Image Card */
+.order-cake-hero-banner {
+  width: 100%;
+  max-width: 580px;
+  height: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #4d5250 0%, #2f3432 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 30px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.order-cake-hero-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.order-cake-no-img {
+  color: #fff;
+  font-size: 1.2rem;
+  opacity: 0.7;
+}
+
+/* Order Field Group & Required Tag */
+.order-field-group {
+  margin-bottom: 22px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.field-label-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.field-label-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.field-required-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  color: #888;
+  background-color: #f8f8f8;
+}
+
+/* Option Cards Pills Grid (Size, Fruit, Candle, Plate) */
+.option-pills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.option-pill-card {
+  position: relative;
+  background-color: #f7f6f2;
+  border: 1px solid #e2ded4;
+  border-radius: 8px;
+  padding: 12px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+}
+
+.option-pill-card:hover {
+  background-color: #ede9de;
+}
+
+.option-pill-card.selected {
+  background-color: var(--primary-color, #768a6e) !important;
+  border-color: var(--primary-color, #768a6e) !important;
+  color: #ffffff !important;
+}
+
+.option-pill-card.selected .option-pill-title,
+.option-pill-card.selected .option-pill-price {
+  color: #ffffff !important;
+}
+
+.option-pill-checkmark {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.option-pill-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 2px;
+}
+
+.option-pill-price {
+  font-size: 12px;
+  color: #777;
+}
+
+/* Textarea & Inputs */
+.order-textarea-field {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  background-color: #ffffff;
+  font-size: 14px;
+  min-height: 90px;
+  resize: vertical;
+  outline: none;
+  margin-top: 10px;
+  box-sizing: border-box;
+}
+
+.order-textarea-field:focus {
+  border-color: var(--primary-color, #768a6e);
+}
+
+.order-styled-input {
+  width: 100%;
+  padding: 12px 14px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 8px !important;
+  background-color: #ffffff !important;
+  font-size: 14px !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+}
+
+.order-styled-input:focus {
+  border-color: var(--primary-color, #768a6e) !important;
+}
+
+.datepicker-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.calendar-icon-indicator {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 16px;
+  opacity: 0.6;
+}
+
+.order-section-divider {
+  width: 100%;
+  height: 1px;
+  background-color: #e5e5e5;
+  margin: 30px 0;
+}
+
+/* CTA Submit Button */
+.order-submit-btn {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 30px auto 0;
+  padding: 15px 24px;
+  background-color: var(--primary-color, #768a6e) !important;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.order-submit-btn:hover {
+  background-color: var(--primary-hover, #62745a) !important;
+  transform: translateY(-1px);
+}
+
+/* List Option Section (Message Plate & Candle Layout matching screenshot) */
+.list-option-section {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.list-option-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.list-option-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.list-option-title strong {
+  font-size: 15px;
+  color: #222;
+  font-weight: 700;
+}
+
+.list-option-subtitle {
+  font-size: 12px;
+  color: #555;
+  font-weight: 500;
+}
+
+.required-red-text {
+  font-size: 12px;
+  color: #d32f2f;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+.accordion-arrow {
+  font-size: 14px;
+  color: #555;
+}
+
+.list-option-rows {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #eaeaea;
+}
+
+.list-option-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 4px;
+  border-bottom: 1px solid #eaeaea;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.list-option-row:hover {
+  background-color: #fafafa;
+}
+
+.list-option-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.radio-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.radio-circle.active {
+  border-color: var(--primary-color, #96784b);
+  background-color: #ffffff;
+}
+
+.radio-circle.active::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--primary-color, #96784b);
+}
+
+.list-option-label {
+  font-size: 14px;
+  color: #333;
+}
+
+.list-option-price {
+  font-size: 13px;
+  color: #666;
+}
+
+.plate-message-input-box {
+  margin-top: 14px;
+}
+
 /* Estilos para o resumo do pedido */
 .order-summary {
   background: #f9f9f9;
@@ -87,7 +432,7 @@
 .payment-button {
   width: 100%;
   padding: 15px;
-  background-color: #d32f2f;
+  background-color: var(--primary-color, #d32f2f);
   color: white;
   border: none;
   border-radius: 8px;
@@ -99,7 +444,7 @@
 }
 
 .payment-button:hover:not(:disabled) {
-  background-color: #b71c1c;
+  background-color: var(--primary-hover, #b71c1c);
 }
 
 .payment-button:disabled {
@@ -685,12 +1030,12 @@ body {
       cursor: pointer;
       border-radius: 10px;
       font-size: 18px;
-      background-color: #2d2a2a;
+      background-color: var(--primary-color, #2d2a2a);
       color: #fff;
     }
 
     .btn:hover {
-      background-color: #131313d2;
+      background-color: var(--primary-hover, #131313d2);
     }
 
     .send {
