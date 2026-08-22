@@ -26,7 +26,7 @@
 /* ── HEADER ───────────────────────────────────────────────── */
 .sdc-pub-header {
   height: 50px;
-  background: #1a1a1a;
+  background: var(--primary-color, #1a1a1a);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -312,7 +312,7 @@
 .sdc-pub-card-btn {
   margin-top: auto;
   padding: 10px 0;
-  background: #1a1a1a;
+  background: var(--primary-color, #1a1a1a);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -323,7 +323,7 @@
   transition: background 0.2s;
 }
 
-.sdc-pub-card-btn:hover { background: #c8a96e; }
+.sdc-pub-card-btn:hover { background: var(--primary-hover, #c8a96e); }
 
 /* ── MODAL ────────────────────────────────────────────────── */
 .sdc-pub-modal-overlay {
@@ -557,7 +557,7 @@
 /* Botão de add */
 .sdc-pub-add-btn {
   padding: 14px;
-  background: #1a1a1a;
+  background: var(--primary-color, #1a1a1a);
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -570,7 +570,7 @@
 }
 
 .sdc-pub-add-btn:hover:not(:disabled) {
-  background: #c8a96e;
+  background: var(--primary-hover, #c8a96e);
   transform: translateY(-1px);
 }
 
@@ -587,7 +587,7 @@
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  background: #1a1a1a;
+  background: var(--primary-color, #1a1a1a);
   color: #fff;
   border: none;
   font-size: 22px;
@@ -601,7 +601,7 @@
 }
 
 .sdc-pub-cart-float:hover {
-  background: #c8a96e;
+  background: var(--primary-hover, #c8a96e);
   transform: scale(1.08);
 }
 
@@ -609,8 +609,8 @@
   position: absolute;
   top: -4px;
   right: -4px;
-  background: #c8a96e;
-  color: #fff;
+  background: var(--secondary-color, #c8a96e);
+  color: #000;
   font-size: 11px;
   font-weight: 700;
   min-width: 20px;
@@ -802,7 +802,7 @@
 
 .sdc-pub-checkout-btn {
   padding: 15px;
-  background: #1a1a1a;
+  background: var(--primary-color, #1a1a1a);
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -813,11 +813,11 @@
   transition: background 0.2s;
 }
 
-.sdc-pub-checkout-btn:hover { background: #c8a96e; }
+.sdc-pub-checkout-btn:hover { background: var(--primary-hover, #c8a96e); }
 
 /* ── FOOTER ───────────────────────────────────────────────── */
 .sdc-pub-footer {
-  background: #1a1a1a;
+  background: var(--primary-color, #1a1a1a);
   color: #888;
   padding: 30px 20px;
   text-align: center;

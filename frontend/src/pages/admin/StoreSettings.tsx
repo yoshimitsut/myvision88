@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { StoreInfo } from '../../types/types';
+import { applyStoreTheme } from '../../utils/theme';
 import './StoreSettings.css';
 
 export default function StoreSettings() {
@@ -26,11 +27,26 @@ export default function StoreSettings() {
       const data = await res.json();
       console.log('Dados recebidos da API:', data);
       setStoreInfo(data);
+      if (data.primary_color || data.secondary_color) {
+        applyStoreTheme(data.primary_color, data.secondary_color);
+      }
     } catch (error) {
       console.error('設定の読み込みエラー:', error);
       setMessage({ type: 'error', text: '設定の読み込みに失敗しました' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleColorChange = (primary: string, secondary?: string) => {
+    if (storeInfo) {
+      const updated = {
+        ...storeInfo,
+        primary_color: primary,
+        secondary_color: secondary ?? storeInfo.secondary_color ?? '#fdd111'
+      };
+      setStoreInfo(updated);
+      applyStoreTheme(updated.primary_color, updated.secondary_color);
     }
   };
 
@@ -79,6 +95,10 @@ export default function StoreSettings() {
         throw new Error(data.error || '設定の保存に失敗しました');
       }
 
+      if (storeInfo?.primary_color) {
+        applyStoreTheme(storeInfo.primary_color, storeInfo.secondary_color);
+      }
+
       setMessage({ type: 'success', text: '✅ 設定を保存しました！' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
@@ -113,6 +133,114 @@ export default function StoreSettings() {
       )}
 
       <form onSubmit={handleSubmit} className="store-settings-form">
+        {/* 🎨 Section Theme Color */}
+        <div className="store-settings-section">
+          <h2>🎨 店舗テーマカラー設定 (Cor Padrão da Loja)</h2>
+          <p style={{ fontSize: '13px', color: '#666', marginBottom: '15px' }}>
+            店舗のテーマカラーを設定します。保存すると、ボタンや強調カラーなどサイト全体の色が自動的に変更されます。
+          </p>
+
+          <div className="store-settings-field">
+            <label>メインカラー (Primary Color)：</label>
+            <div className="color-picker-row">
+              <input
+                type="color"
+                name="primary_color"
+                value={storeInfo.primary_color || '#000000'}
+                onChange={(e) => handleColorChange(e.target.value, storeInfo.secondary_color)}
+                className="color-picker-input"
+              />
+              <input
+                type="text"
+                name="primary_color"
+                value={storeInfo.primary_color || '#000000'}
+                onChange={(e) => handleColorChange(e.target.value, storeInfo.secondary_color)}
+                placeholder="#000000"
+                style={{ width: '120px' }}
+              />
+            </div>
+          </div>
+
+          <div className="store-settings-field">
+            <label>サブカラー (Secondary Color)：</label>
+            <div className="color-picker-row">
+              <input
+                type="color"
+                name="secondary_color"
+                value={storeInfo.secondary_color || '#fdd111'}
+                onChange={(e) => handleColorChange(storeInfo.primary_color || '#000000', e.target.value)}
+                className="color-picker-input"
+              />
+              <input
+                type="text"
+                name="secondary_color"
+                value={storeInfo.secondary_color || '#fdd111'}
+                onChange={(e) => handleColorChange(storeInfo.primary_color || '#000000', e.target.value)}
+                placeholder="#fdd111"
+                style={{ width: '120px' }}
+              />
+            </div>
+          </div>
+
+          <div style={{ marginTop: '15px' }}>
+            <label style={{ fontSize: '14px', fontWeight: 500, color: '#495057' }}>クイックプリセット (Preset Cores):</label>
+            <div className="color-preset-group">
+              <button
+                type="button"
+                className="color-preset-btn"
+                onClick={() => handleColorChange('#000000', '#fdd111')}
+              >
+                <span className="color-badge" style={{ backgroundColor: '#000000' }}></span>
+                🖤 ブラック (Black)
+              </button>
+
+              <button
+                type="button"
+                className="color-preset-btn"
+                onClick={() => handleColorChange('#fdd111', '#000000')}
+              >
+                <span className="color-badge" style={{ backgroundColor: '#fdd111' }}></span>
+                🟡 イエロー (Yellow)
+              </button>
+
+              <button
+                type="button"
+                className="color-preset-btn"
+                onClick={() => handleColorChange('#007bff', '#fdd111')}
+              >
+                <span className="color-badge" style={{ backgroundColor: '#007bff' }}></span>
+                🔵 ブルー (Blue)
+              </button>
+
+              <button
+                type="button"
+                className="color-preset-btn"
+                onClick={() => handleColorChange('#ff758c', '#fff0f3')}
+              >
+                <span className="color-badge" style={{ backgroundColor: '#ff758c' }}></span>
+                🌸 サクラピンク (Sakura Pink)
+              </button>
+
+              <button
+                type="button"
+                className="color-preset-btn"
+                onClick={() => handleColorChange('#2d6a4f', '#d8f3dc')}
+              >
+                <span className="color-badge" style={{ backgroundColor: '#2d6a4f' }}></span>
+                🍵 抹茶グリーン (Matcha Green)
+              </button>
+
+              <button
+                type="button"
+                className="color-preset-btn"
+                onClick={() => handleColorChange('#6f42c1', '#f3e8ff')}
+              >
+                <span className="color-badge" style={{ backgroundColor: '#6f42c1' }}></span>
+                💜 パープル (Purple)
+              </button>
+            </div>
+          </div>
+        </div>
         <div className="store-settings-section">
           <h2>基本情報</h2>
           

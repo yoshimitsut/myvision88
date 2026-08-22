@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { applyStoreTheme } from './utils/theme';
 
 // Páginas Públicas
 import Hero from './pages/public/Hero';
@@ -28,6 +30,18 @@ import StoreSettings from './pages/admin/StoreSettings';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
+  useEffect(() => {
+    // Carregar configurações da loja e aplicar tema
+    fetch(`${import.meta.env.VITE_API_URL}/api/storeinfo`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && (data.primary_color || data.secondary_color)) {
+          applyStoreTheme(data.primary_color, data.secondary_color);
+        }
+      })
+      .catch(err => console.error('Erro ao carregar tema da loja:', err));
+  }, []);
+
   return (
     <Router>
       <Routes>

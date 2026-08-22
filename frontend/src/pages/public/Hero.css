@@ -180,8 +180,8 @@
 }
 
 .hero-item-info {
-  background-color: #6a7c8e;
-  /* Blue-gray label bar similar to reference */
+  background-color: var(--primary-color, #6a7c8e);
+  /* Blue-gray or configured store primary color */
   color: white;
   padding: 20px;
   text-align: center;
@@ -196,7 +196,7 @@
 
 /* Footer */
 .hero-footer {
-  background-color: #1a1a1a;
+  background-color: var(--primary-color, #1a1a1a);
   color: white;
   padding: 60px 20px 40px;
   text-align: center;
@@ -467,12 +467,12 @@
 }
 
 .hero-modal-size-label.selected {
-  border-color: #fdd111;
+  border-color: var(--secondary-color, #fdd111);
   background-color: #fffdf5;
 }
 
 .hero-size-radio {
-  accent-color: #fdd111;
+  accent-color: var(--primary-color, #000000);
 }
 
 .hero-modal-size-name {
@@ -495,7 +495,7 @@
 }
 
 .hero-buy-btn {
-  background-color: #333;
+  background-color: var(--primary-color, #333);
   color: white;
   border: none;
   padding: 18px;
@@ -509,7 +509,7 @@
 }
 
 .hero-buy-btn:hover {
-  background-color: #000;
+  background-color: var(--primary-hover, #000);
 }
 
 .hero-buy-btn:disabled {

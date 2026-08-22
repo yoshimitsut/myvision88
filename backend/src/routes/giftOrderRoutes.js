@@ -102,7 +102,16 @@ router.post('/reservar', async (req, res) => {
 // =============================================
 router.get('/list', async (req, res) => {
   try {
-    const search = (req.query.search || '').toString().trim().toLowerCase();
+    const rawSearch = (req.query.search || '').toString();
+    const search = rawSearch.replace(/[\u3000]/g, ' ').trim().toLowerCase();
+
+    // Utilitários para converter hiragana <-> katakana
+    const hiraToKata = (str) => str.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+    const kataToHira = (str) => str.replace(/[\u30A1-\u30F6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+
+    const searchKata = hiraToKata(search);
+    const searchHira = kataToHira(search);
+
     let query = `
       SELECT 
         go.*, 
@@ -123,11 +132,46 @@ router.get('/list', async (req, res) => {
 
     if (search) {
       query += `
-        WHERE LOWER(CONCAT(go.first_name, go.last_name)) LIKE ? 
-        OR go.tel LIKE ? 
-        OR go.id_order = ?
+        WHERE go.id_order IN (
+          SELECT sub_go.id_order
+          FROM gift_orders sub_go
+          LEFT JOIN gift_order_items sub_goi ON sub_go.id_order = sub_goi.order_id
+          LEFT JOIN gift sub_g ON sub_goi.gift_id = sub_g.id
+          WHERE LOWER(IFNULL(sub_go.first_name, '')) LIKE ? 
+             OR LOWER(IFNULL(sub_go.last_name, '')) LIKE ?
+             OR LOWER(CONCAT(IFNULL(sub_go.first_name, ''), ' ', IFNULL(sub_go.last_name, ''))) LIKE ? 
+             OR LOWER(CONCAT(IFNULL(sub_go.last_name, ''), ' ', IFNULL(sub_go.first_name, ''))) LIKE ?
+             OR LOWER(CONCAT(IFNULL(sub_go.first_name, ''), IFNULL(sub_go.last_name, ''))) LIKE ? 
+             OR sub_go.tel LIKE ? 
+             OR LOWER(IFNULL(sub_go.email, '')) LIKE ?
+             OR sub_go.id_order = ?
+             OR CAST(sub_go.id_order AS CHAR) LIKE ?
+             OR LPAD(sub_go.id_order, 4, '0') LIKE ?
+             OR LOWER(IFNULL(sub_g.name, '')) LIKE ?
+             OR LOWER(IFNULL(sub_g.name, '')) LIKE ?
+             OR LOWER(IFNULL(sub_g.name, '')) LIKE ?
+        )
       `;
-      params.push(`%${search}%`, `%${search}%`, Number(search) || 0);
+      const searchParam = `%${search}%`;
+      const searchKataParam = `%${searchKata}%`;
+      const searchHiraParam = `%${searchHira}%`;
+      const numSearch = Number(search) || 0;
+
+      params.push(
+        searchParam,
+        searchParam,
+        searchParam,
+        searchParam,
+        searchParam,
+        searchParam,
+        searchParam,
+        numSearch,
+        searchParam,
+        searchParam,
+        searchParam,
+        searchKataParam,
+        searchHiraParam
+      );
     }
 
     query += ' ORDER BY go.id_order DESC';

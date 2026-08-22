@@ -13,6 +13,4 @@ const pool = mysql.createPool({
 module.exports = pool;
 
 
-//CREATE SCHEMA `beurre_mou` DEFAULT CHARACTER SET utf8 ;
-
 

@@ -311,7 +311,16 @@ router.put('/reservar/:id_order', async (req, res) => {
 // GET /api/list - Listar Pedidos
 router.get('/list', async (req, res) => {
   try {
-    const search = (req.query.search || '').toString().trim().toLowerCase();
+    const rawSearch = (req.query.search || '').toString();
+    const search = rawSearch.replace(/[\u3000]/g, ' ').trim().toLowerCase();
+
+    // Utilitários para converter hiragana <-> katakana
+    const hiraToKata = (str) => str.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+    const kataToHira = (str) => str.replace(/[\u30A1-\u30F6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+
+    const searchKata = hiraToKata(search);
+    const searchHira = kataToHira(search);
+
     let query = `
       SELECT 
         o.*, 
@@ -335,11 +344,50 @@ router.get('/list', async (req, res) => {
 
     if (search) {
       query += `
-        WHERE LOWER(CONCAT(o.first_name, o.last_name)) LIKE ? 
-        OR o.tel LIKE ? 
-        OR o.id_order = ?
+        WHERE o.id_order IN (
+          SELECT sub_o.id_order
+          FROM orders sub_o
+          LEFT JOIN order_cakes sub_oc ON sub_o.id_order = sub_oc.order_id
+          LEFT JOIN cakes sub_c ON sub_oc.cake_id = sub_c.id
+          WHERE LOWER(IFNULL(sub_o.first_name, '')) LIKE ? 
+             OR LOWER(IFNULL(sub_o.last_name, '')) LIKE ?
+             OR LOWER(CONCAT(IFNULL(sub_o.first_name, ''), ' ', IFNULL(sub_o.last_name, ''))) LIKE ? 
+             OR LOWER(CONCAT(IFNULL(sub_o.last_name, ''), ' ', IFNULL(sub_o.first_name, ''))) LIKE ?
+             OR LOWER(CONCAT(IFNULL(sub_o.first_name, ''), IFNULL(sub_o.last_name, ''))) LIKE ? 
+             OR sub_o.tel LIKE ? 
+             OR LOWER(IFNULL(sub_o.email, '')) LIKE ?
+             OR sub_o.id_order = ?
+             OR CAST(sub_o.id_order AS CHAR) LIKE ?
+             OR LPAD(sub_o.id_order, 4, '0') LIKE ?
+             OR LOWER(IFNULL(sub_c.name, '')) LIKE ?
+             OR LOWER(IFNULL(sub_c.name, '')) LIKE ?
+             OR LOWER(IFNULL(sub_c.name, '')) LIKE ?
+             OR LOWER(IFNULL(sub_oc.message_cake, '')) LIKE ?
+             OR LOWER(IFNULL(sub_oc.message_cake, '')) LIKE ?
+        )
       `;
-      params.push(`%${search}%`, `%${search}%`, Number(search) || 0);
+      const searchParam = `%${search}%`;
+      const searchKataParam = `%${searchKata}%`;
+      const searchHiraParam = `%${searchHira}%`;
+      const numSearch = Number(search) || 0;
+
+      params.push(
+        searchParam,     // first_name
+        searchParam,     // last_name
+        searchParam,     // first last
+        searchParam,     // last first
+        searchParam,     // firstlast
+        searchParam,     // tel
+        searchParam,     // email
+        numSearch,       // id_order =
+        searchParam,     // CAST id_order
+        searchParam,     // LPAD id_order
+        searchParam,     // sub_c.name (raw)
+        searchKataParam, // sub_c.name (katakana)
+        searchHiraParam, // sub_c.name (hiragana)
+        searchParam,     // message_cake (raw)
+        searchKataParam  // message_cake (katakana)
+      );
     }
 
     query += ' ORDER BY o.id_order DESC';

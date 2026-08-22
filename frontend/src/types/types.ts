@@ -140,6 +140,8 @@ export interface StoreInfo {
   use_admin_cake: 's' | 'n';
   use_admin_date: 's' | 'n';
   use_admin_download: 's' | 'n';
+  primary_color?: string;
+  secondary_color?: string;
 }
 // ------------------ 🎁 Gift (Okashi) ------------------
 

@@ -1,0 +1,19 @@
+:root {
+  --primary-color: #000000;
+  --primary-hover: #1a1a1a;
+  --secondary-color: #fdd111;
+  --accent-color: #007bff;
+}
+
+/* Utilitários globais de tema */
+.theme-bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.theme-color-primary {
+  color: var(--primary-color) !important;
+}
+
+.theme-border-primary {
+  border-color: var(--primary-color) !important;
+}

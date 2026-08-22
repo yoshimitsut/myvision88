@@ -38,7 +38,7 @@
 .newsletter-form button {
   align-self: flex-start;
   padding: 10px 20px;
-  background: rgb(110, 149, 185);
+  background: var(--primary-color, rgb(110, 149, 185));
   border: none;
   border-radius: 6px;
   font-weight: bold;
@@ -48,7 +48,7 @@
 }
 
 .newsletter-form button:hover {
-  background: rgb(47, 69, 89);
+  background: var(--primary-hover, rgb(47, 69, 89));
 }
 
 /* 🔹 LISTA */

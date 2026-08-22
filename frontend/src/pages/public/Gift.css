@@ -23,7 +23,7 @@
 /* Header */
 .gift-header {
   height: 40px;
-  background: #454538;
+  background: var(--primary-color, #454538);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -200,7 +200,7 @@
 }
 
 .gift-label-bar {
-  background-color: #454538;
+  background-color: var(--primary-color, #454538);
   padding: 15px 10px;
   text-align: center;
   color: white;
@@ -225,7 +225,7 @@
 
 /* Footer */
 .gift-footer {
-  background-color: #454538;
+  background-color: var(--primary-color, #454538);
   padding: 15px 0px;
   text-align: center;
   color: white;

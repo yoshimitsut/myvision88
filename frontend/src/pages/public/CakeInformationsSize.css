@@ -23,7 +23,7 @@
 /* Header */
 .cake-header {
   height: 40px;
-  background: #454538;
+  background: var(--primary-color, #454538);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -183,7 +183,7 @@
 }
 
 .cake-label-bar {
-  background-color: #454538;
+  background-color: var(--primary-color, #454538);
   padding: 15px 10px;
   text-align: center;
   color: white;
@@ -208,7 +208,7 @@
 
 /* Footer */
 .cake-footer {
-  background-color: #454538;
+  background-color: var(--primary-color, #454538);
   padding: 15px 0px;
   text-align: center;
   color: white;
@@ -399,7 +399,7 @@
 }
 
 .cake-buy-btn {
-  background-color: #333;
+  background-color: var(--primary-color, #333);
   color: white;
   border: none;
   padding: 18px;
@@ -412,7 +412,7 @@
 }
 
 .cake-buy-btn:hover {
-  background-color: #000;
+  background-color: var(--primary-hover, #000);
 }
 
 .modal-sizes-options {
@@ -436,13 +436,13 @@
 }
 
 .modal-size-label.selected {
-  border-color: #fdd111;
+  border-color: var(--secondary-color, #fdd111);
   background-color: #fffdf5;
 }
 
 .size-radio {
   margin-right: 15px;
-  accent-color: #fdd111;
+  accent-color: var(--primary-color, #000000);
 }
 
 /* RESPONSIVIDADE */

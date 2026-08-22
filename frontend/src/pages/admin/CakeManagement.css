@@ -30,7 +30,7 @@
 }
 
 .tab-cake-button.active {
-  background: #007bff;
+  background: var(--primary-color, #007bff);
   color: white;
   font-weight: bold;
 }

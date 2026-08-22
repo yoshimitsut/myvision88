@@ -225,7 +225,7 @@ ul {
 
 
 .list-order-table thead {
-  background-color: #000;
+  background-color: var(--primary-color, #000000);
   color: white;
 }
 
@@ -469,7 +469,7 @@ ul {
 
 .sales-view-tab--active {
   color: #fff !important;
-  background-color: #000 !important;
+  background-color: var(--primary-color, #000000) !important;
 
 }
 
@@ -520,8 +520,8 @@ ul {
 }
 
 .tab-button-list.active {
-  border-bottom-color: #000 !important;
-  background-color: #000;
+  border-bottom-color: var(--primary-color, #000000) !important;
+  background-color: var(--primary-color, #000000);
   color: #fff !important;
 }
 
