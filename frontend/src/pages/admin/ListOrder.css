@@ -14,6 +14,438 @@
   color: #333;
 }
 
+/* ==================== MODERN JAPANESE ADMIN DASHBOARD STYLES ==================== */
+
+.admin-dashboard-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #e5eae6; /* Light green-gray background as in image */
+  font-family: 'Inter', 'Noto Sans JP', sans-serif;
+  color: #333;
+}
+
+/* ── LEFT SIDEBAR ────────────────────────────────────────── */
+.admin-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background-color: #edf1ee;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-right: 1px solid #dcdfdc;
+}
+
+.admin-sidebar-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-sub-title {
+  font-size: 11px;
+  color: #777;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-main-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 2px 0 0;
+  letter-spacing: 0.05em;
+}
+
+/* Sidebar Top Menu White Card */
+.sidebar-menu-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.sidebar-menu-item {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-menu-item:hover {
+  background-color: #f4f6f4;
+}
+
+.sidebar-menu-item.active {
+  background-color: #ffffff;
+  color: #1a1a1a;
+}
+
+/* Sidebar Search & Add Button */
+.sidebar-search-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.sidebar-search-input-wrapper .search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: #999;
+}
+
+.sidebar-search-input {
+  width: 100%;
+  padding: 8px 10px 8px 30px;
+  border: 1px solid #ced4da;
+  border-radius: 16px;
+  font-size: 12px;
+  background-color: #ffffff;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.sidebar-add-btn {
+  width: 100%;
+  padding: 8px;
+  border: 1.5px solid var(--primary-color, #237050);
+  border-radius: 16px;
+  background-color: #ffffff;
+  color: var(--primary-color, #237050);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-add-btn:hover {
+  background-color: #f0f7f3;
+}
+
+/* Sidebar Section Titles & Filter Lists */
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-section-title {
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+}
+
+.sidebar-filter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-filter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+}
+
+.sidebar-filter-item.active {
+  background-color: var(--primary-color, #237050);
+  color: #ffffff;
+}
+
+.sidebar-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background-color: #f0f0f0;
+  color: #555;
+}
+
+.sidebar-filter-item.active .sidebar-badge {
+  background-color: #ffffff;
+  color: var(--primary-color, #237050);
+}
+
+.sidebar-badge.badge-green {
+  background-color: var(--primary-color, #237050);
+  color: #ffffff;
+}
+
+/* Footer Quick Action Grid */
+.sidebar-footer-actions {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.sidebar-action-btn {
+  background-color: var(--primary-color, #237050);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-action-btn:hover {
+  opacity: 0.9;
+}
+
+.sidebar-action-btn .action-icon {
+  font-size: 16px;
+}
+
+.sidebar-action-btn .action-label {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* ── RIGHT MAIN PANEL ────────────────────────────────────── */
+.admin-main-content {
+  flex: 1;
+  padding: 20px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-x: hidden;
+}
+
+.admin-breadcrumbs {
+  font-size: 13px;
+  color: #888;
+}
+
+.admin-breadcrumbs .current {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Main Container Card */
+.admin-card-container {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: calc(100vh - 100px);
+}
+
+.admin-page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+/* Category Pills Row */
+.category-pills-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.category-pill {
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ffffff;
+  border: 2px solid #ddd;
+  color: #555;
+}
+
+.category-pill.active-solid {
+  background-color: var(--primary-color, #237050);
+  border-color: var(--primary-color, #237050);
+  color: #ffffff;
+}
+
+.category-pill.pill-cake {
+  border-color: var(--primary-color, #237050);
+  color: var(--primary-color, #237050);
+}
+
+.category-pill.pill-cake.active-cake {
+  background-color: var(--primary-color, #237050);
+  color: #ffffff;
+}
+
+.category-pill.pill-gift {
+  border-color: #e8853b;
+  color: #e8853b;
+}
+
+.category-pill.pill-gift.active-gift {
+  background-color: #e8853b;
+  color: #ffffff;
+}
+
+.pill-count {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background-color: rgba(0,0,0,0.08);
+}
+
+.category-pill.active-solid .pill-count,
+.category-pill.active-cake .pill-count,
+.category-pill.active-gift .pill-count {
+  background-color: #ffffff;
+  color: #333;
+}
+
+/* Custom Table Card Rows */
+.table-card-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.modern-admin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px; /* Space between row cards! */
+}
+
+.modern-admin-table thead tr th {
+  background-color: var(--primary-color, #237050);
+  color: #ffffff;
+  padding: 12px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.modern-admin-table thead tr th:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.modern-admin-table thead tr th:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* Individual Row Card Item */
+.order-row-card {
+  background-color: #ffffff;
+  border: 2px solid var(--primary-color, #237050);
+  border-radius: 10px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.order-row-card.gift-card-row {
+  border-color: #e8853b !important;
+}
+
+.order-row-card td {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #333;
+  vertical-align: middle;
+  background-color: #ffffff;
+}
+
+.order-row-card td:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.order-row-card td:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.order-date-col {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-id-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+}
+
+.status-pill-toggle {
+  display: inline-block;
+  width: 32px;
+  height: 16px;
+  border-radius: 10px;
+  background-color: var(--primary-color, #237050);
+  position: relative;
+}
+
+.status-pill-toggle::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #ffffff;
+}
+
+.edit-circle-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--primary-color, #237050);
+  background-color: #ffffff;
+  color: var(--primary-color, #237050);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.edit-circle-btn:hover {
+  background-color: var(--primary-color, #237050);
+  color: #ffffff;
+}
+
 .sales-view-tabs-list {
   display: flex;
 }

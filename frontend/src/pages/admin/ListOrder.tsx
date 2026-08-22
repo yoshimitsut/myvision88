@@ -552,21 +552,17 @@ export default function ListOrder() {
       {sortedAllOrders.length === 0 ? (
         <p>該当する注文はありません。</p>
       ) : (
-        <div className="table-wrapper scroll-cell table-order-container">
-          <table className="list-order-table table-order">
+        <div className="table-card-wrapper">
+          <table className="modern-admin-table">
             <thead>
               <tr>
-                <th className='id-cell'>受付番号</th>
-                <th className='situation-cell'>お会計</th>
-                <th>お名前</th>
-                <th>受取希望日時</th>
-                <th>ご注文のケーキ</th>
+                <th>受取日時</th>
+                <th>お名前 / 受付番号</th>
+                <th>商品名</th>
                 <th>個数</th>
                 <th>フルーツ盛り</th>
-                <th className='message-cell'>メッセージプレート</th>
-                <th className='message-cell'>その他メッセージ</th>
-                <th>電話番号</th>
-                <th>メールアドレス</th>
+                <th>キャンドル</th>
+                <th>メッセージプレート</th>
                 <th>編集</th>
               </tr>
             </thead>
@@ -581,76 +577,58 @@ export default function ListOrder() {
                   return matchesStatus && matchesCake && matchesDate && matchesHour;
                 })
                 .map((order) => (
-                  <tr key={order.id_order}>
-                    <td>{String(order.id_order).padStart(4, "0")}</td>
-                    <td className='situation-cell'>
-                      <Select<StatusOption, false>
-                        options={statusOptions}
-                        value={statusOptions.find((opt) => opt.value === order.status)}
-                        onChange={(selected: SingleValue<StatusOption>) => {
-                          if (selected) handleStatusChange(order.id_order, selected.value);
-                        }}
-                        styles={customStyles}
-                        isSearchable={false}
-                        isDisabled={isUpdating}
-                        isLoading={isUpdating && updatingOrderId === order.id_order}
-                      />
-                    </td>
-                    <td>{order.first_name} {order.last_name}</td>
-                    <td>{formatDateJP(order.date)} {order.pickupHour}</td>
+                  <tr key={order.id_order} className="order-row-card">
                     <td>
-                      <ul>
-                        {order.cakes && order.cakes.map((cake, index) => (
-                          <li key={`${order.id_order}-${cake.cake_id}-${index}`}>
-                            {cake.name} {cake.size} - ¥{cake.price}
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="order-date-col">
+                        <span>{formatDateJP(order.date)}</span>
+                        <span style={{ fontSize: '11px', color: '#666' }}>{order.pickupHour}</span>
+                        <span className="status-pill-toggle"></span>
+                      </div>
                     </td>
-                    <td style={{ textAlign: "left" }}>
-                      <ul>
-                        {order.cakes && order.cakes.map((cake, index) => (
-                          <li key={`${order.id_order}-${cake.cake_id}-${index}`}>
-                            {cake.amount}
-                          </li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td style={{ textAlign: "left" }}>
-                      <ul>
-                        {order.cakes && order.cakes.map((cake, index) => (
-                          <li key={`${order.id_order}-${cake.cake_id}-${index}`}>
-                            {cake.fruit_option}
-                          </li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td className='message-cell' style={{ textAlign: "left" }}>
-                      <ul>
-                        {order.cakes && order.cakes.map((cake, index) => (
-                          <li key={`${order.id_order}-${cake.cake_id}-${index}`}>
-                            {cake.message_cake}
-                          </li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td className='message-cell'>{order.message || " "}</td>
-                    <td>{order.tel}</td>
-                    <td>{order.email}</td>
                     <td>
-                      <button
-                        onClick={() => setEditingOrder(order)}
-                        style={{
-                          padding: "0.25rem 0.5rem",
-                          backgroundColor: "#007bff",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                          fontSize: "0.8rem"
-                        }}
-                      >
-                        編集
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <strong style={{ fontSize: '13px', color: '#222' }}>{order.first_name} {order.last_name}</strong>
+                        <span className="order-id-badge">#{String(order.id_order).padStart(4, "0")}</span>
+                      </div>
+                    </td>
+                    <td>
+                      {order.cakes && order.cakes.map((cake, index) => (
+                        <div key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                          {cake.name} {cake.size}
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      {order.cakes && order.cakes.map((cake, index) => (
+                        <div key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                          {cake.amount}
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      {order.cakes && order.cakes.map((cake, index) => (
+                        <div key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                          {cake.fruit_option || "有り"}
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      {order.cakes && order.cakes.map((cake, index) => (
+                        <div key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                          {(cake as any).candle_option || "有り"}
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      {order.cakes && order.cakes.map((cake, index) => (
+                        <div key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                          {cake.message_cake || "なし"}
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      <button className="edit-circle-btn" onClick={() => setEditingOrder(order)} title="編集">
+                        ✏️
                       </button>
                     </td>
                   </tr>
@@ -1487,204 +1465,260 @@ export default function ListOrder() {
   };
 
   return (
-    <div className='list-order-container'>
-      {/* ── Title and Action Buttons ── */}
-      <div className="list-header-row">
-        <div className="list-header-row-title">
-          <h2>予約管理</h2>
+    <div className='admin-dashboard-page'>
+      {/* ── LEFT SIDEBAR ── */}
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-header">
+          <span className="sidebar-sub-title">予約管理</span>
+          <h1 className="sidebar-main-title">MYVISION88</h1>
         </div>
 
-        <div className='btn-actions-list'>
-          <button onClick={() => navigate("/admin/cake")} className='list-btn'>
-            <img src="/icons/cake_icon.png" alt="ケーキ" />
-          </button>
-          <button onClick={() => navigate("/admin/same-day-cake")} className='list-btn' title="当日受取ケーキ管理">
-            <img src="/icons/cake_icon.png" alt="当日受取" style={{ filter: 'sepia(1) saturate(3) hue-rotate(200deg)' }} />
-          </button>
-          <button onClick={() => navigate("/admin/date")} className='list-btn'>
-            <img src="/icons/calendar_icon.ico" alt="カレンダー" />
-          </button>
-          <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
-          <button onClick={() => setShowScanner(true)} className='list-btn'>
-            <img className='icon-black' src="/icons/qr-code.ico" alt="QRコード" />
-          </button>
-          <button onClick={() => navigate("/ordertable")} className='list-btn'>
-            <img className='icon-black' src="/icons/graph.ico" alt="グラフ" />
+        {/* Top Menu White Card */}
+        <div className="sidebar-menu-card">
+          <div
+            className={`sidebar-menu-item ${viewType === "cake" ? "active" : ""}`}
+            onClick={() => setViewType("cake")}
+          >
+            <span>TOPメニュー</span>
+          </div>
+          <div className="sidebar-menu-item" onClick={() => navigate("/admin/cake")}>
+            <span>ケーキ</span>
+          </div>
+          <div className="sidebar-menu-item" onClick={() => navigate("/admin/gift")}>
+            <span>ギフト</span>
+          </div>
+        </div>
+
+        {/* Search Box & Add Action Button */}
+        <div className="sidebar-search-box">
+          <div className="sidebar-search-input-wrapper">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="名前・電話番号・受付番号で検索"
+              value={search}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearch(val);
+                if (val.trim() !== '' && activeTab !== 'all') {
+                  setActiveTab('all');
+                }
+              }}
+              className="sidebar-search-input"
+            />
+          </div>
+          <button className="sidebar-add-btn" onClick={() => navigate("/order")}>
+            + 新しい予約
           </button>
         </div>
-      </div>
 
-      {/* ── Seletor Cake / Gift ── */}
-      <div className='sales-view-tabs-list' style={{ marginBottom: '20px' }}>
-        <button
-          className={`sales-view-tab-list ${viewType === "cake" ? "sales-view-tab--active" : ""}`}
-          onClick={() => setViewType("cake")}
-        >
-          🎂 ケーキ
-        </button>
-        <button
-          className={`sales-view-tab-list ${viewType === "gift" ? "sales-view-tab--active" : ""}`}
-          onClick={() => setViewType("gift")}
-        >
-          🎁 ギフト
-        </button>
-      </div>
-
-      {viewType === "gift" ? (
-        <ListGiftOrder />
-      ) : (
-        <>
-          {showScanner && (
-            <div style={{ position: 'relative', marginBottom: 20 }}>
-              <button
-                onClick={() => setShowScanner(false)}
-                style={{
-                  position: 'absolute',
-                  top: '10px',
-                  right: '10px',
-                  zIndex: 1000,
-                  background: 'red',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '30px',
-                  height: '30px',
-                  cursor: 'pointer'
-                }}
-              >
-                ×
-              </button>
-              <div id="reader" style={{ width: '100%', maxWidth: '300px' }}></div>
+        {/* Status Filters Menu (予約ステータス) */}
+        <div className="sidebar-section">
+          <div className="sidebar-section-title">予約ステータス</div>
+          <div className="sidebar-filter-list">
+            <div
+              className={`sidebar-filter-item ${activeTab === 'all' || activeTab === 'today' ? 'active' : ''}`}
+              onClick={() => setActiveTab('all')}
+            >
+              <span>すべて</span>
+              <span className="sidebar-badge active">{orders.length}</span>
             </div>
-          )}
-
-
-          {foundScannedOrder && (
-            <div style={{ border: '1px solid #007bff', padding: 12, marginBottom: 20 }}>
-              <strong>
-                <Select
-                  options={statusOptions}
-                  value={statusOptions.find((opt) => String(opt.value) === String(foundScannedOrder.status))}
-                  onChange={(selected) =>
-                    handleStatusChange(
-                      foundScannedOrder.id_order,
-                      selected?.value as "a" | "b" | "c" | "d" | "e"
-                    )
-                  }
-                  isDisabled={isUpdating}
-                  isLoading={isUpdating}
-                  styles={customStyles}
-                  isSearchable={false}
-                />
-              </strong>
-              <strong>受付番号: </strong> {String(foundScannedOrder.id_order).padStart(4, "0")}<br />
-              <strong>お名前: </strong> {foundScannedOrder.first_name} {foundScannedOrder.last_name}<br />
-              <strong>電話番号: </strong> {foundScannedOrder.tel}<br />
-              <strong>受取日: </strong> {formatDateJP(foundScannedOrder.date)} - {foundScannedOrder.pickupHour}<br />
-              <strong>ご注文のケーキ: </strong>
-              <ul className='cake-list'>
-                {foundScannedOrder.cakes.map((cake, index) => (
-                  <li key={`${cake.cake_id}-${index}`}>
-                    <span className='cake-name'>{cake.name}</span>
-                    <span className='cake-amount'>¥{cake.price.toLocaleString()}</span>
-                    <span className='cake-size'>サイズ: {cake.size}</span>
-                    <span className='cake-quantity'>個数: {cake.amount}</span>
-                    <span className='cake-fruitop'>フルーツ盛り: {cake.fruit_option}</span>
-                  </li>
-                ))}
-              </ul>
+            <div
+              className={`sidebar-filter-item ${activeTab === 'active' ? 'active' : ''}`}
+              onClick={() => setActiveTab('active')}
+            >
+              <span>オンライン予約</span>
+              <span className="sidebar-badge">{activeOrders.length}</span>
             </div>
-          )}
-
-          <div className="tabs-container">
-            <div className="tabs-header-row">
-              <div className="tabs-header">
-                <button
-                  className={`tab-button-list tab-all ${activeTab === "all" ? "active" : ""}`}
-                  onClick={() => setActiveTab("all")}
-                >
-                  すべて ({orders.length})
-                </button>
-                <button
-                  className={`tab-button-list tab-today ${activeTab === "today" ? "active" : ""}`}
-                  onClick={() => setActiveTab("today")}
-                >
-                  本日お渡し予定分 ({todayOrders.length})
-                </button>
-                <button
-                  className={`tab-button-list tab-active ${activeTab === "active" ? "active" : ""}`}
-                  onClick={() => setActiveTab("active")}
-                >
-                  現在の注文 ({activeOrders.length})
-                </button>
-                <button
-                  className={`tab-button-list tab-completed ${activeTab === "completed" ? "active" : ""}`}
-                  onClick={() => setActiveTab("completed")}
-                >
-                  お渡し済み ({completedOrders.length})
-                </button>
-                <button
-                  className={`tab-button-list tab-past ${activeTab === "past" ? "active" : ""}`}
-                  onClick={() => setActiveTab("past")}
-                >
-                  <span style={{ marginRight: '4px' }}>🕒</span> 過去の日付 ({pastDateOrders.length})
-                </button>
-                <button
-                  className={`tab-button-list tab-cancelled ${activeTab === "cancelled" ? "active" : ""}`}
-                  onClick={() => setActiveTab("cancelled")}
-                >
-                  <span style={{ marginRight: '4px' }}>✕</span> キャンセル ({cancelledOrders.length})
-                </button>
-              </div>
-
-              <div className="search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <span style={{ position: 'absolute', left: '10px', color: '#888' }}>🔍</span>
-                <input
-                  type="text"
-                  placeholder='名前・電話番号・受付番号で検索'
-                  value={search}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setSearch(val);
-                    if (val.trim() !== '' && activeTab !== 'all') {
-                      setActiveTab('all');
-                    }
-                  }}
-                  className='list-order-input'
-                  style={{ paddingLeft: '32px', borderRadius: '4px', border: '1px solid #ddd', minWidth: '300px' }}
-                />
-              </div>
-            </div>
-
-            <div className="tab-content">
-              {loading ? (
-                <p style={{ padding: '20px 0' }}>読み込み中...</p>
-              ) : orders.length === 0 ? (
-                <p style={{ padding: '20px 0' }}>注文が見つかりません。</p>
-              ) : (
-                <>
-                  {activeTab === "all" && renderAllOrdersTable()}
-                  {activeTab === "today" && renderTodayOrdersTable()}
-                  {activeTab === "active" && renderActiveOrdersTable()}
-                  {activeTab === "past" && renderPastDateOrdersTable()}
-                  {activeTab === "completed" && renderCompletedOrdersTable()}
-                  {activeTab === "cancelled" && renderCancelledOrdersTable()}
-                </>
-              )}
+            <div
+              className={`sidebar-filter-item`}
+              onClick={() => setActiveTab('today')}
+            >
+              <span>店頭予約</span>
+              <span className="sidebar-badge">{todayOrders.length}</span>
             </div>
           </div>
+        </div>
 
-          {/* Modal de edição */}
-          {editingOrder && (
-            <EditOrderModal
-              editingOrder={editingOrder}
-              setEditingOrder={setEditingOrder}
-              handleSaveEdit={handleSaveEdit}
-              isSaving={isSavingEdit}
-            />
+        {/* History Section (履歴) */}
+        <div className="sidebar-section">
+          <div className="sidebar-section-title">履歴</div>
+          <div className="sidebar-filter-list">
+            <div
+              className={`sidebar-filter-item ${activeTab === 'past' ? 'active' : ''}`}
+              onClick={() => setActiveTab('past')}
+            >
+              <span>予約日経過</span>
+              <span className="sidebar-badge badge-green">{pastDateOrders.length}</span>
+            </div>
+            <div
+              className={`sidebar-filter-item ${activeTab === 'completed' ? 'active' : ''}`}
+              onClick={() => setActiveTab('completed')}
+            >
+              <span>受け取り済み</span>
+              <span className="sidebar-badge badge-green">{completedOrders.length}</span>
+            </div>
+            <div
+              className={`sidebar-filter-item ${activeTab === 'cancelled' ? 'active' : ''}`}
+              onClick={() => setActiveTab('cancelled')}
+            >
+              <span>キャンセル</span>
+              <span className="sidebar-badge badge-green">{cancelledOrders.length}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Quick Action Grid (4 Dark Green Icon Buttons) */}
+        <div className="sidebar-footer-actions">
+          <button className="sidebar-action-btn" onClick={() => navigate("/admin/date")} title="予定">
+            <span className="action-icon">📅</span>
+            <span className="action-label">予定</span>
+          </button>
+          <div className="sidebar-action-btn-wrapper" title="出力">
+            <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
+          </div>
+          <button className="sidebar-action-btn" onClick={() => navigate("/ordertable")} title="集計">
+            <span className="action-icon">📊</span>
+            <span className="action-label">集計</span>
+          </button>
+          <button className="sidebar-action-btn" onClick={() => setShowScanner(true)} title="QR">
+            <span className="action-icon">📱</span>
+            <span className="action-label">QR</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* ── RIGHT MAIN PANEL ── */}
+      <main className="admin-main-content">
+        {/* Breadcrumbs */}
+        <div className="admin-breadcrumbs">
+          <span>予約管理</span> / <span>予約ステータス</span> / <span className="current">すべて</span>
+        </div>
+
+        {/* Main Card Container */}
+        <div className="admin-card-container">
+          <h2 className="admin-page-title">予約ステータス</h2>
+
+          {/* Category Pills Row */}
+          <div className="category-pills-row">
+            <button
+              className={`category-pill ${activeTab === 'all' ? 'active-solid' : ''}`}
+              onClick={() => {
+                setActiveTab('all');
+                setViewType('cake');
+              }}
+            >
+              すべて
+            </button>
+            <button
+              className={`category-pill pill-cake ${viewType === 'cake' ? 'active-cake' : ''}`}
+              onClick={() => setViewType('cake')}
+            >
+              ケーキ <span className="pill-count">{activeOrders.length || orders.length}</span>
+            </button>
+            <button
+              className={`category-pill pill-gift ${viewType === 'gift' ? 'active-gift' : ''}`}
+              onClick={() => setViewType('gift')}
+            >
+              ギフト <span className="pill-count">1</span>
+            </button>
+          </div>
+
+          {viewType === "gift" ? (
+            <ListGiftOrder />
+          ) : (
+            <>
+              {showScanner && (
+                <div style={{ position: 'relative', marginBottom: 20 }}>
+                  <button
+                    onClick={() => setShowScanner(false)}
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      zIndex: 1000,
+                      background: 'red',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '30px',
+                      height: '30px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ×
+                  </button>
+                  <div id="reader" style={{ width: '100%', maxWidth: '300px' }}></div>
+                </div>
+              )}
+
+              {foundScannedOrder && (
+                <div style={{ border: '1px solid #007bff', padding: 12, marginBottom: 20 }}>
+                  <strong>
+                    <Select
+                      options={statusOptions}
+                      value={statusOptions.find((opt) => String(opt.value) === String(foundScannedOrder.status))}
+                      onChange={(selected) =>
+                        handleStatusChange(
+                          foundScannedOrder.id_order,
+                          selected?.value as "a" | "b" | "c" | "d" | "e"
+                        )
+                      }
+                      isDisabled={isUpdating}
+                      isLoading={isUpdating}
+                      styles={customStyles}
+                      isSearchable={false}
+                    />
+                  </strong>
+                  <strong>受付番号: </strong> {String(foundScannedOrder.id_order).padStart(4, "0")}<br />
+                  <strong>お名前: </strong> {foundScannedOrder.first_name} {foundScannedOrder.last_name}<br />
+                  <strong>電話番号: </strong> {foundScannedOrder.tel}<br />
+                  <strong>受取日: </strong> {formatDateJP(foundScannedOrder.date)} - {foundScannedOrder.pickupHour}<br />
+                  <strong>ご注文のケーキ: </strong>
+                  <ul className='cake-list'>
+                    {foundScannedOrder.cakes.map((cake, index) => (
+                      <li key={`${cake.cake_id}-${index}`}>
+                        <span className='cake-name'>{cake.name}</span>
+                        <span className='cake-amount'>¥{cake.price.toLocaleString()}</span>
+                        <span className='cake-size'>サイズ: {cake.size}</span>
+                        <span className='cake-quantity'>個数: {cake.amount}</span>
+                        <span className='cake-fruitop'>フルーツ盛り: {cake.fruit_option}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="tab-content">
+                {loading ? (
+                  <p style={{ padding: '20px 0' }}>読み込み中...</p>
+                ) : orders.length === 0 ? (
+                  <p style={{ padding: '20px 0' }}>注文が見つかりません。</p>
+                ) : (
+                  <>
+                    {activeTab === "all" && renderAllOrdersTable()}
+                    {activeTab === "today" && renderTodayOrdersTable()}
+                    {activeTab === "active" && renderActiveOrdersTable()}
+                    {activeTab === "past" && renderPastDateOrdersTable()}
+                    {activeTab === "completed" && renderCompletedOrdersTable()}
+                    {activeTab === "cancelled" && renderCancelledOrdersTable()}
+                  </>
+                )}
+              </div>
+
+              {/* Modal de edição */}
+              {editingOrder && (
+                <EditOrderModal
+                  editingOrder={editingOrder}
+                  setEditingOrder={setEditingOrder}
+                  handleSaveEdit={handleSaveEdit}
+                  isSaving={isSavingEdit}
+                />
+              )}
+            </>
           )}
-        </>
-      )}
+        </div>
+      </main>
     </div>
   );
 }
