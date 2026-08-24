@@ -11,7 +11,7 @@ const UPLOAD_DIR = path.join(process.cwd(), 'uploads/myvision88');
 // Função para sanitizar nome do arquivo
 function sanitizeFileName(name) {
   if (!name) return 'produto';
-  
+
   return name
     .toString()
     // Remove caracteres inválidos para arquivos
@@ -30,7 +30,7 @@ function sanitizeFileName(name) {
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // const uploadPath = path.join(__dirname, '../../image');
-    
+
     const uploadPath = UPLOAD_DIR;
 
     if (!fs.existsSync(uploadPath)) {
@@ -42,39 +42,39 @@ const storage = multer.diskStorage({
     try {
       // Log para debug
       // console.log('📦 req.body no filename:', req.body);
-      
+
       // Pega o nome do produto do body (já deve estar populado)
       const productName = req.body.name;
       // 
       console.log('📦 Nome do produto no filename:', productName);
-      
+
       if (!productName) {
         console.log('⚠️ Nome do produto não fornecido, usando timestamp');
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const ext = path.extname(file.originalname).toLowerCase();
         return cb(null, 'cake-' + uniqueSuffix + ext);
       }
-      
+
       const ext = path.extname(file.originalname).toLowerCase();
       const sanitizedName = sanitizeFileName(productName);
-      
+
       let fileName = sanitizedName + ext;
       // console.log(`📸 Tentando salvar como: ${fileName}`);
-      
+
       // const uploadPath = path.join(__dirname, '../../image');
       const uploadPath = UPLOAD_DIR;
       const fullPath = path.join(uploadPath, fileName);
-      
+
       // Se já existe, adiciona timestamp
       if (fs.existsSync(fullPath)) {
         const timestamp = Date.now();
         fileName = `${sanitizedName}-${timestamp}${ext}`;
         console.log(`📸 Arquivo já existe, usando: ${fileName}`);
       }
-      
+
       // console.log(`✅ Arquivo será salvo como: ${fileName}`);
       cb(null, fileName);
-      
+
     } catch (error) {
       console.error('❌ Erro no filename:', error);
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -90,7 +90,7 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: function (req, file, cb) {
     // console.log('📸 Arquivo recebido:', file.fieldname, file.originalname);
-    
+
     if (file.fieldname === 'image') {
       if (file.mimetype.startsWith('image/')) {
         cb(null, true);
@@ -107,48 +107,48 @@ const upload = multer({
 router.post('/', (req, res, next) => {
   // console.log('📦 Headers:', req.headers);
   // console.log('📦 Content-Type:', req.headers['content-type']);
-  
+
   // Usa multer para processar a requisição
-  upload(req, res, function(err) {
+  upload(req, res, function (err) {
     if (err) {
       console.error('❌ Erro no multer:', err);
-      return res.status(400).json({ 
-        success: false, 
-        error: err.message 
+      return res.status(400).json({
+        success: false,
+        error: err.message
       });
     }
-    
+
     // Log do body após processamento do multer
     // console.log('📦 req.body após multer:', req.body);
     // console.log('📦 req.file:', req.file);
-    
+
     // Agora processa a criação do cake
     next();
   });
 }, async (req, res) => {
   const connection = await pool.getConnection();
-  
+
   try {
     await connection.beginTransaction();
 
     // console.log('📦 Dados recebidos:', req.body);
 
     const { name, description, sizes, is_active } = req.body;
-    
+
     // Validação
     if (!name || !String(name).trim()) {
       await connection.rollback();
-      return res.status(400).json({ 
-        success: false, 
-        error: 'ケーキ名は必須です' 
+      return res.status(400).json({
+        success: false,
+        error: 'ケーキ名は必須です'
       });
     }
 
-    const isActiveVal = (is_active === 'true' || is_active === true || is_active === '1' || is_active === 1 || is_active === undefined) ? 1 : 0;
+    const isActiveVal = (is_active === 'true' || is_active === true || is_active === '1' || is_active === 1) ? 1 : 0;
 
     // Pega o nome do arquivo
     const imageFilename = req.file ? req.file.filename : '';
-    
+
     // console.log(`🖼️ Nome da imagem salva: ${imageFilename}`);
     // console.log(`📝 Nome do cake: ${name}`);
 
@@ -171,7 +171,7 @@ router.post('/', (req, res, next) => {
           sizesArray = [];
         }
       }
-      
+
       if (Array.isArray(sizesArray) && sizesArray.length > 0) {
         for (const size of sizesArray) {
           const sizeIsActive = (size.is_active === undefined || size.is_active === true || size.is_active === 'true' || size.is_active === 1 || size.is_active === '1') ? 1 : 0;
@@ -195,9 +195,9 @@ router.post('/', (req, res, next) => {
   } catch (err) {
     await connection.rollback();
     console.error('❌ Erro ao criar cake:', err);
-    res.status(500).json({ 
-      success: false, 
-      error: 'ケーキの作成中にエラーが発生しました: ' + err.message 
+    res.status(500).json({
+      success: false,
+      error: 'ケーキの作成中にエラーが発生しました: ' + err.message
     });
   } finally {
     connection.release();
@@ -207,24 +207,24 @@ router.post('/', (req, res, next) => {
 // 🔹 Rota para atualizar produto com imagem
 router.put('/:id', (req, res, next) => {
   // console.log('📦 Update Headers:', req.headers);
-  
-  upload(req, res, function(err) {
+
+  upload(req, res, function (err) {
     if (err) {
       console.error('❌ Erro no multer (update):', err);
-      return res.status(400).json({ 
-        success: false, 
-        error: err.message 
+      return res.status(400).json({
+        success: false,
+        error: err.message
       });
     }
-    
+
     // console.log('📦 Update req.body:', req.body);
     // console.log('📸 Update req.file:', req.file);
-    
+
     next();
   });
 }, async (req, res) => {
   const connection = await pool.getConnection();
-  
+
   try {
     await connection.beginTransaction();
 
@@ -237,33 +237,33 @@ router.put('/:id', (req, res, next) => {
 
     // Verifica se o cake existe
     const [existingCakes] = await connection.query(
-      'SELECT * FROM cakes WHERE id = ?', 
+      'SELECT * FROM cakes WHERE id = ?',
       [cakeId]
     );
-    
+
     if (existingCakes.length === 0) {
       await connection.rollback();
-      return res.status(404).json({ 
-        success: false, 
-        error: 'ケーキが見つかりません' 
+      return res.status(404).json({
+        success: false,
+        error: 'ケーキが見つかりません'
       });
     }
 
     if (!name || !String(name).trim()) {
       await connection.rollback();
-      return res.status(400).json({ 
-        success: false, 
-        error: 'ケーキ名は必須です' 
+      return res.status(400).json({
+        success: false,
+        error: 'ケーキ名は必須です'
       });
     }
 
     // Determina o nome da imagem
     let imageFilename = existingImage || existingCakes[0].image || '';
-    
+
     // Se nova imagem foi enviada
     if (req.file) {
       imageFilename = req.file.filename;
-      
+
       // Deleta imagem antiga
       if (existingCakes[0].image && existingCakes[0].image !== imageFilename) {
         // const oldImagePath = path.join(__dirname, '../../image', existingCakes[0].image);
@@ -295,7 +295,7 @@ router.put('/:id', (req, res, next) => {
           sizesArray = [];
         }
       }
-      
+
       if (Array.isArray(sizesArray) && sizesArray.length > 0) {
         for (const size of sizesArray) {
           const sizeIsActive = (size.is_active === undefined || size.is_active === true || size.is_active === 'true' || size.is_active === 1 || size.is_active === '1') ? 1 : 0;
@@ -318,9 +318,9 @@ router.put('/:id', (req, res, next) => {
   } catch (err) {
     await connection.rollback();
     console.error('❌ Erro ao atualizar cake:', err);
-    res.status(500).json({ 
-      success: false, 
-      error: 'ケーキの更新中にエラーが発生しました: ' + err.message 
+    res.status(500).json({
+      success: false,
+      error: 'ケーキの更新中にエラーが発生しました: ' + err.message
     });
   } finally {
     connection.release();
@@ -331,9 +331,9 @@ router.put('/:id', (req, res, next) => {
 router.post('/upload', upload, async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ 
-        success: false, 
-        error: '画像が送信されていません' 
+      return res.status(400).json({
+        success: false,
+        error: '画像が送信されていません'
       });
     }
 
@@ -344,9 +344,9 @@ router.post('/upload', upload, async (req, res) => {
     });
   } catch (err) {
     console.error('アップロードエラー:', err);
-    res.status(500).json({ 
-      success: false, 
-      error: '画像のアップロードに失敗しました' 
+    res.status(500).json({
+      success: false,
+      error: '画像のアップロードに失敗しました'
     });
   }
 });
@@ -365,9 +365,9 @@ router.get('/', async (req, res) => {
     res.json({ success: true, cakes: result });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ 
-      success: false, 
-      error: 'ケーキの取得中にエラーが発生しました' 
+    res.status(500).json({
+      success: false,
+      error: 'ケーキの取得中にエラーが発生しました'
     });
   }
 });
@@ -375,18 +375,18 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const cakeId = req.params.id;
-    
+
     const [cakes] = await pool.query('SELECT * FROM cakes WHERE id = ?', [cakeId]);
-    
+
     if (cakes.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'ケーキが見つかりません' 
+      return res.status(404).json({
+        success: false,
+        error: 'ケーキが見つかりません'
       });
     }
 
     const [sizes] = await pool.query(
-      'SELECT * FROM cake_sizes WHERE cake_id = ? ORDER BY id', 
+      'SELECT * FROM cake_sizes WHERE cake_id = ? ORDER BY id',
       [cakeId]
     );
 
@@ -398,31 +398,31 @@ router.get('/:id', async (req, res) => {
     res.json({ success: true, cake: result });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ 
-      success: false, 
-      error: 'ケーキの取得中にエラーが発生しました' 
+    res.status(500).json({
+      success: false,
+      error: 'ケーキの取得中にエラーが発生しました'
     });
   }
 });
 
 router.delete('/:id', async (req, res) => {
   const connection = await pool.getConnection();
-  
+
   try {
     await connection.beginTransaction();
 
     const cakeId = req.params.id;
 
     const [existingCakes] = await connection.query(
-      'SELECT * FROM cakes WHERE id = ?', 
+      'SELECT * FROM cakes WHERE id = ?',
       [cakeId]
     );
-    
+
     if (existingCakes.length === 0) {
       await connection.rollback();
-      return res.status(404).json({ 
-        success: false, 
-        error: 'ケーキが見つかりません' 
+      return res.status(404).json({
+        success: false,
+        error: 'ケーキが見つかりません'
       });
     }
 
@@ -449,9 +449,9 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     await connection.rollback();
     console.error('❌ Erro ao deletar cake:', err);
-    res.status(500).json({ 
-      success: false, 
-      error: 'ケーキの削除中にエラーが発生しました' 
+    res.status(500).json({
+      success: false,
+      error: 'ケーキの削除中にエラーが発生しました'
     });
   } finally {
     connection.release();

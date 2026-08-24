@@ -6,14 +6,13 @@ import { ja } from 'date-fns/locale';
 
 import Select from 'react-select';
 import type { StylesConfig, CSSObjectWithLabel, OptionProps, ControlProps } from 'react-select';
-import type { OrderCake, OptionType, SizeOption, TimeOptionType } from "../../types/types";
+import type { OrderCake, OptionType, TimeOptionType } from "../../types/types";
 
 import { PaymentFormStripe } from '../../components/order/PaymentFormStripe';
 
 import "react-datepicker/dist/react-datepicker.css";
 import "./OrderCake.css";
 // ==================== HOOKS PERSONALIZADOS ====================
-import Input from '../../components/shared/forms/Input';
 
 import { useCakesData } from '../../hooks/useCakesData';
 import { useTimeSlots } from '../../hooks/useTimeSlots';
@@ -504,34 +503,6 @@ export default function OrderCake() {
     }),
   });
 
-  const customStylesSize: StylesConfig<SizeOption, false> = {
-    option: (provided: CSSObjectWithLabel, state: OptionProps<SizeOption, false>) => ({
-      ...provided,
-      backgroundColor: state.isSelected ? '#fdd111' : state.isFocused ? '#fdeca2' : 'white',
-      color: state.isDisabled ? '#999' : '#333',
-      cursor: state.isDisabled ? 'not-allowed' : 'pointer',
-    }),
-    control: (provided: CSSObjectWithLabel, state: ControlProps<SizeOption, false>) => ({
-      ...provided,
-      borderColor: state.isFocused ? '#fdeca2' : '#ddd',
-      boxShadow: state.isFocused ? '0 0 0 1px #fdeca2' : 'none',
-      '&:hover': {
-        ...(provided['&:hover'] as CSSObjectWithLabel),
-        borderColor: '#fdeca2'
-      },
-    }),
-    singleValue: (provided: CSSObjectWithLabel) => ({
-      ...provided,
-      color: '#333',
-      borderRadius: '4px',
-      padding: '2px 6px',
-    }),
-    menu: (provided: CSSObjectWithLabel) => ({
-      ...provided,
-      zIndex: 9999,
-    }),
-  };
-
   const customStyles = getBaseStyles<OptionType>();
   const customStylesHour = getBaseStyles<TimeOptionType>();
   const customStylesCake = getBaseStyles<CustomOptionType>();
@@ -578,11 +549,6 @@ export default function OrderCake() {
             <div className="cake-information">
               {cakes.map((item, index) => {
                 const selectedCakeData = cakesData?.find(c => c.id === item.cake_id);
-                const sizeOptions: SizeOption[] = selectedCakeData?.sizes.map(s => ({
-                  ...s,
-                  value: s.size || '',
-                  label: s.size ? `${s.size} ￥${s.price.toLocaleString()}` : '',
-                })) || [];
 
                 return (
                   <div className="box-cake" key={`${item.cake_id}-${index}`}>
