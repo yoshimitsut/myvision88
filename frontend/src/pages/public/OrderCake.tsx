@@ -998,10 +998,10 @@ export default function OrderCake() {
                       updateStepProgress('emailSelected', true);
                     }
                   }}
-                  disabled={!stepProgress.emailSelected}
+                  disabled={!stepProgress.lastNameSelected}
                   style={{
-                    opacity: stepProgress.emailSelected ? 1 : 0.5,
-                    pointerEvents: stepProgress.emailSelected ? 'auto' : 'none'
+                    opacity: stepProgress.lastNameSelected ? 1 : 0.5,
+                    pointerEvents: stepProgress.lastNameSelected ? 'auto' : 'none'
                   }}
                   required
                 />
