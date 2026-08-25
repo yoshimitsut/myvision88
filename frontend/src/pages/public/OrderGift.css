@@ -326,6 +326,88 @@
   margin-top: 2px;
 }
 
+/* Grid para quantidade - mais compacto */
+.quantity-pills-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+/* Pills de quantidade - mais quadrados/compactos */
+.quantity-pill {
+  min-width: 50px;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  padding: 12px;
+}
+
+.quantity-pill:hover {
+  border-color: #333;
+  background-color: #ede9de;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.quantity-pill.selected {
+  border-color: #000000;
+  background-color: #000000;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(253, 209, 17, 0.3);
+}
+
+.quantity-pill.selected .option-pill-title {
+  color: #333;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.quantity-pill .option-pill-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.quantity-pill .option-pill-checkmark {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #fdd111;
+  color: #333;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Para telas menores */
+@media (max-width: 768px) {
+  .quantity-pills-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+
+  .quantity-pill {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px;
+  }
+
+  .quantity-pill .option-pill-title {
+    font-size: 1rem;
+  }
+}
+
 /* ==================== Shipping Address ==================== */
 .og-shipping-address {
   margin-top: 5px;

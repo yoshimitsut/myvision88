@@ -615,6 +615,7 @@ export default function OrderCake() {
                           if (selected) {
                             const newCakeId = Number(selected.value);
                             const selectedCake = cakesData?.find(c => c.id === newCakeId);
+
                             updateCake(index, "cake_id", newCakeId);
                             updateCake(index, "size", "");
                             updateCake(index, "price", 0);
@@ -653,26 +654,29 @@ export default function OrderCake() {
                         <span className="field-label-text">個数</span>
                         <span className="field-required-badge">必須</span>
                       </div>
-                      <Select<OptionType, false>
-                        options={Array.from({ length: 10 }, (_, i) => ({
-                          value: String(i + 1),
-                          label: String(i + 1)
-                        }))}
-                        value={Array.from({ length: 10 }, (_, i) => ({
-                          value: String(i + 1),
-                          label: String(i + 1)
-                        })).find(opt => opt.value === String(item.amount)) || null}
-                        isSearchable={false}
-                        onChange={(selected) => {
-                          updateCake(index, "amount", selected ? Number(selected.value) : 1)
-                          updateStepProgress("quantitySelected", true);
-                        }}
-                        isDisabled={!stepProgress.cakeSelected}
-                        classNamePrefix="react-select"
-                        placeholder="数量"
-                        styles={customStyles}
-                        required
-                      />
+                      <div className='quantity-pills-grid'>
+                        {Array.from({ length: 10 }, (_, i) => {
+                          const quantity = i + 1;
+                          const isSelected = item.amount === quantity;
+                          return (
+                            <div
+                              key={quantity}
+                              className={`pill-option-card quantity-pill ${isSelected ? 'selected' : ''}`}
+                              onClick={() => {
+                                updateCake(index, "amount", quantity);
+                                updateStepProgress("quantitySelected", true);
+                              }}
+                              style={{
+                                pointerEvents: stepProgress.cakeSelected ? 'auto' : 'none',
+                                opacity: stepProgress.cakeSelected ? 1 : 0.5
+                              }}
+                            >
+                              {quantity}
+                            </div>
+                          )
+                        })}
+
+                      </div>
                     </div>
 
                     {/* 3. サイズ (Size Pills Grid) */}
@@ -765,8 +769,10 @@ export default function OrderCake() {
                               onClick={() => {
                                 if (stepProgress.fruitSelected) {
                                   updateCake(index, "plate_type" as any, pOpt.value);
-                                  if (pOpt.value !== "その他" && !item.message_cake) {
+                                  if (pOpt.value !== "その他") {
                                     updateCake(index, "message_cake", pOpt.label);
+                                  } else {
+                                    updateCake(index, "message_cake", "");
                                   }
                                   updateStepProgress("messageSelected", true);
                                 }
