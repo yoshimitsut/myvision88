@@ -103,6 +103,20 @@ export default function OrderCake() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'store'>('card');
   const [paymentKey, setPaymentKey] = useState(0);
+  const [stepProgress, setStepProgress] = useState({
+    cakeSelected: false,
+    quantitySelected: false,
+    sizeSelected: false,
+    fruitSelected: false,
+    messageSelected: false,
+    candlesSelected: false,
+    dateSelected: false,
+    timeSelected: false,
+    firstNameSelected: false,
+    lastNameSelected: false,
+    emailSelected: false,
+    telSelected: false,
+  });
   const [, setProcessingStorePayment] = useState(false);
 
   // Hooks personalizados
@@ -260,6 +274,10 @@ export default function OrderCake() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+
+  const updateStepProgress = (field: string, value: boolean) => {
+    setStepProgress(prev => ({ ...prev, [field]: value }));
   };
 
   // ==================== FUNÇÕES DE SUBMISSÃO ====================
@@ -601,19 +619,25 @@ export default function OrderCake() {
                             updateCake(index, "size", "");
                             updateCake(index, "price", 0);
 
+                            updateStepProgress("cakeSelected", true);
+
                             if (selectedCake?.sizes && selectedCake.sizes.length === 1) {
                               const singleSize = selectedCake.sizes[0];
                               if (singleSize.stock > 0 && singleSize.size) {
                                 updateCake(index, "size", singleSize.size);
                                 updateCake(index, "price", singleSize.price);
+                                updateStepProgress("sizeSelected", true);
                               }
                             }
                           } else {
                             updateCake(index, "cake_id", 0);
                             updateCake(index, "size", "");
                             updateCake(index, "price", 0);
+                            updateStepProgress("cakeSelected", false);
+                            updateStepProgress("quantitySelected", false);
                           }
                         }}
+                        isDisabled={false}
                         noOptionsMessage={() => "読み込み中..."}
                         classNamePrefix="react-select"
                         placeholder="ケーキを選択"
@@ -639,7 +663,11 @@ export default function OrderCake() {
                           label: String(i + 1)
                         })).find(opt => opt.value === String(item.amount)) || null}
                         isSearchable={false}
-                        onChange={(selected) => updateCake(index, "amount", selected ? Number(selected.value) : 1)}
+                        onChange={(selected) => {
+                          updateCake(index, "amount", selected ? Number(selected.value) : 1)
+                          updateStepProgress("quantitySelected", true);
+                        }}
+                        isDisabled={!stepProgress.cakeSelected}
                         classNamePrefix="react-select"
                         placeholder="数量"
                         styles={customStyles}
@@ -649,7 +677,7 @@ export default function OrderCake() {
 
                     {/* 3. サイズ (Size Pills Grid) */}
                     {selectedCakeData && selectedCakeData.sizes && (
-                      <div className='order-field-group'>
+                      <div className={`order-field-group`}>
                         <div className="field-label-row">
                           <span className="field-label-text">サイズ</span>
                           <span className="field-required-badge">必須</span>
@@ -662,8 +690,15 @@ export default function OrderCake() {
                                 key={sIdx}
                                 className={`option-pill-card ${isSelected ? 'selected' : ''}`}
                                 onClick={() => {
-                                  updateCake(index, "size", s.size);
-                                  updateCake(index, "price", s.price);
+                                  if (stepProgress.cakeSelected) {
+                                    updateCake(index, "size", s.size);
+                                    updateCake(index, "price", s.price);
+                                    updateStepProgress('sizeSelected', true);
+                                  }
+                                }}
+                                style={{
+                                  pointerEvents: stepProgress.cakeSelected ? 'auto' : 'none',
+                                  opacity: stepProgress.cakeSelected ? 1 : 0.5
                                 }}
                               >
                                 {isSelected && <span className="option-pill-checkmark">✓</span>}
@@ -689,7 +724,16 @@ export default function OrderCake() {
                             <div
                               key={option.value}
                               className={`option-pill-card ${isSelected ? 'selected' : ''}`}
-                              onClick={() => updateCake(index, "fruit_option", option.value)}
+                              onClick={() => {
+                                if (stepProgress.sizeSelected) {
+                                  updateCake(index, "fruit_option", option.value);
+                                  updateStepProgress("fruitSelected", true);
+                                }
+                              }}
+                              style={{
+                                pointerEvents: stepProgress.sizeSelected ? 'auto' : 'none',
+                                opacity: stepProgress.sizeSelected ? 1 : 0.5
+                              }}
                             >
                               {isSelected && <span className="option-pill-checkmark">✓</span>}
                               <span className="option-pill-title">{option.label}</span>
@@ -708,21 +752,28 @@ export default function OrderCake() {
                       </div>
                       <div className="option-pills-grid">
                         {[
-                          { value: "お名前＋おたんじょうびおめでとう", label: "お名前＋おたんじょうびおめでとう", priceText: "+¥0" },
-                          { value: "お名前＋Happy Birthday", label: "お名前＋Happy Birthday", priceText: "+¥0" },
-                          { value: "その他", label: "その他", priceText: "+¥0" }
+                          { value: "お名前＋おたんじょうびおめでとう", label: "お名前＋おたんじょうびおめでとう", priceText: "+¥100" },
+                          { value: "お名前＋Happy Birthday", label: "お名前＋Happy Birthday", priceText: "+¥100" },
+                          { value: "その他", label: "その他", priceText: "+¥100" }
                         ].map(pOpt => {
-                          const currentPlateType = (item as any).plate_type || "お名前＋おたんじょうびおめでとう";
+                          const currentPlateType = (item as any).plate_type || "";
                           const isSelected = currentPlateType === pOpt.value;
                           return (
                             <div
                               key={pOpt.value}
                               className={`option-pill-card ${isSelected ? 'selected' : ''}`}
                               onClick={() => {
-                                updateCake(index, "plate_type" as any, pOpt.value);
-                                if (pOpt.value !== "その他" && !item.message_cake) {
-                                  updateCake(index, "message_cake", pOpt.label);
+                                if (stepProgress.fruitSelected) {
+                                  updateCake(index, "plate_type" as any, pOpt.value);
+                                  if (pOpt.value !== "その他" && !item.message_cake) {
+                                    updateCake(index, "message_cake", pOpt.label);
+                                  }
+                                  updateStepProgress("messageSelected", true);
                                 }
+                              }}
+                              style={{
+                                pointerEvents: stepProgress.fruitSelected ? 'auto' : 'none',
+                                opacity: stepProgress.fruitSelected ? 1 : 0.5
                               }}
                             >
                               {isSelected && <span className="option-pill-checkmark">✓</span>}
@@ -732,6 +783,7 @@ export default function OrderCake() {
                           );
                         })}
                       </div>
+
                       <div className="plate-message-input-box" style={{ marginTop: '10px' }}>
                         <input
                           type="text"
@@ -739,6 +791,11 @@ export default function OrderCake() {
                           placeholder="お名前・メッセージをご記入ください (例: たろうくん お誕生日おめでとう)"
                           value={item.message_cake || ""}
                           onChange={(e) => updateCake(index, "message_cake", e.target.value)}
+                          disabled={!stepProgress.messageSelected}
+                          style={{
+                            opacity: stepProgress.messageSelected ? 1 : 0.5,
+                            pointerEvents: stepProgress.messageSelected ? 'auto' : 'none'
+                          }}
                         />
                       </div>
                     </div>
@@ -752,15 +809,24 @@ export default function OrderCake() {
                       <div className="option-pills-grid">
                         {[
                           { value: "ノーマル", label: "ノーマル", priceText: "¥0" },
-                          { value: "ナンバーキャンドル", label: "ナンバーキャンドル", priceText: "有料" },
-                          { value: "なし", label: "なし", priceText: "" }
+                          { value: "ナンバーキャンドル", label: "ナンバーキャンドル", priceText: "¥100" },
+                          { value: "なし", label: "なし", priceText: "¥0" }
                         ].map(cOpt => {
                           const isSelected = (item as any).candle_option === cOpt.value || (cOpt.value === "ノーマル" && !(item as any).candle_option);
                           return (
                             <div
                               key={cOpt.value}
                               className={`option-pill-card ${isSelected ? 'selected' : ''}`}
-                              onClick={() => updateCake(index, "candle_option" as any, cOpt.value)}
+                              onClick={() => {
+                                if (stepProgress.messageSelected) {
+                                  updateCake(index, "candle_option" as any, cOpt.value)
+                                  updateStepProgress("candlesSelected", true);
+                                }
+                              }}
+                              style={{
+                                pointerEvents: stepProgress.messageSelected ? 'auto' : 'none',
+                                opacity: stepProgress.messageSelected ? 1 : 0.5
+                              }}
                             >
                               {isSelected && <span className="option-pill-checkmark">✓</span>}
                               <span className="option-pill-title">{cOpt.label}</span>
@@ -796,7 +862,11 @@ export default function OrderCake() {
                 <div className="datepicker-input-wrapper">
                   <DatePicker
                     selected={selectedDate}
-                    onChange={(date) => setSelectedDate(date)}
+                    onChange={(date) => {
+                      setSelectedDate(date);
+                      updateStepProgress("dateSelected", true);
+                    }}
+                    disabled={!stepProgress.candlesSelected}
                     minDate={today}
                     maxDate={maxDate}
                     excludeDates={excludedDates}
@@ -834,20 +904,23 @@ export default function OrderCake() {
                 <Select<TimeOptionType, false>
                   options={hoursOptions}
                   value={hoursOptions.find(h => h.value === pickupHour)}
-                  onChange={(selected) => setPickupHour(selected?.value || "時間を選択")}
+                  onChange={(selected) => {
+                    setPickupHour(selected?.value || "時間を選択")
+                    updateStepProgress("timeSelected", true);
+                  }}
                   classNamePrefix="react-select"
                   styles={customStylesHour}
                   placeholder={selectedDate ? "時間を選択" : "日付を選択してください"}
                   isSearchable={false}
-                  isDisabled={!selectedDate || hoursOptions.length === 0}
+                  isDisabled={!selectedDate || hoursOptions.length === 0 || !stepProgress.dateSelected}
                   required
                 />
               </div>
 
-              {/* セイ (カタカナ) */}
+              {/* ヒガ (カタカナ) */}
               <div className='order-field-group'>
                 <div className="field-label-row">
-                  <span className="field-label-text">セイ（カタカナ）</span>
+                  <span className="field-label-text">ヒガ（カタカナ）</span>
                   <span className="field-required-badge">必須</span>
                 </div>
                 <input
@@ -855,8 +928,18 @@ export default function OrderCake() {
                   className="order-styled-input"
                   placeholder="例）ヒガ"
                   value={formData.firstName}
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    handleInputChange(e);
+                    if (e.target.value.trim() !== '') {
+                      updateStepProgress('firstNameSelected', true);
+                    }
+                  }}
                   onBlur={handleKatakanaBlur}
+                  disabled={!stepProgress.timeSelected}
+                  style={{
+                    opacity: stepProgress.timeSelected ? 1 : 0.5,
+                    pointerEvents: stepProgress.timeSelected ? 'auto' : 'none'
+                  }}
                   lang="ja"
                   autoCapitalize="none"
                   autoCorrect="off"
@@ -864,10 +947,10 @@ export default function OrderCake() {
                 />
               </div>
 
-              {/* メイ (カタカナ) */}
+              {/* タロウ (カタカナ) */}
               <div className='order-field-group'>
                 <div className="field-label-row">
-                  <span className="field-label-text">メイ（カタカナ）</span>
+                  <span className="field-label-text">タロウ（カタカナ）</span>
                   <span className="field-required-badge">必須</span>
                 </div>
                 <input
@@ -875,8 +958,18 @@ export default function OrderCake() {
                   className="order-styled-input"
                   placeholder="例）タロウ"
                   value={formData.lastName}
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    handleInputChange(e)
+                    if (e.target.value.trim() !== '') {
+                      updateStepProgress('lastNameSelected', true);
+                    }
+                  }}
                   onBlur={handleKatakanaBlur}
+                  disabled={!stepProgress.firstNameSelected}
+                  style={{
+                    opacity: stepProgress.firstNameSelected ? 1 : 0.5,
+                    pointerEvents: stepProgress.firstNameSelected ? 'auto' : 'none'
+                  }}
                   required
                 />
               </div>
@@ -893,7 +986,17 @@ export default function OrderCake() {
                   className="order-styled-input"
                   placeholder="例）example@example.com"
                   value={formData.email}
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    handleInputChange(e)
+                    if (e.target.value.trim() !== '') {
+                      updateStepProgress('emailSelected', true);
+                    }
+                  }}
+                  disabled={!stepProgress.emailSelected}
+                  style={{
+                    opacity: stepProgress.emailSelected ? 1 : 0.5,
+                    pointerEvents: stepProgress.emailSelected ? 'auto' : 'none'
+                  }}
                   required
                 />
               </div>
@@ -910,7 +1013,17 @@ export default function OrderCake() {
                   className="order-styled-input"
                   placeholder="例）09012345678"
                   value={formData.tel}
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    handleInputChange(e);
+                    if (e.target.value.trim() !== '') {
+                      updateStepProgress('telSelected', true);
+                    }
+                  }}
+                  disabled={!stepProgress.emailSelected}
+                  style={{
+                    opacity: stepProgress.emailSelected ? 1 : 0.5,
+                    pointerEvents: stepProgress.emailSelected ? 'auto' : 'none'
+                  }}
                   required
                 />
               </div>

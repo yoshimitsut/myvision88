@@ -347,6 +347,40 @@
   margin-top: 14px;
 }
 
+/* Estilos para campos inativos*/
+.inactive-step {
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.active-step {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Estilo para pills inativo*/
+.option-pill-card.inactive {
+  cursor: not-allowed;
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+}
+
+.option-pill-card.inactive.selected {
+  cursor: not-allowed;
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+}
+
+.option-pill-card.inactive:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/*Animação suave para campos ativados*/
+.order-field-group {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
 /* Estilos para o resumo do pedido */
 .order-summary {
   background: #f9f9f9;
