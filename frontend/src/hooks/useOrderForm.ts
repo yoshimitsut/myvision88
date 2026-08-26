@@ -22,7 +22,7 @@ export const useOrderForm = (initialCakes: OrderCake[]) => {
   const addCake = () => {
     setCakes(prev => [
       ...prev,
-      { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "", fruit_option: "無し" }
+      { cake_id: 0, name: "", amount: 1, size: "", price: 1, message_cake: "", fruit_option: "", candle_option: "" }
     ]);
   };
 

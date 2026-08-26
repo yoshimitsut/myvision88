@@ -132,11 +132,12 @@ export default function OrderCake() {
   const initialCake = {
     cake_id: 0,
     name: "",
-    amount: 1,
+    amount: 0,
     size: "",
     price: 0,
     message_cake: "",
-    fruit_option: "無し" as const
+    fruit_option: "" as const,
+    candle_option: ""
   };
 
   const {
@@ -238,7 +239,8 @@ export default function OrderCake() {
           size: resolvedSize,
           price: resolvedPrice,
           message_cake: "",
-          fruit_option: "無し"
+          fruit_option: "",
+          candle_option: ""
         }];
       });
     }
@@ -636,6 +638,10 @@ export default function OrderCake() {
                             updateCake(index, "price", 0);
                             updateStepProgress("cakeSelected", false);
                             updateStepProgress("quantitySelected", false);
+                            updateStepProgress("sizeSelected", false);
+                            updateStepProgress("fruitSelected", false);
+                            updateStepProgress("messageSelected", false);
+                            updateStepProgress("candlesSelected", false);
                           }
                         }}
                         isDisabled={false}
@@ -694,15 +700,15 @@ export default function OrderCake() {
                                 key={sIdx}
                                 className={`option-pill-card ${isSelected ? 'selected' : ''}`}
                                 onClick={() => {
-                                  if (stepProgress.cakeSelected) {
+                                  if (stepProgress.quantitySelected) {
                                     updateCake(index, "size", s.size);
                                     updateCake(index, "price", s.price);
                                     updateStepProgress('sizeSelected', true);
                                   }
                                 }}
                                 style={{
-                                  pointerEvents: stepProgress.cakeSelected ? 'auto' : 'none',
-                                  opacity: stepProgress.cakeSelected ? 1 : 0.5
+                                  pointerEvents: stepProgress.quantitySelected ? 'auto' : 'none',
+                                  opacity: stepProgress.quantitySelected ? 1 : 0.5
                                 }}
                               >
                                 {isSelected && <span className="option-pill-checkmark">✓</span>}
@@ -818,7 +824,7 @@ export default function OrderCake() {
                           { value: "ナンバーキャンドル", label: "ナンバーキャンドル", priceText: "¥100" },
                           { value: "なし", label: "なし", priceText: "¥0" }
                         ].map(cOpt => {
-                          const isSelected = (item as any).candle_option === cOpt.value || (cOpt.value === "ノーマル" && !(item as any).candle_option);
+                          const isSelected = (item as any).candle_option === cOpt.value && (item as any).candle_option !== "";
                           return (
                             <div
                               key={cOpt.value}

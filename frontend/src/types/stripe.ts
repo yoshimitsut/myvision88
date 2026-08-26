@@ -5,7 +5,7 @@ export interface OrderSummaryData {
     size: string;
     amount: number;
     price: number;
-    fruit_option: '有り' | '無し';
+    fruit_option: '有り' | '無し' | "";
     message_cake?: string;
   }>;
   customer: {
@@ -80,7 +80,7 @@ export interface OrderData {
     price: number;
     size: string;
     message_cake?: string;
-    fruit_option: "有り" | "無し";
+    fruit_option: "有り" | "無し" | "";
     fruit_price: number;
   }>;
 }
