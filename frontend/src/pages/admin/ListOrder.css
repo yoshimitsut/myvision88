@@ -1043,3 +1043,163 @@ ul {
     }
   }
 }
+
+/* ==================== 本日の予約タイムライン ==================== */
+
+.today-timeline-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8e2;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.today-timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: linear-gradient(90deg, #f0f5f0 0%, #e8f0e8 100%);
+  border-bottom: 1px solid #d8e4d8;
+}
+
+.today-timeline-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d5a27;
+  letter-spacing: 0.04em;
+}
+
+.today-timeline-date {
+  font-size: 12px;
+  color: #6a8a66;
+  font-weight: 500;
+}
+
+/* Scrollable horizontal row of time slots */
+.today-timeline-scroll {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  overflow-x: auto;
+  padding: 16px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: #c8d8c8 transparent;
+}
+
+.today-timeline-scroll::-webkit-scrollbar {
+  height: 5px;
+}
+
+.today-timeline-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.today-timeline-scroll::-webkit-scrollbar-thumb {
+  background-color: #c8d8c8;
+  border-radius: 4px;
+}
+
+/* Each time-slot column */
+.today-timeline-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 160px;
+  padding-right: 20px;
+  border-right: 1px dashed #dde8dd;
+  margin-right: 20px;
+}
+
+.today-timeline-slot:last-child {
+  border-right: none;
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.today-timeline-slot-time {
+  font-size: 12px;
+  font-weight: 700;
+  color: #3a6b34;
+  background: #eaf3ea;
+  border-radius: 6px;
+  padding: 4px 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.today-timeline-slot-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Individual order card inside slot */
+.today-timeline-card {
+  background: #f8fbf8;
+  border: 1px solid #dde8dd;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+  min-width: 140px;
+}
+
+.today-timeline-card:hover {
+  background: #ecf4ec;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(50, 100, 50, 0.12);
+}
+
+.today-timeline-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  gap: 4px;
+}
+
+.today-timeline-card-id {
+  font-size: 11px;
+  font-weight: 700;
+  color: #3a6b34;
+  background: #d6ecd6;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.today-timeline-card-hour {
+  font-size: 10px;
+  color: #88a888;
+}
+
+.today-timeline-card-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.today-timeline-card-cake {
+  font-size: 11px;
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+  .today-timeline-scroll {
+    padding: 12px;
+  }
+
+  .today-timeline-slot {
+    min-width: 130px;
+    padding-right: 14px;
+    margin-right: 14px;
+  }
+}

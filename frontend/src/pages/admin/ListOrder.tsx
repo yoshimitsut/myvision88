@@ -195,37 +195,54 @@ export default function ListOrder() {
   }, [viewMode, sortedGroupedOrders, orders]);
 
   // 🔹 SEPARAR PEDIDOS POR CATEGORIAS
-  const today = new Date().setHours(0, 0, 0, 0);
+  // Usar string YYYY-MM-DD local para evitar bug de fuso horário com UTC do MySQL
+  const todayLocalStr = (() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  })();
+
+  // Extrai a parte YYYY-MM-DD da data do pedido (que vem do MySQL como string)
+  // Usa slice(0,10) para NUNCA fazer conversão de timezone — 100% seguro em qualquer fuso
+  const getOrderDateStr = (dateStr: string) => {
+    if (!dateStr) return '';
+    // MySQL2 retorna DATE como "2026-08-27" ou "2026-08-27T00:00:00.000Z"
+    // slice(0,10) sempre pega exatamente "YYYY-MM-DD" sem converter para Date
+    return dateStr.slice(0, 10);
+  };
+
 
   // 🔹 Pedidos de Hoje: todos os status com data de hoje
   const todayOrders = useMemo(() => {
     return orders.filter(o => {
-      const date = new Date(o.date).setHours(0, 0, 0, 0);
+      const orderDate = getOrderDateStr(o.date);
       const isFinish = o.status !== "d";
       const orderNoCanceled = o.status !== "e";
-      return date === today && isFinish && orderNoCanceled;
+      return orderDate === todayLocalStr && isFinish && orderNoCanceled;
     });
-  }, [orders, today]);
+  }, [orders, todayLocalStr]);
 
   // Pedidos Ativos: status a, b, c com data futura ou hoje
   const activeOrders = useMemo(() => {
     return orders.filter(o => {
-      const date = new Date(o.date).setHours(0, 0, 0, 0);
+      const orderDate = getOrderDateStr(o.date);
       const isActiveStatus = o.status === "a" || o.status === "b" || o.status === "c" || o.status === "f";
-      const isFutureOrToday = date >= today;
+      const isFutureOrToday = orderDate >= todayLocalStr;
       return isActiveStatus && isFutureOrToday;
     });
-  }, [orders, today]);
+  }, [orders, todayLocalStr]);
 
   // 🔹 Pedidos com Data Anterior: status a, b, c com data passada
   const pastDateOrders = useMemo(() => {
     return orders.filter(o => {
-      const date = new Date(o.date).setHours(0, 0, 0, 0);
+      const orderDate = getOrderDateStr(o.date);
       const isActiveStatus = o.status === "a" || o.status === "b" || o.status === "c" || o.status === "f";
-      const isPastDate = date < today;
+      const isPastDate = orderDate < todayLocalStr;
       return isActiveStatus && isPastDate;
     });
-  }, [orders, today]);
+  }, [orders, todayLocalStr]);
 
   // Pedidos Finalizados: status d (お渡し済み)
   const completedOrders = useMemo(() => {
@@ -281,6 +298,28 @@ export default function ListOrder() {
   const sortedAllOrders = useMemo(() => {
     return [...orders].sort((a, b) => b.id_order - a.id_order);
   }, [orders]);
+
+  // 🔹 Pedidos de hoje agrupados por horário para o painel de timeline
+  const todayOrdersByHour = useMemo(() => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const reserved = orders.filter(o => {
+      const orderDate = o.date?.slice(0, 10);
+      const isToday = orderDate === todayStr;
+      const isNotCancelled = o.status !== 'e' && o.status !== 'd';
+      return isToday && isNotCancelled;
+    });
+
+    const grouped: Record<string, typeof orders> = {};
+    for (const order of reserved) {
+      const hour = order.pickupHour || '時間未定';
+      if (!grouped[hour]) grouped[hour] = [];
+      grouped[hour].push(order);
+    }
+
+    // Ordenar as chaves (horários)
+    return Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b, 'ja'));
+  }, [orders]);
+
 
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
@@ -373,19 +412,19 @@ export default function ListOrder() {
           } else if (data.stripe.action === 'already_canceled') {
             alert(`ℹ️ 注文をキャンセルしました。
       
-📋 受付番号: ${String(order.id_order).padStart(4, "0")}
-👤 お客様: ${order.last_name} ${order.first_name}
-この支払いは既にキャンセル済みです。`);
+            📋 受付番号: ${String(order.id_order).padStart(4, "0")}
+            👤 お客様: ${order.last_name} ${order.first_name}
+            この支払いは既にキャンセル済みです。`);
           }
         } else {
           // ⚠️ Caso de erro no Stripe
           alert(`⚠️ 注文はキャンセルされましたが、Stripeでの処理に問題がありました。
     
-📋 受付番号: ${String(order.id_order).padStart(4, "0")}
-👤 お客様: ${order.last_name} ${order.first_name}
-❌ エラー: ${data.stripe.message || 'Erro na comunicação com Stripe'}
+          📋 受付番号: ${String(order.id_order).padStart(4, "0")}
+          👤 お客様: ${order.last_name} ${order.first_name}
+          ❌ エラー: ${data.stripe.message || 'Erro na comunicação com Stripe'}
 
-別途返金処理が必要な場合があります。`);
+          別途返金処理が必要な場合があります。`);
         }
       }
 
@@ -1579,6 +1618,57 @@ export default function ListOrder() {
               </div>
             )}
 
+
+            {/* ========== 本日の予約タイムライン ========== */}
+            {todayOrdersByHour.length > 0 && (
+              <div className="today-timeline-panel">
+                <div className="today-timeline-header">
+                  <span className="today-timeline-title">🕐 本日の予約状況</span>
+                  <span className="today-timeline-date">
+                    {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
+                  </span>
+                </div>
+                <div className="today-timeline-scroll">
+                  {todayOrdersByHour.map(([hour, hourOrders]) => (
+                    <div key={hour} className="today-timeline-slot">
+                      <div className="today-timeline-slot-time">{hour}</div>
+                      <div className="today-timeline-slot-cards">
+                        {hourOrders.map(order => {
+                          const statusColor: Record<string, string> = {
+                            a: '#C40000', b: '#000DBD', c: '#287300',
+                            f: '#7332a8', e: '#000', d: '#6B6B6B'
+                          };
+                          const color = statusColor[order.status] || '#555';
+                          return (
+                            <div
+                              key={order.id_order}
+                              className="today-timeline-card"
+                              style={{ borderLeft: `4px solid ${color}` }}
+                              onClick={() => setEditingOrder(order)}
+                              title="クリックして編集"
+                            >
+                              <div className="today-timeline-card-header">
+                                <span className="today-timeline-card-id">#{String(order.id_order).padStart(4, '0')}</span>
+                                <span className="today-timeline-card-hour">{hour}</span>
+                              </div>
+                              <div className="today-timeline-card-name">
+                                {order.first_name} {order.last_name}
+                              </div>
+                              {order.cakes?.map((cake, ci) => (
+                                <div key={ci} className="today-timeline-card-cake">
+                                  {cake.name} {cake.size && `(${cake.size})`}
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="tab-content">
               {loading ? (
                 <p style={{ padding: '20px 0' }}>読み込み中...</p>
@@ -1595,6 +1685,7 @@ export default function ListOrder() {
                 </>
               )}
             </div>
+
 
             {/* Modal de edição */}
             {editingOrder && (
