@@ -1,6 +1,8 @@
 import './CakeManagement.css';
 import CakeForm from '../../components/order/CakeForm';
 import { useCakeManagement } from '../../hooks/useCakeManagement';
+import { useNavigate } from 'react-router-dom';
+import AdminLayout from '../../components/admin/AdminLayout';
 
 export default function CakeManagement() {
   const {
@@ -24,7 +26,6 @@ export default function CakeManagement() {
     addNewSize,
     removeSize,
     updateSize,
-    handleDeleteCake,
     handleEditCake,
     setImagePreview,
     setSelectedImage,
@@ -32,46 +33,64 @@ export default function CakeManagement() {
     FOLDER_URL
   } = useCakeManagement();
 
+  const navigate = useNavigate();
+
+  const toggleSizeActive = async (sizeId: number) => {
+    try {
+      await fetch(`${API_URL}/api/sizes/${sizeId}/toggle`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      // A quick reload to reflect changes, or it can be handled by the hook state reload
+      window.location.reload();
+    } catch (error) {
+      console.error('Erro ao toggle size:', error);
+    }
+  };
+
   if (loading) return <div className="loading">ケーキを読み込み中...</div>;
   if (error) return <div className="error">エラー: {error}</div>;
 
   return (
-    <div className="cake-management">
-      <h1>🎂 ケーキ管理</h1>
-
-      {/* ナビゲーションタブ */}
-      <div className="cake-tabs">
-        <button
-          className={`tab-cake-button ${activeTab === 'list' ? 'active' : ''}`}
-          onClick={() => setActiveTab('list')}
-        >
-          📋 ケーキ一覧
-        </button>
-        <button
-          className={`tab-cake-button ${activeTab === 'add' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveTab('add');
-            setEditingCake(null);
-            clearForm();
-          }}
-        >
-          ➕ {editingCake ? 'ケーキを編集' : 'ケーキを追加'}
-        </button>
+    <AdminLayout>
+      <div className="cake-management-content">
+      {/* Breadcrumb */}
+      <div className="breadcrumb">
+        <span>ケーキ</span>
+        <span className="breadcrumb-separator">/</span>
+        <span className="breadcrumb-current">ケーキリスト</span>
       </div>
 
-      {/* タブの内容 */}
-      <div className="tab-content">
-        {activeTab === 'list' && (
-          <div className="cake-list-admin">
-            <h2>登録済みケーキ一覧</h2>
+      {/* Header */}
+      <div className="page-header">
+        <h1>ケーキメニュー</h1>
+        <div className="header-actions">
+          <button
+            className="add-cake-btn"
+            onClick={() => {
+              setActiveTab('add');
+              setEditingCake(null);
+              clearForm();
+            }}
+          >
+            ＋ ケーキを追加
+          </button>
+          <button className="close-btn" onClick={() => navigate('/list')}>× 閉じる</button>
+        </div>
+      </div>
 
+      {/* Conteúdo */}
+      <div className="content-area">
+        {activeTab === 'list' && (
+          <div className="cake-list">
             {cakes.length === 0 ? (
               <p className="no-cakes">登録されているケーキがありません。</p>
             ) : (
-              <div className="cakes-grid">
+              <div className="cake-cards-list">
                 {cakes.map(cake => (
-                  <div key={cake.id} className="cake-card">
-                    <div className="cake-image">
+                  <div key={cake.id} className="cake-card-horizontal">
+                    {/* Imagem */}
+                    <div className="cake-image-container">
                       {cake.image ? (
                         <img
                           src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`}
@@ -81,51 +100,57 @@ export default function CakeManagement() {
                           }}
                         />
                       ) : (
-                        <div className="no-image">📷 画像なし</div>
+                        <div className="no-image">📷</div>
                       )}
                     </div>
 
-                    <div className='cake-info-actions'>
-                      <div className="cake-info">
-                        <h3>{cake.name} {cake.is_active === 0 && <span style={{ color: 'red', fontSize: '0.8em' }}>(非アクティブ)</span>}</h3>
-                        {cake.description && (
-                          <p className="cake-description">{cake.description}</p>
-                        )}
-
-                        <div className="cake-sizes">
-                          <h4>サイズ:</h4>
-                          {cake.sizes.length === 0 ? (
-                            <p className="no-sizes">登録されているサイズがありません</p>
+                    {/* Informações */}
+                    <div className="cake-details">
+                      <div className="cake-header">
+                        <h2>{cake.name}</h2>
+                        <div className="cake-actions-header">
+                          <button
+                            className="edit-link"
+                            onClick={() => handleEditCake(cake)}
+                          >
+                            編集
+                          </button>
+                          {cake.is_active === 1 ? (
+                            <span className="status-badge active">オンライン販売中</span>
                           ) : (
-                            <ul>
-                              {cake.sizes.map(size => (
-                                <li key={size.id}>
-                                  <span className="size-name" style={{ textDecoration: size.is_active === 0 ? 'line-through' : 'none', color: size.is_active === 0 ? '#999' : 'inherit' }}>
-                                    {size.size} {size.is_active === 0 && '(無効)'}
-                                  </span>
-                                  <span className="size-details">
-                                    在庫: {size.stock} | ¥{size.price.toLocaleString('ja-JP')}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
+                            <span className="status-badge inactive">オンライン停止中</span>
                           )}
                         </div>
                       </div>
 
-                      <div className="cake-actions">
-                        <button
-                          className="edit-cake-btn"
-                          onClick={() => handleEditCake(cake)}
-                        >
-                          ✏️ 編集
-                        </button>
-                        <button
-                          className="delete-cake-btn"
-                          onClick={() => handleDeleteCake(cake.id)}
-                        >
-                          🗑️ 削除
-                        </button>
+                      {/* Tabela de tamanhos */}
+                      <div className="sizes-table">
+                        {cake.sizes.map(size => (
+                          <div key={size.id} className="size-row">
+                            <div className="size-toggle-wrapper">
+                              <label className="toggle-switch">
+                                <input
+                                  type="checkbox"
+                                  checked={size.is_active === 1}
+                                  onChange={() => size.id !== undefined && toggleSizeActive(size.id)}
+                                />
+                                <span className="toggle-slider"></span>
+                              </label>
+                              <span className={`size-label ${size.is_active === 0 ? 'inactive' : ''}`}>
+                                {size.size}
+                              </span>
+                              <span className="size-icon">♾️</span>
+                            </div>
+                            <div className="size-price">
+                              <span className="currency-symbol">¥</span>
+                              <span className="price-value">{size.price.toLocaleString('ja-JP')}</span>
+                            </div>
+                            <div className="size-stock">
+                              <span className="stock-percentage">8%</span>
+                              <span className="stock-value">{Math.floor(size.price * 1.08).toLocaleString('ja-JP')}</span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -161,6 +186,7 @@ export default function CakeManagement() {
           />
         )}
       </div>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

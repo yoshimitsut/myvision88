@@ -5,6 +5,7 @@ import Select from "react-select";
 
 import ExcelExportButton from '../../components/admin/ExcelExportButton';
 import EditOrderModal from "../../components/admin/EditOrderModal";
+import AdminLayout from '../../components/admin/AdminLayout';
 
 import type { StylesConfig, SingleValue } from 'react-select';
 import type { Order, StatusOption } from '../../types/types';
@@ -1465,131 +1466,21 @@ export default function ListOrder() {
   };
 
   return (
-    <div className='admin-dashboard-page'>
-      {/* ── LEFT SIDEBAR ── */}
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-header">
-          <span className="sidebar-sub-title">予約管理</span>
-          <h1 className="sidebar-main-title">MYVISION88</h1>
-        </div>
-
-        {/* Top Menu White Card */}
-        <div className="sidebar-menu-card">
-          <div
-            className={`sidebar-menu-item ${viewType === "cake" ? "active" : ""}`}
-            onClick={() => setViewType("cake")}
-          >
-            <span>TOPメニュー</span>
-          </div>
-          <div className="sidebar-menu-item" onClick={() => navigate("/admin/cake")}>
-            <span>ケーキ</span>
-          </div>
-          <div className="sidebar-menu-item" onClick={() => navigate("/admin/gift")}>
-            <span>ギフト</span>
-          </div>
-        </div>
-
-        {/* Search Box & Add Action Button */}
-        <div className="sidebar-search-box">
-          <div className="sidebar-search-input-wrapper">
-            <span className="search-icon">🔍</span>
-            <input
-              type="text"
-              placeholder="名前・電話番号・受付番号で検索"
-              value={search}
-              onChange={(e) => {
-                const val = e.target.value;
-                setSearch(val);
-                if (val.trim() !== '' && activeTab !== 'all') {
-                  setActiveTab('all');
-                }
-              }}
-              className="sidebar-search-input"
-            />
-          </div>
-          <button className="sidebar-add-btn" onClick={() => navigate("/order")}>
-            + 新しい予約
-          </button>
-        </div>
-
-        {/* Status Filters Menu (予約ステータス) */}
-        <div className="sidebar-section">
-          <div className="sidebar-section-title">予約ステータス</div>
-          <div className="sidebar-filter-list">
-            <div
-              className={`sidebar-filter-item ${activeTab === 'all' || activeTab === 'today' ? 'active' : ''}`}
-              onClick={() => setActiveTab('all')}
-            >
-              <span>すべて</span>
-              <span className="sidebar-badge active">{orders.length}</span>
-            </div>
-            <div
-              className={`sidebar-filter-item ${activeTab === 'active' ? 'active' : ''}`}
-              onClick={() => setActiveTab('active')}
-            >
-              <span>オンライン予約</span>
-              <span className="sidebar-badge">{activeOrders.length}</span>
-            </div>
-            <div
-              className={`sidebar-filter-item`}
-              onClick={() => setActiveTab('today')}
-            >
-              <span>店頭予約</span>
-              <span className="sidebar-badge">{todayOrders.length}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* History Section (履歴) */}
-        <div className="sidebar-section">
-          <div className="sidebar-section-title">履歴</div>
-          <div className="sidebar-filter-list">
-            <div
-              className={`sidebar-filter-item ${activeTab === 'past' ? 'active' : ''}`}
-              onClick={() => setActiveTab('past')}
-            >
-              <span>予約日経過</span>
-              <span className="sidebar-badge badge-green">{pastDateOrders.length}</span>
-            </div>
-            <div
-              className={`sidebar-filter-item ${activeTab === 'completed' ? 'active' : ''}`}
-              onClick={() => setActiveTab('completed')}
-            >
-              <span>受け取り済み</span>
-              <span className="sidebar-badge badge-green">{completedOrders.length}</span>
-            </div>
-            <div
-              className={`sidebar-filter-item ${activeTab === 'cancelled' ? 'active' : ''}`}
-              onClick={() => setActiveTab('cancelled')}
-            >
-              <span>キャンセル</span>
-              <span className="sidebar-badge badge-green">{cancelledOrders.length}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer Quick Action Grid (4 Dark Green Icon Buttons) */}
-        <div className="sidebar-footer-actions">
-          <button className="sidebar-action-btn" onClick={() => navigate("/admin/date")} title="予定">
-            <span className="action-icon">📅</span>
-            <span className="action-label">予定</span>
-          </button>
-          <div className="sidebar-action-btn-wrapper" title="出力">
-            <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
-          </div>
-          <button className="sidebar-action-btn" onClick={() => navigate("/ordertable")} title="集計">
-            <span className="action-icon">📊</span>
-            <span className="action-label">集計</span>
-          </button>
-          <button className="sidebar-action-btn" onClick={() => setShowScanner(true)} title="QR">
-            <span className="action-icon">📱</span>
-            <span className="action-label">QR</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* ── RIGHT MAIN PANEL ── */}
-      <main className="admin-main-content">
+    <AdminLayout sidebarProps={{
+      orders,
+      activeOrders,
+      todayOrders,
+      pastDateOrders,
+      completedOrders,
+      cancelledOrders,
+      viewType,
+      setViewType,
+      search,
+      setSearch,
+      activeTab,
+      setActiveTab,
+      setShowScanner
+    }}>
         {/* Breadcrumbs */}
         <div className="admin-breadcrumbs">
           <span>予約管理</span> / <span>予約ステータス</span> / <span className="current">すべて</span>
@@ -1718,7 +1609,6 @@ export default function ListOrder() {
             </>
           )}
         </div>
-      </main>
-    </div>
+    </AdminLayout>
   );
 }

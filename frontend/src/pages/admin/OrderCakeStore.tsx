@@ -4,15 +4,15 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { addDays, isSameDay, format, endOfMonth, getDay } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
-import type { OrderCake, SizeOption } from "../../types/types";
+import Select from 'react-select';
+import type { StylesConfig, CSSObjectWithLabel, OptionProps, ControlProps } from 'react-select';
+import type { OrderCake, OptionType, TimeOptionType } from "../../types/types";
 
 import { PaymentFormStripe } from '../../components/order/PaymentFormStripe';
 
 import "react-datepicker/dist/react-datepicker.css";
 import "./OrderCakeStore.css";
-
 // ==================== HOOKS PERSONALIZADOS ====================
-import Input from '../../components/shared/forms/Input';
 
 import { useCakesData } from '../../hooks/useCakesData';
 import { useTimeSlots } from '../../hooks/useTimeSlots';
@@ -24,11 +24,16 @@ import { useDateValidation } from '../../hooks/useDateValidation';
 // ==================== IMPORTS PARA PAGAMENTO ====================
 import { calculateTotalPrice } from '../../utils/priceCalculator';
 import type { StripePaymentResponse, StripeError, OrderData, OrderStatus, PaymentStatus } from '../../types/stripe';
+import AdminLayout from '../../components/admin/AdminLayout';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
 
 // ==================== TIPOS ====================
+interface CustomOptionType extends OptionType {
+  isDisabled?: boolean;
+}
+
 interface FruitOption {
   value: "有り" | "無し";
   label: string;
@@ -99,6 +104,20 @@ export default function OrderCake() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'store'>('card');
   const [paymentKey, setPaymentKey] = useState(0);
+  const [stepProgress, setStepProgress] = useState({
+    cakeSelected: false,
+    quantitySelected: false,
+    sizeSelected: false,
+    fruitSelected: false,
+    messageSelected: false,
+    candlesSelected: false,
+    dateSelected: false,
+    timeSelected: false,
+    firstNameSelected: false,
+    lastNameSelected: false,
+    emailSelected: false,
+    telSelected: false,
+  });
   const [, setProcessingStorePayment] = useState(false);
 
   // Hooks personalizados
@@ -114,11 +133,12 @@ export default function OrderCake() {
   const initialCake = {
     cake_id: 0,
     name: "",
-    amount: 1,
+    amount: 0,
     size: "",
     price: 0,
     message_cake: "",
-    fruit_option: "無し" as const
+    fruit_option: "" as const,
+    candle_option: ""
   };
 
   const {
@@ -148,19 +168,68 @@ export default function OrderCake() {
   const selectedSizeName = searchParams.get("size");
 
   // Efeito para inicializar bolo da URL
+  // useEffect(() => {
+  //   if (!cakesData.length || !selectedCakeName) return;
+
+  //   const selectedCake = cakesData.find(c =>
+  //     String(c.id) === selectedCakeName || c.name === selectedCakeName
+  //   );
+
+  //   if (selectedCake) {
+  //     setCakes(prevCakes => {
+  //       const sizeOption = selectedCake.sizes?.find(s => s.size === selectedSizeName);
+  //       const resolvedSize = sizeOption?.size || "";
+
+  //       // Prevent infinite loop by checking if we already set it
+  //       if (prevCakes.length > 0 && prevCakes[0].cake_id === selectedCake.id && prevCakes[0].size === resolvedSize) {
+  //         return prevCakes;
+  //       }
+
+  //       return [{
+  //         cake_id: selectedCake.id,
+  //         name: selectedCake.name,
+  //         amount: 1,
+  //         size: resolvedSize,
+  //         price: sizeOption?.price || 0,
+  //         message_cake: "",
+  //         fruit_option: "無し"
+  //       }];
+  //     });
+  //   }
+  // }, [cakesData, selectedCakeName, selectedSizeName, setCakes]);
+
+  // ==================== CORREÇÃO ULTRA-SEGURA PARA IPHONE (NFC) ====================
   useEffect(() => {
     if (!cakesData.length || !selectedCakeName) return;
 
-    const selectedCake = cakesData.find(c =>
-      String(c.id) === selectedCakeName || c.name === selectedCakeName
-    );
+    // Força decodificação correta e normalização para o padrão NFC usado em bancos de dados/APIs
+    const normalizedCakeParam = decodeURIComponent(selectedCakeName).normalize("NFC");
+    const normalizedSizeParam = selectedSizeName ? decodeURIComponent(selectedSizeName).normalize("NFC") : "";
+
+    // Busca o bolo aplicando a normalização NFC em ambas as strings
+    const selectedCake = cakesData.find(c => {
+      const nameNorm = c.name ? c.name.normalize("NFC") : "";
+      const idStr = String(c.id);
+      return idStr === normalizedCakeParam || nameNorm === normalizedCakeParam;
+    });
 
     if (selectedCake) {
-      setCakes(prevCakes => {
-        const sizeOption = selectedCake.sizes?.find(s => s.size === selectedSizeName);
-        const resolvedSize = sizeOption?.size || "";
+      // Busca o tamanho aplicando rigidamente a normalização NFC
+      const sizeOption = selectedCake.sizes?.find(s => {
+        const sizeNorm = s.size ? s.size.normalize("NFC") : "";
+        return sizeNorm === normalizedSizeParam;
+      });
 
-        if (prevCakes.length > 0 && prevCakes[0].cake_id === selectedCake.id && prevCakes[0].size === resolvedSize) {
+      const resolvedSize = sizeOption?.size || "";
+      const resolvedPrice = sizeOption?.price || 0;
+
+      setCakes(prevCakes => {
+        // Trava rigorosa anti-loop infinito para o Safari
+        if (
+          prevCakes.length === 1 &&
+          prevCakes[0].cake_id === selectedCake.id &&
+          prevCakes[0].size === resolvedSize
+        ) {
           return prevCakes;
         }
 
@@ -169,14 +238,15 @@ export default function OrderCake() {
           name: selectedCake.name,
           amount: 1,
           size: resolvedSize,
-          price: sizeOption?.price || 0,
+          price: resolvedPrice,
           message_cake: "",
-          fruit_option: "無し"
+          fruit_option: "",
+          candle_option: ""
         }];
       });
     }
-  }, [cakesData, selectedCakeName, selectedSizeName, setCakes]);
-
+    // Deixe setCakes fora das dependências para evitar loops causados por mutação de referência
+  }, [cakesData, selectedCakeName, selectedSizeName]);
   // Resetar horário quando data muda
   useEffect(() => {
     if (selectedDate && pickupHour !== "時間を選択") {
@@ -207,6 +277,10 @@ export default function OrderCake() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+
+  const updateStepProgress = (field: string, value: boolean) => {
+    setStepProgress(prev => ({ ...prev, [field]: value }));
   };
 
   // ==================== FUNÇÕES DE SUBMISSÃO ====================
@@ -240,7 +314,7 @@ export default function OrderCake() {
       date: getLocalDateString(selectedDate),
       date_order: format(new Date(), "yyyy-MM-dd"),
       pickupHour,
-      status: 'b' as OrderStatus,
+      status: 'c' as OrderStatus,
       message: formData.message,
       total_amount: totalAmount,
       payment_status: 'pending' as PaymentStatus,
@@ -421,7 +495,38 @@ export default function OrderCake() {
     </div>
   );
 
+  // ==================== STYLES TIPADOS ====================
+  const getBaseStyles = <T extends OptionType>(): StylesConfig<T, false> => ({
+    option: (provided: CSSObjectWithLabel, state: OptionProps<T, false>) => ({
+      ...provided,
+      backgroundColor: state.isSelected ? '#fdd111' : state.isFocused ? '#fdeca2' : 'white',
+      color: state.isDisabled ? '#999' : '#333',
+      cursor: state.isDisabled ? 'not-allowed' : 'pointer',
+    }),
+    control: (provided: CSSObjectWithLabel, state: ControlProps<T, false>) => ({
+      ...provided,
+      borderColor: state.isFocused ? '#fdeca2' : '#ddd',
+      boxShadow: state.isFocused ? '0 0 0 1px #fdeca2' : 'none',
+      '&:hover': {
+        ...(provided['&:hover'] as CSSObjectWithLabel),
+        borderColor: '#fdeca2'
+      },
+    }),
+    singleValue: (provided: CSSObjectWithLabel) => ({
+      ...provided,
+      color: '#333',
+      borderRadius: '4px',
+      padding: '2px 6px',
+    }),
+    menu: (provided: CSSObjectWithLabel) => ({
+      ...provided,
+      zIndex: 9999,
+    }),
+  });
 
+  const customStyles = getBaseStyles<OptionType>();
+  const customStylesHour = getBaseStyles<TimeOptionType>();
+  const customStylesCake = getBaseStyles<CustomOptionType>();
 
   const orderSummaryData = {
     id_order: orderData?.id_client || '',
@@ -450,364 +555,556 @@ export default function OrderCake() {
 
   // ==================== RENDER ====================
   return (
-    <div className='reservation-main'>
-      <div className="container">
-        <h2 className='cake-title-h2'>デコレーションケーキ</h2>
-        <h2 className='cake-title-h2'>予約フォーム</h2>
+    <AdminLayout>
+      <div className='order-cake-store-main'>
+        <div className="container">
+          {/* Title Header */}
+          <h1 className='order-form-title'>オーダーフォーム</h1>
+          <div className="order-form-divider">
+            <span className="divider-line"></span>
+            <span className="infinity-symbol">∞</span>
+            <span className="divider-line"></span>
+          </div>
 
-        {paymentStep === 'form' ? (
-          <form className="form-order" onSubmit={handleSubmit}>
-            <div className="cake-information">
-              {cakes.map((item, index) => {
-                const selectedCakeData = cakesData?.find(c => c.id === item.cake_id);
-                const sizeOptions: (SizeOption & { value: string; label: string })[] = selectedCakeData?.sizes.map(s => ({
-                  ...s,
-                  value: s.size || '',
-                  label: s.size ? `${s.size} ￥${s.price.toLocaleString()}` : '',
-                })) || [];
+          {paymentStep === 'form' ? (
+            <form className="form-order" onSubmit={handleSubmit}>
+              <div className="cake-information">
+                {cakes.map((item, index) => {
+                  const selectedCakeData = cakesData?.find(c => c.id === item.cake_id);
 
-                return (
-                  <div className="box-cake" key={`${item.cake_id}-${index}`}>
-                    {index > 0 && (
-                      <div className='btn-remove-div'>
-                        <button type="button" onClick={() => removeCake(index)} className='btn-remove-cake'>
-                          ❌
-                        </button>
+                  return (
+                    <div className="box-cake" key={`${item.cake_id}-${index}`}>
+                      {index > 0 && (
+                        <div className='btn-remove-div'>
+                          <button type="button" onClick={() => removeCake(index)} className='btn-remove-cake'>
+                            ❌
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Top Hero Cake Image Banner */}
+                      <div className="order-cake-hero-banner">
+                        {selectedCakeData && selectedCakeData.image ? (
+                          <img
+                            src={`${API_URL}/image/${FOLDER_URL}/${selectedCakeData.image}`.replace(/([^:]\/)\/+/g, "$1")}
+                            alt={selectedCakeData.name}
+                          />
+                        ) : (
+                          <div className="order-cake-no-img">
+                            <span>🎂 ケーキ画像</span>
+                          </div>
+                        )}
                       </div>
-                    )}
 
-                    {selectedCakeData && selectedCakeData.image && (
-                      <img
-                        className='img-cake-order'
-                        src={`${API_URL}/image/${FOLDER_URL}/${selectedCakeData.image}`}
-                        alt={selectedCakeData.name}
-                      />
-                    )}
+                      {/* 1. 商品名 (Cake Select) */}
+                      <div className='order-field-group'>
+                        <div className="field-label-row">
+                          <span className="field-label-text">商品名</span>
+                          <span className="field-required-badge">必須</span>
+                        </div>
+                        <Select<CustomOptionType, false>
+                          options={cakesData?.map(c => ({
+                            value: String(c.id),
+                            label: c.name,
+                            image: c.image,
+                            isDisabled: false
+                          })) || []}
+                          value={cakesData?.map(c => ({
+                            value: String(c.id),
+                            label: c.name,
+                            image: c.image,
+                            isDisabled: false
+                          })).find(c => Number(c.value) === item.cake_id) || null}
+                          onChange={(selected) => {
+                            if (selected) {
+                              const newCakeId = Number(selected.value);
+                              const selectedCake = cakesData?.find(c => c.id === newCakeId);
 
-                    <div className="input-group-radio cake-name-group">
-                      <div className="pill-group cake-name-pills">
-                        {cakesData?.map((c) => (
-                          <label
-                            key={c.id}
-                            className={`pill ${item.cake_id === c.id ? "active" : ""}`}
-                          >
-                            <input
-                              type="radio"
-                              name={`cake-id-${index}`}
-                              value={c.id}
-                              checked={item.cake_id === c.id}
-                              style={{ display: "none" }}
-                              onChange={() => {
-                                const newCakeId = Number(c.id);
-                                const selectedCake = cakesData?.find(ck => ck.id === newCakeId);
-                                updateCake(index, "cake_id", newCakeId);
-                                updateCake(index, "size", "");
-                                updateCake(index, "price", 0);
+                              updateCake(index, "cake_id", newCakeId);
+                              updateCake(index, "size", "");
+                              updateCake(index, "price", 0);
 
-                                if (selectedCake?.sizes && selectedCake.sizes.length === 1) {
-                                  const singleSize = selectedCake.sizes[0];
-                                  if (singleSize.stock > 0 && singleSize.size) {
-                                    updateCake(index, "size", singleSize.size);
-                                    updateCake(index, "price", singleSize.price);
-                                  }
+                              updateStepProgress("cakeSelected", true);
+
+                              if (selectedCake?.sizes && selectedCake.sizes.length === 1) {
+                                const singleSize = selectedCake.sizes[0];
+                                if (singleSize.stock > 0 && singleSize.size) {
+                                  updateCake(index, "size", singleSize.size);
+                                  updateCake(index, "price", singleSize.price);
+                                  updateStepProgress("sizeSelected", true);
                                 }
-                              }}
-                            />
-                            <span>{c.name}</span>
-                          </label>
-                        ))}
+                              }
+                            } else {
+                              updateCake(index, "cake_id", 0);
+                              updateCake(index, "size", "");
+                              updateCake(index, "price", 0);
+                              updateStepProgress("cakeSelected", false);
+                              updateStepProgress("quantitySelected", false);
+                              updateStepProgress("sizeSelected", false);
+                              updateStepProgress("fruitSelected", false);
+                              updateStepProgress("messageSelected", false);
+                              updateStepProgress("candlesSelected", false);
+                            }
+                          }}
+                          isDisabled={false}
+                          noOptionsMessage={() => "読み込み中..."}
+                          classNamePrefix="react-select"
+                          placeholder="ケーキを選択"
+                          required
+                          isSearchable={false}
+                          styles={customStylesCake}
+                        />
                       </div>
-                      <label className='select-group-radio'>*ケーキ名:</label>
-                    </div>
 
-                    {selectedCakeData && sizeOptions.length > 0 && (
-                      <div className="input-group-radio">
-                        <div className="pill-group">
-                          {sizeOptions.map(s => (
-                            <label
-                              key={s.size}
-                              className={`pill ${item.size === s.size ? "active" : ""}`}
-                            >
-                              <input
-                                type="radio"
-                                name={`cake-size-${index}`}
-                                value={s.size}
-                                checked={item.size === s.size}
-                                style={{ display: "none" }}
-                                onChange={() => {
-                                  if (s.size) {
-                                    updateCake(index, "size", s.size);
-                                    updateCake(index, "price", s.price);
+                      {/* 2. 個数 (Quantity Select) */}
+                      <div className='order-field-group'>
+                        <div className="field-label-row">
+                          <span className="field-label-text">個数</span>
+                          <span className="field-required-badge">必須</span>
+                        </div>
+                        <div className='quantity-pills-grid'>
+                          {Array.from({ length: 10 }, (_, i) => {
+                            const quantity = i + 1;
+                            const isSelected = item.amount === quantity;
+                            return (
+                              <div
+                                key={quantity}
+                                className={`pill-option-card quantity-pill ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  updateCake(index, "amount", quantity);
+                                  updateStepProgress("quantitySelected", true);
+                                }}
+                                style={{
+                                  pointerEvents: stepProgress.cakeSelected ? 'auto' : 'none',
+                                  opacity: stepProgress.cakeSelected ? 1 : 0.5
+                                }}
+                              >
+                                {quantity}
+                              </div>
+                            )
+                          })}
+
+                        </div>
+                      </div>
+
+                      {/* 3. サイズ (Size Pills Grid) */}
+                      {selectedCakeData && selectedCakeData.sizes && (
+                        <div className={`order-field-group`}>
+                          <div className="field-label-row">
+                            <span className="field-label-text">サイズ</span>
+                            <span className="field-required-badge">必須</span>
+                          </div>
+                          <div className="option-pills-grid">
+                            {selectedCakeData.sizes.map((s, sIdx) => {
+                              const isSelected = item.size === s.size;
+                              return (
+                                <div
+                                  key={sIdx}
+                                  className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    if (stepProgress.quantitySelected) {
+                                      updateCake(index, "size", s.size);
+                                      updateCake(index, "price", s.price);
+                                      updateStepProgress('sizeSelected', true);
+                                    }
+                                  }}
+                                  style={{
+                                    pointerEvents: stepProgress.quantitySelected ? 'auto' : 'none',
+                                    opacity: stepProgress.quantitySelected ? 1 : 0.5
+                                  }}
+                                >
+                                  {isSelected && <span className="option-pill-checkmark">✓</span>}
+                                  <span className="option-pill-title">{s.size}</span>
+                                  <span className="option-pill-price">¥{s.price.toLocaleString()}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 4. フルーツ盛り (Fruit Option Pills Grid) */}
+                      <div className='order-field-group'>
+                        <div className="field-label-row">
+                          <span className="field-label-text">フルーツ盛り</span>
+                          <span className="field-required-badge">必須</span>
+                        </div>
+                        <div className="option-pills-grid">
+                          {FRUIT_OPTIONS.map(option => {
+                            const isSelected = item.fruit_option === option.value;
+                            return (
+                              <div
+                                key={option.value}
+                                className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  if (stepProgress.sizeSelected) {
+                                    updateCake(index, "fruit_option", option.value);
+                                    updateStepProgress("fruitSelected", true);
                                   }
                                 }}
-                              />
-                              <span>{s.label}</span>
-                            </label>
-                          ))}
+                                style={{
+                                  pointerEvents: stepProgress.sizeSelected ? 'auto' : 'none',
+                                  opacity: stepProgress.sizeSelected ? 1 : 0.5
+                                }}
+                              >
+                                {isSelected && <span className="option-pill-checkmark">✓</span>}
+                                <span className="option-pill-title">{option.label}</span>
+                                <span className="option-pill-price">{option.priceText}</span>
+                              </div>
+                            );
+                          })}
                         </div>
-                        <label className='select-group-radio'>*ケーキのサイズ</label>
                       </div>
-                    )}
 
-                    <div className="input-group-radio">
-                      <div className="pill-group">
-                        {FRUIT_OPTIONS.map(option => (
-                          <label
-                            key={option.value}
-                            className={`pill ${item.fruit_option === option.value ? "active" : ""}`}
-                          >
-                            <input
-                              className='radio-input-fruit'
-                              type="radio"
-                              name={`fruit-option-${index}`}
-                              value={option.value}
-                              checked={item.fruit_option === option.value}
-                              onChange={() => updateCake(index, "fruit_option", option.value)}
-                            />
-                            <span style={{ width: "120px", textAlign: "start" }}>{option.label}</span>
-                            <span style={{ width: "5rem", textAlign: "end" }}>{option.priceText}</span>
-                          </label>
-                        ))}
+                      {/* 5. メッセージプレート (Message Plate Option Pills Grid) */}
+                      <div className='order-field-group'>
+                        <div className="field-label-row">
+                          <span className="field-label-text">メッセージプレート</span>
+                          <span className="field-required-badge">必須</span>
+                        </div>
+                        <div className="option-pills-grid">
+                          {[
+                            { value: "お名前＋おたんじょうびおめでとう", label: "お名前＋おたんじょうびおめでとう", priceText: "+¥100" },
+                            { value: "お名前＋Happy Birthday", label: "お名前＋Happy Birthday", priceText: "+¥100" },
+                            { value: "その他", label: "その他", priceText: "+¥100" }
+                          ].map(pOpt => {
+                            const currentPlateType = (item as any).plate_type || "";
+                            const isSelected = currentPlateType === pOpt.value;
+                            return (
+                              <div
+                                key={pOpt.value}
+                                className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  if (stepProgress.fruitSelected) {
+                                    updateCake(index, "plate_type" as any, pOpt.value);
+                                    if (pOpt.value !== "その他") {
+                                      updateCake(index, "message_cake", pOpt.label);
+                                    } else {
+                                      updateCake(index, "message_cake", "");
+                                    }
+                                    updateStepProgress("messageSelected", true);
+                                  }
+                                }}
+                                style={{
+                                  pointerEvents: stepProgress.fruitSelected ? 'auto' : 'none',
+                                  opacity: stepProgress.fruitSelected ? 1 : 0.5
+                                }}
+                              >
+                                {isSelected && <span className="option-pill-checkmark">✓</span>}
+                                <span className="option-pill-title">{pOpt.label}</span>
+                                <span className="option-pill-price">{pOpt.priceText}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="plate-message-input-box" style={{ marginTop: '10px' }}>
+                          <input
+                            type="text"
+                            className="order-styled-input"
+                            placeholder="お名前・メッセージをご記入ください (例: たろうくん お誕生日おめでとう)"
+                            value={item.message_cake || ""}
+                            onChange={(e) => updateCake(index, "message_cake", e.target.value)}
+                            disabled={!stepProgress.messageSelected}
+                            style={{
+                              opacity: stepProgress.messageSelected ? 1 : 0.5,
+                              pointerEvents: stepProgress.messageSelected ? 'auto' : 'none'
+                            }}
+                          />
+                        </div>
                       </div>
-                      <label className='select-group-radio'>*フルーツ盛り</label>
-                    </div>
 
-                    <div className="input-group-radio">
-                      <div className="input-group-quantity">
-                        <div className="quantity-control">
-                          <button
-                            type="button"
-                            className="quantity-btn"
-                            onClick={() => {
-                              const newAmount = Math.max(1, item.amount - 1);
-                              updateCake(index, "amount", newAmount);
-                            }}
-                            disabled={item.amount <= 1}
-                          >
-                            −
-                          </button>
+                      {/* 6. キャンドル (Candles Option Pills Grid) */}
+                      <div className='order-field-group'>
+                        <div className="field-label-row">
+                          <span className="field-label-text">キャンドル</span>
+                          <span className="field-required-badge">必須</span>
+                        </div>
+                        <div className="option-pills-grid">
+                          {[
+                            { value: "ノーマル", label: "ノーマル", priceText: "¥0" },
+                            { value: "ナンバーキャンドル", label: "ナンバーキャンドル", priceText: "¥100" },
+                            { value: "なし", label: "なし", priceText: "¥0" }
+                          ].map(cOpt => {
+                            const isSelected = (item as any).candle_option === cOpt.value && (item as any).candle_option !== "";
+                            return (
+                              <div
+                                key={cOpt.value}
+                                className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  if (stepProgress.messageSelected) {
+                                    updateCake(index, "candle_option" as any, cOpt.value)
+                                    updateStepProgress("candlesSelected", true);
+                                  }
+                                }}
+                                style={{
+                                  pointerEvents: stepProgress.messageSelected ? 'auto' : 'none',
+                                  opacity: stepProgress.messageSelected ? 1 : 0.5
+                                }}
+                              >
+                                {isSelected && <span className="option-pill-checkmark">✓</span>}
+                                <span className="option-pill-title">{cOpt.label}</span>
+                                {cOpt.priceText && <span className="option-pill-price">{cOpt.priceText}</span>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
 
-                          <span className="quantity-value">{item.amount}</span>
-
-                          <button
-                            type="button"
-                            className="quantity-btn"
-                            onClick={() => {
-                              const newAmount = Math.min(99, item.amount + 1);
-                              updateCake(index, "amount", newAmount);
-                            }}
-                            disabled={item.amount >= 99}
-                          >
-                            +
+                      {cakes.length > 1 && (
+                        <div className='btn-div'>
+                          <button type='button' onClick={addCake} className='btn btn-add-cake'>
+                            ➕ 別のケーキを追加
                           </button>
                         </div>
-                        <label className='select-group-radio'>*個数:</label>
-                      </div>
+                      )}
                     </div>
+                  );
+                })}
+              </div>
 
-                    <div className='input-group'>
-                      <label htmlFor={`message_cake_${index}`}>メッセージプレート</label>
-                      <textarea
-                        id={`message_cake_${index}`}
-                        name="message_cake"
-                        placeholder="ご要望がある場合のみご記入ください。"
-                        value={item.message_cake || ""}
-                        onChange={(e) => updateCake(index, "message_cake", e.target.value)}
-                      />
-                    </div>
+              <div className="order-section-divider"></div>
 
-                    <div className='btn-div'>
-                      <button type='button' onClick={addCake} className='btn btn-add-cake'>
-                        ➕ 別のケーキを追加
-                      </button>
-                    </div>
+              {/* Customer Details & Pickup Information */}
+              <div className="client-information">
+                {/* 受取日 */}
+                <div className='order-field-group'>
+                  <div className="field-label-row">
+                    <span className="field-label-text">受取日</span>
+                    <span className="field-required-badge">必須</span>
                   </div>
-                );
-              })}
-            </div>
-
-            <div className="client-information">
-              <label className='title-information'>お客様情報</label>
-              <div className="full-name">
-                <Input
-                  id="firstName"
-                  label="*姓(カタカナ)"
-                  placeholder="ヒガ"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  onBlur={handleKatakanaBlur}
-                  lang="ja"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  required
-                />
-
-                <Input
-                  id="lastName"
-                  label="*名(カタカナ)"
-                  placeholder="タロウ"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  onBlur={handleKatakanaBlur}
-                  required
-                />
-
-                <Input
-                  id="email"
-                  label="*メールアドレス"
-                  type="email"
-                  placeholder="必須"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-
-                <Input
-                  id="tel"
-                  label="*お電話番号"
-                  type="tel"
-                  placeholder="ハイフン不要"
-                  value={formData.tel}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="date-information">
-              <label className='title-information'>*受取日時</label>
-              <div className='input-group'>
-                <label htmlFor="datepicker" className='datepicker'>*受け取り希望日</label>
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
-                  minDate={today}
-                  maxDate={maxDate}
-                  excludeDates={excludedDates}
-                  filterDate={isDateAllowed}
-                  dateFormat="yyyy年MM月dd日"
-                  locale={ja}
-                  placeholderText="日付を選択"
-                  dayClassName={(date) => {
-                    if (isSameDay(date, today)) return "hoje-azul";
-                    if (getDay(date) === 0) return "domingo-vermelho";
-                    return "";
-                  }}
-                  className="react-datepicker"
-                  calendarClassName="datepicker-calendar"
-                  calendarContainer={CustomCalendarContainer}
-                  required
-                  renderDayContents={(day, date) => (
-                    <DayCell
-                      day={day}
-                      date={date!}
-                      isSelectable={isDateAllowed(date!)}
-                    />
-                  )}
-                />
-              </div>
-
-              <div className='input-group-radio'>
-                <div className="pill-group" style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                  {hoursOptions.length > 0 ? (
-                    hoursOptions.map(h => (
-                      <label
-                        key={h.value}
-                        className={`pill ${pickupHour === h.value ? "active" : ""}`}
-                        style={{ flex: '1 0 calc(33.333% - 0.5rem)', textAlign: 'center', justifyContent: 'center', opacity: h.isDisabled ? 0.5 : 1, cursor: h.isDisabled ? 'not-allowed' : 'pointer' }}
-                      >
-                        <input
-                          type="radio"
-                          name="pickupHour"
-                          value={h.value}
-                          checked={pickupHour === h.value}
-                          disabled={h.isDisabled}
-                          style={{ display: "none" }}
-                          onChange={() => setPickupHour(h.value)}
+                  <div className="datepicker-input-wrapper">
+                    <DatePicker
+                      selected={selectedDate}
+                      onChange={(date) => {
+                        setSelectedDate(date);
+                        updateStepProgress("dateSelected", true);
+                      }}
+                      disabled={!stepProgress.candlesSelected}
+                      minDate={today}
+                      maxDate={maxDate}
+                      excludeDates={excludedDates}
+                      filterDate={isDateAllowed}
+                      dateFormat="yyyy年MM月dd日"
+                      locale={ja}
+                      placeholderText="日付を選択"
+                      dayClassName={(date) => {
+                        if (isSameDay(date, today)) return "hoje-azul";
+                        if (getDay(date) === 0) return "domingo-vermelho";
+                        return "";
+                      }}
+                      className="order-styled-input react-datepicker"
+                      calendarClassName="datepicker-calendar"
+                      calendarContainer={CustomCalendarContainer}
+                      required
+                      renderDayContents={(day, date) => (
+                        <DayCell
+                          day={day}
+                          date={date!}
+                          isSelectable={isDateAllowed(date!)}
                         />
-                        <span>{h.label}</span>
-                      </label>
-                    ))
-                  ) : (
-                    <span style={{ padding: '10px', color: '#666', fontSize: '1rem' }}>
-                      {selectedDate ? "選択可能な時間がありません" : "日付を選択してください"}
-                    </span>
-                  )}
-                </div>
-                <label className='select-group-radio'>受け取り希望時間</label>
-              </div>
-
-              <div className='input-group' style={{ display: 'none' }}>
-                <label htmlFor="message">その他</label>
-                <textarea
-                  id="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  placeholder=""
-                />
-              </div>
-            </div>
-
-            <div className="order-summary">
-              <h3>ご注文内容</h3>
-              {cakes.filter(cake => cake.cake_id !== 0 && cake.size !== "").map((cake, index) => {
-                const cakeData = cakesData?.find(c => c.id === cake.cake_id);
-                const fruitPrice = FRUIT_OPTIONS.find(f => f.value === cake.fruit_option)?.price || 0;
-                const itemTotal = (cake.price + fruitPrice) * cake.amount;
-
-                return (
-                  <div key={index} className="order-item">
-                    <span>{cakeData?.name} ({cake.size}) x{cake.amount}</span>
-                    <span>￥{itemTotal.toLocaleString()}</span>
+                      )}
+                    />
+                    <span className="calendar-icon-indicator">📅</span>
                   </div>
-                );
-              })}
-              <div className="order-total">
-                <strong>合計:</strong>
-                <strong>￥{totalAmount.toLocaleString()}</strong>
+                </div>
+
+                {/* 受け取り希望時間 */}
+                <div className='order-field-group'>
+                  <div className="field-label-row">
+                    <span className="field-label-text">受け取り希望時間</span>
+                    <span className="field-required-badge">必須</span>
+                  </div>
+                  <Select<TimeOptionType, false>
+                    options={hoursOptions}
+                    value={hoursOptions.find(h => h.value === pickupHour)}
+                    onChange={(selected) => {
+                      setPickupHour(selected?.value || "時間を選択")
+                      updateStepProgress("timeSelected", true);
+                    }}
+                    classNamePrefix="react-select"
+                    styles={customStylesHour}
+                    placeholder={selectedDate ? "時間を選択" : "日付を選択してください"}
+                    isSearchable={false}
+                    isDisabled={!selectedDate || hoursOptions.length === 0 || !stepProgress.dateSelected}
+                    required
+                  />
+                </div>
+
+                {/* ヒガ (カタカナ) */}
+                <div className='order-field-group'>
+                  <div className="field-label-row">
+                    <span className="field-label-text">ヒガ（カタカナ）</span>
+                    <span className="field-required-badge">必須</span>
+                  </div>
+                  <input
+                    id="firstName"
+                    className="order-styled-input"
+                    placeholder="例）ヒガ"
+                    value={formData.firstName}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      if (e.target.value.trim() !== '') {
+                        updateStepProgress('firstNameSelected', true);
+                      }
+                    }}
+                    onBlur={handleKatakanaBlur}
+                    disabled={!stepProgress.timeSelected}
+                    style={{
+                      opacity: stepProgress.timeSelected ? 1 : 0.5,
+                      pointerEvents: stepProgress.timeSelected ? 'auto' : 'none'
+                    }}
+                    lang="ja"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    required
+                  />
+                </div>
+
+                {/* タロウ (カタカナ) */}
+                <div className='order-field-group'>
+                  <div className="field-label-row">
+                    <span className="field-label-text">タロウ（カタカナ）</span>
+                    <span className="field-required-badge">必須</span>
+                  </div>
+                  <input
+                    id="lastName"
+                    className="order-styled-input"
+                    placeholder="例）タロウ"
+                    value={formData.lastName}
+                    onChange={(e) => {
+                      handleInputChange(e)
+                      if (e.target.value.trim() !== '') {
+                        updateStepProgress('lastNameSelected', true);
+                      }
+                    }}
+                    onBlur={handleKatakanaBlur}
+                    disabled={!stepProgress.firstNameSelected}
+                    style={{
+                      opacity: stepProgress.firstNameSelected ? 1 : 0.5,
+                      pointerEvents: stepProgress.firstNameSelected ? 'auto' : 'none'
+                    }}
+                    required
+                  />
+                </div>
+
+                {/* メールアドレス */}
+                <div className='order-field-group'>
+                  <div className="field-label-row">
+                    <span className="field-label-text">メールアドレス</span>
+                    <span className="field-required-badge">必須</span>
+                  </div>
+                  <input
+                    id="email"
+                    type="email"
+                    className="order-styled-input"
+                    placeholder="例）example@example.com"
+                    value={formData.email}
+                    onChange={(e) => {
+                      handleInputChange(e)
+                      if (e.target.value.trim() !== '') {
+                        updateStepProgress('emailSelected', true);
+                      }
+                    }}
+                    disabled={!stepProgress.lastNameSelected}
+                    style={{
+                      opacity: stepProgress.lastNameSelected ? 1 : 0.5,
+                      pointerEvents: stepProgress.lastNameSelected ? 'auto' : 'none'
+                    }}
+                    required
+                  />
+                </div>
+
+                {/* 電話番号 */}
+                <div className='order-field-group'>
+                  <div className="field-label-row">
+                    <span className="field-label-text">電話番号</span>
+                    <span className="field-required-badge">必須</span>
+                  </div>
+                  <input
+                    id="tel"
+                    type="tel"
+                    className="order-styled-input"
+                    placeholder="例）09012345678"
+                    value={formData.tel}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      if (e.target.value.trim() !== '') {
+                        updateStepProgress('telSelected', true);
+                      }
+                    }}
+                    disabled={!stepProgress.emailSelected}
+                    style={{
+                      opacity: stepProgress.emailSelected ? 1 : 0.5,
+                      pointerEvents: stepProgress.emailSelected ? 'auto' : 'none'
+                    }}
+                    required
+                  />
+                </div>
               </div>
-            </div>
 
-            <PaymentMethodSelector
-              selectedMethod={paymentMethod}
-              onChange={setPaymentMethod}
-            />
+              <div className="order-summary">
+                <h3>ご注文内容</h3>
+                {cakes.filter(cake => cake.cake_id !== 0 && cake.size !== "").map((cake, index) => {
+                  const cakeData = cakesData?.find(c => c.id === cake.cake_id);
+                  const fruitPrice = FRUIT_OPTIONS.find(f => f.value === cake.fruit_option)?.price || 0;
+                  const itemTotal = (cake.price + fruitPrice) * cake.amount;
 
-            <div className='btn-div'>
-              <button
-                type='submit'
-                className='send btn'
-                disabled={isSubmitting}
-                style={{ opacity: isSubmitting ? 0.6 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
-              >
-                {isSubmitting ? '処理中...' : `お支払いに進む (￥${totalAmount.toLocaleString()})`}
+                  return (
+                    <div key={index} className="order-item">
+                      <span>{cakeData?.name} ({cake.size}) x{cake.amount}</span>
+                      <span>￥{itemTotal.toLocaleString()}</span>
+                    </div>
+                  );
+                })}
+                <div className="order-total">
+                  <strong>合計:</strong>
+                  <strong>￥{totalAmount.toLocaleString()}</strong>
+                </div>
+              </div>
+
+              <PaymentMethodSelector
+                selectedMethod={paymentMethod}
+                onChange={setPaymentMethod}
+              />
+
+              {/* Bottom Submit CTA Button */}
+              <div className='btn-div'>
+                <button
+                  type='submit'
+                  className='order-submit-btn'
+                  disabled={isSubmitting}
+                  style={{ opacity: isSubmitting ? 0.6 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+                >
+                  {isSubmitting ? '処理中...' : '入力内容を確認する  ›'}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="payment-step">
+              <button onClick={handleBackToForm} className="btn-back" type="button">
+                ← 予約フォームに戻る
               </button>
+
+              <h3>お支払い情報</h3>
+              <p className="payment-amount">
+                お支払い金額: <strong>￥{totalAmount.toLocaleString()}</strong>
+              </p>
+
+              <PaymentFormStripe
+                key={paymentKey}
+                // publishableKey={STRIPE_PUBLISHABLE_KEY}
+                amount={totalAmount}
+                currency="jpy"
+                orderData={orderSummaryData}
+                onPaymentSuccess={handlePaymentSuccess}
+                onPaymentError={handlePaymentError}
+                onReady={() => console.log('Stripe pronto')}
+              />
             </div>
-          </form>
-        ) : (
-          <div className="payment-step">
-            <button onClick={handleBackToForm} className="btn-back" type="button">
-              ← 予約フォームに戻る
-            </button>
-
-            <h3>お支払い情報</h3>
-            <p className="payment-amount">
-              お支払い金額: <strong>￥{totalAmount.toLocaleString()}</strong>
-            </p>
-
-            <PaymentFormStripe
-              key={paymentKey}
-              // publishableKey={STRIPE_PUBLISHABLE_KEY}
-              amount={totalAmount}
-              currency="jpy"
-              orderData={orderSummaryData}
-              onPaymentSuccess={handlePaymentSuccess}
-              onPaymentError={handlePaymentError}
-              onReady={() => console.log('Stripe pronto')}
-            />
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div >
+    </AdminLayout>
   );
 }
