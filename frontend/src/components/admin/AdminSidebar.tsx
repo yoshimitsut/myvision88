@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ExcelExportButton from './ExcelExportButton';
 import type { Order } from '../../types/types';
@@ -26,8 +25,6 @@ export default function AdminSidebar({
   pastDateOrders = [],
   completedOrders = [],
   cancelledOrders = [],
-  viewType = "cake",
-  setViewType,
   search = "",
   setSearch,
   activeTab = "all",

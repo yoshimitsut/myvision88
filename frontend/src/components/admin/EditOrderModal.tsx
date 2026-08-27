@@ -12,29 +12,29 @@ type Props = {
   editingOrder: Order;
   setEditingOrder: (order: Order | null) => void;
   handleSaveEdit: (updatedOrder: Order) => void;
-  isSaving: boolean; 
+  isSaving: boolean;
 };
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export default function EditOrderModal({ 
-  editingOrder, 
-  setEditingOrder, 
+export default function EditOrderModal({
+  editingOrder,
+  setEditingOrder,
   handleSaveEdit,
   isSaving
 }: Props) {
   const [cakesData, setCakesData] = useState<Cake[]>([]);
   const [cakes, setCakes] = useState<OrderCake[]>(editingOrder.cakes ? [...editingOrder.cakes] : []);
-  
+
   const [selectedTime, setSelectedTime] = useState(editingOrder.pickupHour || "");
-  
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(
-  editingOrder.date ? 
-    (() => {
-      const [year, month, day] = editingOrder.date.split('-').map(Number);
-      return new Date(year, month - 1, day);
-    })()
-    : null
+    editingOrder.date ?
+      (() => {
+        const [year, month, day] = editingOrder.date.split('-').map(Number);
+        return new Date(year, month - 1, day);
+      })()
+      : null
   );
 
   // Fetch bolos
@@ -53,7 +53,7 @@ export default function EditOrderModal({
     if (cakesData.length > 0) {
       const firstCake = cakesData[0];
       const firstSize = firstCake.sizes[0];
-      
+
       const newCake: OrderCake = {
         cake_id: firstCake.id,
         name: firstCake.name,
@@ -61,9 +61,10 @@ export default function EditOrderModal({
         size: firstSize?.size || "",
         price: firstSize?.price || 0,
         message_cake: "",
-        fruit_option: "無し"
+        fruit_option: "",
+        candle_option: ""
       };
-      
+
       setCakes(prev => [...prev, newCake]);
     }
   };
@@ -104,7 +105,7 @@ export default function EditOrderModal({
         pickupHour: selectedTime || editingOrder.pickupHour,
       };
       handleSaveEdit(updatedOrder);
-      
+
     } catch (err) {
       console.error("Erro ao salvar:", err);
       alert("エラーが発生しました。もう一度お試しください。");
@@ -131,15 +132,15 @@ export default function EditOrderModal({
       backgroundColor: state.isSelected
         ? "#007bff"
         : state.isFocused
-        ? "#e8f0fe"
-        : "white",
+          ? "#e8f0fe"
+          : "white",
       color: state.isSelected ? "white" : "black",
       cursor: "pointer",
-  }),
+    }),
   };
 
   const sizeStyles: StylesConfig<SizeOption, false, GroupBase<SizeOption>> = {
-  control: (base: CSSObjectWithLabel) => ({
+    control: (base: CSSObjectWithLabel) => ({
       ...base,
       minWidth: "200px",
       width: "100%",
@@ -151,18 +152,18 @@ export default function EditOrderModal({
     menu: (base: CSSObjectWithLabel) => ({ ...base, zIndex: 9999 }),
     valueContainer: (base: CSSObjectWithLabel) => ({ ...base, padding: "4px 8px" }),
     placeholder: (base: CSSObjectWithLabel) => ({ ...base, color: "#aaa" }),
-      option: (base, state) => ({
-    ...base,
-    backgroundColor: state.isSelected
-      ? "#000"
-      : state.isFocused
-      ? "#e8f0fe"
-      : "white",
-    color: state.isSelected ? "white" : "black",
-    cursor: "pointer",
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isSelected
+        ? "#000"
+        : state.isFocused
+          ? "#e8f0fe"
+          : "white",
+      color: state.isSelected ? "white" : "black",
+      cursor: "pointer",
       "&:hover": { borderColor: "#007bff" },
-  }),
-};
+    }),
+  };
 
   return (
     <div className="modal-overlay">
@@ -170,66 +171,66 @@ export default function EditOrderModal({
         <div className="modal-top">
           <h2 className="modal-title">注文の編集 - 受付番号 {String(editingOrder.id_order).padStart(4, "0")}</h2>
           <button className="modal-close-button"
-              onClick={() => setEditingOrder(null)}
+            onClick={() => setEditingOrder(null)}
           >
             閉じる
           </button>
         </div>
 
         {/* Dados do cliente */}
-        
-{/* Dados do cliente */}
-<div className="modal-edit-content">
-  <div className="modal-name">
-    <label>姓(カタカナ)：</label>
-    <input 
-      className="input-text-modal"
-      type="text" 
-      value={editingOrder.first_name || ""} 
-      onChange={(e) => setEditingOrder({ ...editingOrder, first_name: e.target.value })} 
-      disabled={isSaving}
-    />
-  </div>
-  <div className="modal-name">
-    <label>名(カタカナ)：</label>
-    <input 
-      className="input-text-modal"
-      type="text" 
-      value={editingOrder.last_name || ""} 
-      onChange={(e) => setEditingOrder({ ...editingOrder, last_name: e.target.value })} 
-      disabled={isSaving}
-    />
-  </div>
-</div>
 
-<div className="modal-contact">
-  <div>
-    <label>メールアドレス：</label>
-    <input 
-      className="input-text-modal"
-      type="text" 
-      value={editingOrder.email || ""} 
-      onChange={(e) => setEditingOrder({ ...editingOrder, email: e.target.value })} 
-      disabled={isSaving}
-    />
-  </div>
-  <div>
-    <label>お電話番号：</label>
-    <input 
-      className="input-text-modal"
-      type="text" 
-      value={editingOrder.tel || ""} 
-      onChange={(e) => setEditingOrder({ ...editingOrder, tel: e.target.value })} 
-      disabled={isSaving}
-    />
-  </div>
-</div>
+        {/* Dados do cliente */}
+        <div className="modal-edit-content">
+          <div className="modal-name">
+            <label>姓(カタカナ)：</label>
+            <input
+              className="input-text-modal"
+              type="text"
+              value={editingOrder.first_name || ""}
+              onChange={(e) => setEditingOrder({ ...editingOrder, first_name: e.target.value })}
+              disabled={isSaving}
+            />
+          </div>
+          <div className="modal-name">
+            <label>名(カタカナ)：</label>
+            <input
+              className="input-text-modal"
+              type="text"
+              value={editingOrder.last_name || ""}
+              onChange={(e) => setEditingOrder({ ...editingOrder, last_name: e.target.value })}
+              disabled={isSaving}
+            />
+          </div>
+        </div>
+
+        <div className="modal-contact">
+          <div>
+            <label>メールアドレス：</label>
+            <input
+              className="input-text-modal"
+              type="text"
+              value={editingOrder.email || ""}
+              onChange={(e) => setEditingOrder({ ...editingOrder, email: e.target.value })}
+              disabled={isSaving}
+            />
+          </div>
+          <div>
+            <label>お電話番号：</label>
+            <input
+              className="input-text-modal"
+              type="text"
+              value={editingOrder.tel || ""}
+              onChange={(e) => setEditingOrder({ ...editingOrder, tel: e.target.value })}
+              disabled={isSaving}
+            />
+          </div>
+        </div>
 
         {/* Resumo do pedido */}
         <div style={{ marginTop: "1rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
             <h3>ご注文のケーキ:</h3>
-            <button 
+            <button
               onClick={addCake}
               disabled={isSaving} // 🔹 Desabilita durante o salvamento
               style={{
@@ -245,11 +246,11 @@ export default function EditOrderModal({
               + ケーキを追加
             </button>
           </div>
-          
+
           {cakes.map((cake, index) => (
             <div key={index} style={{ border: "1px solid #ccc", padding: "1rem", marginBottom: "1rem", position: "relative" }}>
               {cakes.length > 1 && (
-                <button 
+                <button
                   onClick={() => removeCake(index)}
                   disabled={isSaving} // 🔹 Desabilita durante o salvamento
                   style={{
@@ -273,7 +274,7 @@ export default function EditOrderModal({
                   ×
                 </button>
               )}
-              
+
               <div
                 style={{
                   marginBottom: 16,
@@ -315,12 +316,12 @@ export default function EditOrderModal({
                                 prev.map((c, i) =>
                                   i === index
                                     ? {
-                                        ...c,
-                                        cake_id: newCakeId,
-                                        name: val.label,
-                                        size: firstSize?.size || "",
-                                        price: firstSize?.price || 0,
-                                      }
+                                      ...c,
+                                      cake_id: newCakeId,
+                                      name: val.label,
+                                      size: firstSize?.size || "",
+                                      price: firstSize?.price || 0,
+                                    }
                                     : c
                                 )
                               );
@@ -332,65 +333,65 @@ export default function EditOrderModal({
                     </div>
 
                     {/* サイズ */}
-                      <div style={{ flex: 1, minWidth: "200px" }}>
-                        <label>サイズを選択:</label>
-                        <Select<SizeOption, false, GroupBase<SizeOption>>
-                          key={`size-${index}-${cake.size}-${cake.cake_id}`} 
-                          options={getSizeOptions(cake.cake_id)}
-                          styles={sizeStyles}
-                          getOptionValue={(option) => `${option.cake_id}-${option.size}`} 
-                          classNamePrefix="size-select"
-                          // 🔹 SIMPLIFICADO: usa diretamente cake.size
-                          value={getSizeOptions(cake.cake_id).find(s => s.size === cake.size) || null}
-                          onChange={selected => {
-                            console.log("Mudando tamanho:", {
-                              de: cake.size,
-                              para: selected?.size,
-                              preço: selected?.price
-                            });
-                            
-                            if (selected && !isSaving) {
-                              // 🔹 Atualiza APENAS este cake específico
-                              const updatedCakes = [...cakes];
-                              updatedCakes[index] = {
-                                ...updatedCakes[index],
-                                size: selected.size,
-                                price: selected.price
-                              };
-                              setCakes(updatedCakes);
-                            }
-                          }}
-                          placeholder="サイズを選択"
-                          isSearchable={false}
-                          required
-                          isDisabled={isSaving}
-                          formatOptionLabel={option =>
-                            `${option.size} ￥${option.price.toLocaleString()}`
+                    <div style={{ flex: 1, minWidth: "200px" }}>
+                      <label>サイズを選択:</label>
+                      <Select<SizeOption, false, GroupBase<SizeOption>>
+                        key={`size-${index}-${cake.size}-${cake.cake_id}`}
+                        options={getSizeOptions(cake.cake_id)}
+                        styles={sizeStyles}
+                        getOptionValue={(option) => `${option.cake_id}-${option.size}`}
+                        classNamePrefix="size-select"
+                        // 🔹 SIMPLIFICADO: usa diretamente cake.size
+                        value={getSizeOptions(cake.cake_id).find(s => s.size === cake.size) || null}
+                        onChange={selected => {
+                          console.log("Mudando tamanho:", {
+                            de: cake.size,
+                            para: selected?.size,
+                            preço: selected?.price
+                          });
+
+                          if (selected && !isSaving) {
+                            // 🔹 Atualiza APENAS este cake específico
+                            const updatedCakes = [...cakes];
+                            updatedCakes[index] = {
+                              ...updatedCakes[index],
+                              size: selected.size,
+                              price: selected.price
+                            };
+                            setCakes(updatedCakes);
                           }
-                        />
-                      </div>
-                    </div>
-
-                    <FruitOptionRadio
-                      value={cake.fruit_option}
-                      onChange={(val) => !isSaving && updateCake(index, "fruit_option", val)} // 🔹 Não permite mudar durante salvamento
-                      name={`fruit-option-${index}`}
-                      label="フルーツ盛り"
-                      required
-                    />
-
-                    {/* 数量 */}
-                    <div className="quantity-model">
-                      <label>数量:</label>
-                      <input
-                        className="input-text-modal"
-                        type="number"
-                        min="1"
-                        value={cake.amount}
-                        onChange={e => !isSaving && updateCake(index, "amount", Number(e.target.value))} // 🔹 Não permite mudar durante salvamento
-                        style={{ width: "100%" }}
-                        disabled={isSaving} // 🔹 Desabilita durante salvamento
+                        }}
+                        placeholder="サイズを選択"
+                        isSearchable={false}
+                        required
+                        isDisabled={isSaving}
+                        formatOptionLabel={option =>
+                          `${option.size} ￥${option.price.toLocaleString()}`
+                        }
                       />
+                    </div>
+                  </div>
+
+                  <FruitOptionRadio
+                    value={cake.fruit_option}
+                    onChange={(val) => !isSaving && updateCake(index, "fruit_option", val)} // 🔹 Não permite mudar durante salvamento
+                    name={`fruit-option-${index}`}
+                    label="フルーツ盛り"
+                    required
+                  />
+
+                  {/* 数量 */}
+                  <div className="quantity-model">
+                    <label>数量:</label>
+                    <input
+                      className="input-text-modal"
+                      type="number"
+                      min="1"
+                      value={cake.amount}
+                      onChange={e => !isSaving && updateCake(index, "amount", Number(e.target.value))} // 🔹 Não permite mudar durante salvamento
+                      style={{ width: "100%" }}
+                      disabled={isSaving} // 🔹 Desabilita durante salvamento
+                    />
                   </div>
 
                   {/* メッセージ */}
@@ -418,14 +419,14 @@ export default function EditOrderModal({
             setSelectedDate={setSelectedDate}
             selectedTime={selectedTime}
             setSelectedTime={setSelectedTime}
-            // disabled={isSaving} // 🔹 Passe a prop se o DateTimePicker suportar
+          // disabled={isSaving} // 🔹 Passe a prop se o DateTimePicker suportar
           />
         </div>
 
         <div style={{ marginTop: "1rem" }}>
           <label>メッセージ：</label>
-          <textarea 
-            value={editingOrder.message || ""} 
+          <textarea
+            value={editingOrder.message || ""}
             onChange={(e) => !isSaving && setEditingOrder({ ...editingOrder, message: e.target.value })} // 🔹 Não permite mudar durante salvamento
             style={{ width: "100%", minHeight: "80px", padding: "5px" }}
             placeholder="全体メッセージを入力（任意）"

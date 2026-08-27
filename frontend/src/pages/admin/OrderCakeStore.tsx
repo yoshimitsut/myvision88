@@ -524,7 +524,7 @@ export default function OrderCake() {
     }),
   });
 
-  const customStyles = getBaseStyles<OptionType>();
+  // const customStyles = getBaseStyles<OptionType>();
   const customStylesHour = getBaseStyles<TimeOptionType>();
   const customStylesCake = getBaseStyles<CustomOptionType>();
 
