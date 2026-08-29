@@ -169,6 +169,10 @@ export default function AdminSidebar({
           <span className="action-icon">📱</span>
           <span className="action-label">QR</span>
         </button>
+        <button className="sidebar-action-btn" onClick={() => navigate("/admin/storesettings")} title="設定">
+          <span className="action-icon">⚙️</span>
+          <span className="action-label">設定</span>
+        </button>
       </div>
     </aside>
   );
