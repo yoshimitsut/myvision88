@@ -12,15 +12,10 @@ import { useTimeSlots } from '../../hooks/useTimeSlots';
 import { useHoursOptions } from '../../hooks/useHoursOptions';
 import { useOrderForm } from '../../hooks/useOrderForm';
 
-import { calculateTotalPrice } from '../../utils/priceCalculator';
 import type { OrderData, OrderStatus, PaymentStatus } from '../../types/stripe';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
-
-interface CustomOptionType extends OptionType {
-  isDisabled?: boolean;
-}
 
 export default function OrderSameDayCake() {
   const navigate = useNavigate();
@@ -28,7 +23,7 @@ export default function OrderSameDayCake() {
 
   // Fixed to today for same-day
   const today = useMemo(() => new Date(), []);
-  
+
   const [pickupHour, setPickupHour] = useState("時間を選択");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
@@ -425,7 +420,7 @@ export default function OrderSameDayCake() {
           {/* Date & Time Selection Section */}
           <div className="form-section date-time-section">
             <h2 className="section-title">受け取り時間</h2>
-            
+
             <div className="input-group date-picker-group">
               <div className="field-label-row">
                 <label>お受け取り日</label>
@@ -458,14 +453,14 @@ export default function OrderSameDayCake() {
 
           {/* Payment Note for Same Day */}
           <div className="payment-method-selector" style={{ marginTop: '30px' }}>
-             <h3>お支払い方法</h3>
-             <div className="payment-method-options">
-               <label className="payment-method-option active">
-                 <span className="method-icon"><img src="/icons/store.png" alt="store icon" className='store-icon-order' /></span>
-                 <span className="method-label">店舗支払い</span>
-                 <span className="method-description">当日店舗でお支払い</span>
-               </label>
-             </div>
+            <h3>お支払い方法</h3>
+            <div className="payment-method-options">
+              <label className="payment-method-option active">
+                <span className="method-icon"><img src="/icons/store.png" alt="store icon" className='store-icon-order' /></span>
+                <span className="method-label">店舗支払い</span>
+                <span className="method-description">当日店舗でお支払い</span>
+              </label>
+            </div>
           </div>
 
           {/* Fixed Footer Actions */}
@@ -474,8 +469,8 @@ export default function OrderSameDayCake() {
               <span className="total-label">合計金額 (税込):</span>
               <span className="total-value">¥{totalAmount.toLocaleString()}</span>
             </div>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className={`submit-btn ${isSubmitting ? 'submitting' : ''}`}
               disabled={isSubmitting}
             >
