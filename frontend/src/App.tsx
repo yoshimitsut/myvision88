@@ -12,6 +12,8 @@ import Gift from './pages/public/Gift';
 import OrderGift from './pages/public/OrderGift';
 import Check from './pages/public/Check';
 import Newsletter from './pages/public/Newsletter';
+import SameDayCakes from './pages/public/SameDayCakes';
+import OrderSameDayCake from './pages/public/OrderSameDayCake';
 
 // Páginas Admin
 import StoreLogin from './pages/admin/StoreLogin';
@@ -52,6 +54,9 @@ function App() {
         <Route path="/newsletter" element={<Newsletter />} />
         <Route path="/gift" element={<Gift />} />
         <Route path="/gift/order" element={<OrderGift />} />
+        
+        <Route path="/sameday" element={<SameDayCakes />} />
+        <Route path="/sameday/order" element={<OrderSameDayCake />} />
 
         <Route path="/orderstore" element={
           <ProtectedRoute>

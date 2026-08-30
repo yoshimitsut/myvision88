@@ -1,0 +1,322 @@
+/* SameDayCakes.css */
+.sameday-page {
+  min-height: 100vh;
+  background-color: var(--store-secondary-color, #fdfbf7);
+  font-family: 'Inter', 'Noto Sans JP', sans-serif;
+  padding-top: 80px; /* Space for fixed header */
+  position: relative;
+}
+
+.sameday-header-section {
+  text-align: center;
+  padding: 40px 20px;
+  background-color: white;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.sameday-header-section h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.sameday-header-section p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.sameday-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sameday-item {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.sameday-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.sameday-item-image-wrapper {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.sameday-item-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.sameday-item:hover .sameday-item-image-wrapper img {
+  transform: scale(1.05);
+}
+
+.sameday-item-info {
+  padding: 20px;
+  text-align: center;
+}
+
+.sameday-item-info h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.sameday-item-info p {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+  color: #777;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sameday-no-cakes {
+  text-align: center;
+  padding: 60px 20px;
+  color: #777;
+  font-size: 1.2rem;
+  grid-column: 1 / -1;
+}
+
+/* Modal Styles */
+.sameday-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.sameday-modal-content {
+  background: white;
+  width: 100%;
+  max-width: 900px;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.sameday-close-modal-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 10;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.sameday-close-modal-btn:hover {
+  background: #f0f0f0;
+  transform: scale(1.1);
+}
+
+.sameday-modal-body {
+  display: flex;
+  width: 100%;
+}
+
+.sameday-modal-gallery {
+  flex: 1;
+  background: #fafafa;
+}
+
+.sameday-modal-main-image {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+}
+
+.sameday-modal-main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sameday-no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 400px;
+  background: #f5f5f5;
+  color: #999;
+  font-size: 1.2rem;
+}
+
+.sameday-modal-details {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sameday-modal-details h2 {
+  font-size: 2rem;
+  color: #333;
+  margin: 0 0 15px 0;
+  font-weight: 700;
+}
+
+.sameday-modal-desc {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.sameday-modal-sizes-box {
+  margin-bottom: 30px;
+  flex-grow: 1;
+}
+
+.sameday-modal-sizes-title {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.sameday-modal-sizes-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sameday-modal-size-label {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border: 2px solid #eaeaea;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.sameday-modal-size-label:hover {
+  border-color: #d0d0d0;
+}
+
+.sameday-modal-size-label.selected {
+  border-color: var(--store-primary-color, #fdd111);
+  background-color: rgba(253, 209, 17, 0.05);
+}
+
+.sameday-size-radio {
+  display: none;
+}
+
+.sameday-modal-size-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.sameday-modal-size-price {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.sameday-modal-size-price small {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: #888;
+}
+
+.sameday-modal-actions {
+  margin-top: auto;
+}
+
+.sameday-buy-btn {
+  width: 100%;
+  padding: 18px;
+  background-color: var(--store-primary-color, #fdd111);
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sameday-buy-btn:hover:not(:disabled) {
+  background-color: #f7ca00;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(253, 209, 17, 0.4);
+}
+
+.sameday-buy-btn:disabled {
+  background-color: #eaeaea;
+  color: #999;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .sameday-modal-content {
+    flex-direction: column;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .sameday-modal-main-image {
+    min-height: 250px;
+  }
+  
+  .sameday-modal-details {
+    padding: 25px;
+  }
+  
+  .sameday-header-section h1 {
+    font-size: 2rem;
+  }
+}

@@ -47,7 +47,7 @@ export const useSameDayCakeManagement = () => {
       if (data.success && Array.isArray(data.same_day_cakes)) {
         setCakes(data.same_day_cakes);
       } else {
-        throw new Error('予期しないレスポンス形式');
+        throw new Error(data.error || '予期しないレスポンス形式');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'ケーキの読み込みエラー');
