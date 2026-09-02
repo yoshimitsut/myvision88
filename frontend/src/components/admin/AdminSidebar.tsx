@@ -72,6 +72,12 @@ export default function AdminSidebar({
           <span>ケーキ</span>
         </div>
         <div
+          className={`sidebar-menu-item ${location.pathname === '/admin/samedaycake' ? "active" : ""}`}
+          onClick={() => navigate("/admin/same-day-cake")}
+        >
+          <span>当日ケーキ</span>
+        </div>
+        <div
           className={`sidebar-menu-item ${location.pathname === '/admin/gift' ? "active" : ""}`}
           onClick={() => navigate("/admin/gift")}
         >
