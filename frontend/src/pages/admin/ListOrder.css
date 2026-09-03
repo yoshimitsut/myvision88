@@ -314,6 +314,17 @@
   color: #ffffff;
 }
 
+.category-pill.pill-sameday {
+  border-color: #d9480f;
+  color: #d9480f;
+}
+
+.category-pill.pill-sameday.active-sameday {
+  background-color: #d9480f;
+  color: #ffffff;
+}
+
+
 .pill-count {
   font-size: 11px;
   font-weight: 700;

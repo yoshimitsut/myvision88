@@ -277,3 +277,103 @@
     flex-direction: column;
   }
 }
+
+/* Time Management Tab Styles */
+.sdc-time-desc {
+  color: #6c757d;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.sdc-time-form {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  align-items: center;
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.sdc-time-input {
+  padding: 10px 15px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: inherit;
+  width: 150px;
+}
+
+.sdc-time-add-btn {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sdc-time-add-btn:hover {
+  background-color: #218838;
+}
+
+.sdc-time-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.sdc-time-table th,
+.sdc-time-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.sdc-time-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+.sdc-time-table .inactive-row {
+  background-color: #f8f9fa;
+  opacity: 0.7;
+}
+
+.time-col {
+  font-size: 18px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.status-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.status-btn.active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-btn.inactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-btn:hover {
+  opacity: 0.8;
+}
+

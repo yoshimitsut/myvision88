@@ -8,11 +8,9 @@ import type { OptionType, TimeOptionType, Cake } from "../../types/types";
 
 import "../public/OrderCake.css"; // Reuse existing order styles
 
-import { useTimeSlots } from '../../hooks/useTimeSlots';
-import { useHoursOptions } from '../../hooks/useHoursOptions';
 import { useOrderForm } from '../../hooks/useOrderForm';
+import { useSameDayTimeSlots } from '../../hooks/useSameDayTimeSlots';
 
-import type { OrderData, OrderStatus, PaymentStatus } from '../../types/stripe';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
@@ -31,9 +29,20 @@ export default function OrderSameDayCake() {
   // States for cake data from same-day API
   const [cakesData, setCakesData] = useState<Cake[]>([]);
 
-  // Use hooks for time options
-  const { timeSlotsData } = useTimeSlots();
-  const hoursOptions = useHoursOptions(today, timeSlotsData);
+  // Use custom hook for same-day time slots
+  const { timeSlots } = useSameDayTimeSlots();
+
+  // Format options for react-select
+  const hoursOptions = useMemo(() => {
+    return timeSlots
+      .filter(slot => slot.is_active)
+      .map(slot => ({
+        id: slot.id,
+        value: slot.time,
+        label: slot.time,
+        isDisabled: false
+      }));
+  }, [timeSlots]);
 
   const initialCake = {
     cake_id: 0,
@@ -151,6 +160,15 @@ export default function OrderSameDayCake() {
     return `${year}-${month}-${day}`;
   };
 
+  const [submittedOrder, setSubmittedOrder] = useState<{
+    id_order: number;
+    pickup_hour: string;
+    total_amount: number;
+    cake_name: string;
+    size: string;
+    amount: number;
+  } | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -172,61 +190,56 @@ export default function OrderSameDayCake() {
     const clientId = crypto.randomUUID?.() ||
       `client_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
-    const orderDataToSave: OrderData = {
+    const payload = {
       id_client: clientId,
       first_name: formData.firstName,
       last_name: formData.lastName,
       email: formData.email,
       tel: formData.tel,
-      date: getLocalDateString(today),
-      date_order: format(new Date(), "yyyy-MM-dd"),
-      pickupHour,
-      status: 'b' as OrderStatus,
-      message: formData.message,
+      pickup_date: getLocalDateString(today),
+      pickup_hour: pickupHour,
+      message: formData.message || '',
       total_amount: totalAmount,
-      payment_status: 'pending' as PaymentStatus,
-      cakes: cakes.map(c => {
-        return {
-          cake_id: c.cake_id,
-          name: c.name,
-          amount: c.amount,
-          price: c.price,
-          size: c.size as string,
-          message_cake: "",
-          fruit_option: "無し",
-          fruit_price: 0
-        };
-      })
+      items: cakes.map(c => ({
+        same_day_cake_id: c.cake_id,
+        cake_name: c.name,
+        size: c.size,
+        amount: c.amount,
+        price: c.price
+      }))
     };
 
     try {
-      const res = await fetch(`${API_URL}/api/reservar`, {
+      const res = await fetch(`${API_URL}/api/sameday-orders/request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderDataToSave),
+        body: JSON.stringify(payload),
       });
 
       const result = await res.json();
 
       if (result.success) {
-        navigate("/order/check", {
-          state: {
-            newOrderCreated: true,
-            paymentMethod: 'store',
-            paymentStatus: 'pending'
-          }
+        setSubmittedOrder({
+          id_order: result.id_order,
+          pickup_hour: pickupHour,
+          total_amount: totalAmount,
+          cake_name: cakes[0].name,
+          size: cakes[0].size || '',
+          amount: cakes[0].amount
         });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        alert("予約の保存に失敗しました。");
+        alert(result.error || "予約リクエストの送信に失敗しました。");
         console.error(result.error);
       }
     } catch (error) {
-      alert("エラーが発生しました。");
+      alert("エラーが発生しました。もう一度お試しください。");
       console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   const getBaseStyles = <T extends OptionType>(): StylesConfig<T, false> => ({
     option: (provided: CSSObjectWithLabel, state: OptionProps<T, false>) => ({
@@ -250,6 +263,117 @@ export default function OrderSameDayCake() {
 
   const selectedCakeData = cakesData.find(c => c.id === cakes[0].cake_id);
 
+  if (submittedOrder) {
+    return (
+      <div className='reservation-main'>
+        <div className="container" style={{ maxWidth: '680px', margin: '0 auto', padding: '20px 15px' }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+            padding: '35px 25px',
+            border: '1px solid #eef0f2',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '15px' }}>⏳</div>
+            <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#222', margin: '0 0 10px 0' }}>
+              ご予約リクエストを受け付けました
+            </h1>
+
+            {/* AVISO IMPORTANTE EM JAPONÊS */}
+            <div style={{
+              background: '#fff9db',
+              border: '1px solid #fcc419',
+              borderRadius: '10px',
+              padding: '16px 20px',
+              margin: '20px 0',
+              textAlign: 'left'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <span style={{ fontSize: '18px' }}>⚠️</span>
+                <strong style={{ color: '#e67700', fontSize: '15px' }}>※この時点ではご予約はまだ完了しておりません</strong>
+              </div>
+              <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.7', color: '#495057' }}>
+                「当日受取ケーキ」は数量限定のため、現在店舗にて<strong>ケーキの実物在庫状況を確認</strong>しております。<br />
+                確認が取れ次第、ご指定のメールアドレス（<strong style={{ color: '#1c7ed6' }}>{formData.email}</strong>）宛てに<strong>【予約確定メール】</strong>をお送りいたしますので、今しばらくお待ちください。
+              </p>
+            </div>
+
+            {/* DETALHES DO PEDIDO */}
+            <div style={{
+              background: '#f8f9fa',
+              borderRadius: '12px',
+              padding: '20px',
+              margin: '25px 0',
+              textAlign: 'left'
+            }}>
+              <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', color: '#333', borderBottom: '2px solid #e9ecef', paddingBottom: '8px' }}>
+                リクエスト詳細
+              </h3>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', rowGap: '10px', fontSize: '14px' }}>
+                <span style={{ color: '#868e96' }}>受付番号：</span>
+                <strong style={{ color: '#2b8a3e', fontSize: '16px' }}>#{String(submittedOrder.id_order).padStart(4, '0')}</strong>
+
+                <span style={{ color: '#868e96' }}>お名前：</span>
+                <span style={{ color: '#212529', fontWeight: '500' }}>{formData.firstName} {formData.lastName} 様</span>
+
+                <span style={{ color: '#868e96' }}>お受取時間：</span>
+                <span style={{ color: '#d6336c', fontWeight: 'bold' }}>本日 {submittedOrder.pickup_hour}</span>
+
+                <span style={{ color: '#868e96' }}>ご希望商品：</span>
+                <span style={{ color: '#212529' }}>{submittedOrder.cake_name} ({submittedOrder.size}) × {submittedOrder.amount}個</span>
+
+                <span style={{ color: '#868e96' }}>合計予定金額：</span>
+                <strong style={{ color: '#212529', fontSize: '16px' }}>¥{submittedOrder.total_amount.toLocaleString()} (税込)</strong>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '13px', color: '#868e96', margin: '15px 0 25px 0', lineHeight: '1.6' }}>
+              ※予約確定メール内に、事前クレジットカード決済または店頭支払いの案内リンクがございます。
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => navigate('/sameday')}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  border: '1px solid #ced4da',
+                  background: '#ffffff',
+                  color: '#495057',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                当日ケーキ一覧へ
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                style={{
+                  padding: '12px 28px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#fdd111',
+                  color: '#212529',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(253, 209, 17, 0.35)'
+                }}
+              >
+                トップページへ戻る
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className='reservation-main'>
       <div className="container">
@@ -260,7 +384,26 @@ export default function OrderSameDayCake() {
           <span className="divider-line"></span>
         </div>
 
+        {/* Informative Banner at Top of Form */}
+        <div style={{
+          background: '#fff9db',
+          border: '1px solid #ffe066',
+          borderRadius: '10px',
+          padding: '14px 18px',
+          marginBottom: '25px',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '10px'
+        }}>
+          <span style={{ fontSize: '20px' }}>ℹ️</span>
+          <div style={{ fontSize: '13px', color: '#5c3c00', lineHeight: '1.6' }}>
+            <strong>【当日受取ケーキのご予約について】</strong><br />
+            当日ケーキは数量限定のため、ご注文後に店舗にて実物の在庫確認を行います。確認が取れ次第、ご予約確定メールをお送りいたします。
+          </div>
+        </div>
+
         <form className="form-order" onSubmit={handleSubmit}>
+
           <div className="cake-information">
             <div className="box-cake">
               <div className="order-cake-hero-banner">

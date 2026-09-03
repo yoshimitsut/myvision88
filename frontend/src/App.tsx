@@ -14,6 +14,7 @@ import Check from './pages/public/Check';
 import Newsletter from './pages/public/Newsletter';
 import SameDayCakes from './pages/public/SameDayCakes';
 import OrderSameDayCake from './pages/public/OrderSameDayCake';
+import SameDayPayment from './pages/public/SameDayPayment';
 
 // Páginas Admin
 import StoreLogin from './pages/admin/StoreLogin';
@@ -57,6 +58,8 @@ function App() {
         
         <Route path="/sameday" element={<SameDayCakes />} />
         <Route path="/sameday/order" element={<OrderSameDayCake />} />
+        <Route path="/sameday/payment/:orderId" element={<SameDayPayment />} />
+
 
         <Route path="/orderstore" element={
           <ProtectedRoute>

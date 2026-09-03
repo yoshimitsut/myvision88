@@ -9,8 +9,8 @@ interface AdminSidebarProps {
   pastDateOrders?: Order[];
   completedOrders?: Order[];
   cancelledOrders?: Order[];
-  viewType?: "cake" | "gift";
-  setViewType?: (type: "cake" | "gift") => void;
+  viewType?: "cake" | "gift" | "sameday";
+  setViewType?: (type: "cake" | "gift" | "sameday") => void;
   search?: string;
   setSearch?: (val: string) => void;
   activeTab?: string;

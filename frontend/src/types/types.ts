@@ -58,6 +58,13 @@ export type Order = {
   cakes: OrderCake[];
 };
 
+export type SameDayTimeSlot = {
+  id: number;
+  time: string;
+  is_active: number;
+};
+
+
 // ------------------ 🕓 Horários ------------------
 
 export type TimeslotSQL = {
@@ -193,3 +200,38 @@ export type GiftOrder = {
   total_amount: number;
   items: OrderGiftItem[];
 };
+
+// ------------------ ⚡ Same Day Cake (当日受取ケーキ) ------------------
+
+export type SameDayOrderStatus = 'pending' | 'confirmed' | 'rejected' | 'completed' | 'cancelled';
+
+export type SameDayOrderItem = {
+  id?: number;
+  order_id?: number;
+  same_day_cake_id: number;
+  cake_name: string;
+  size: string;
+  amount: number;
+  price: number;
+  image?: string | null;
+};
+
+export type SameDayOrder = {
+  id_order: number;
+  id_client: string;
+  first_name: string;
+  last_name: string;
+  tel: string;
+  email: string;
+  pickup_date: string;
+  pickup_hour: string;
+  message: string;
+  status: SameDayOrderStatus;
+  payment_method: 'store' | 'card';
+  payment_status: 'pending' | 'paid' | 'refunded' | 'failed';
+  payment_intent_id?: string | null;
+  total_amount: number;
+  created_at: string;
+  items: SameDayOrderItem[];
+};
+

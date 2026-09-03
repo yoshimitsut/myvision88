@@ -15,10 +15,12 @@ setInterval(() => {
 // Importar Routes
 const cakeRoutes = require('./routes/cakeRoutes');
 const sameDayCakeRoutes = require('./routes/sameDayCakeRoutes');
+const sameDayOrderRoutes = require('./routes/sameDayOrderRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const giftRoutes = require('./routes/giftRoutes');
 const giftOrderRoutes = require('./routes/giftOrderRoutes');
 const timeslotRoutes = require('./routes/timeslotRoutes');
+const sameDayTimeRoutes = require('./routes/sameDayTimeRoutes');
 const newsletterRoutes = require('./routes/newsletter');
 const storeInfo = require('./routes/storeInfo');
 const stripeRoutes = require('./routes/stripe');
@@ -80,16 +82,20 @@ const selectiveAuth = (req, res, next) => {
   // Verificamos a URL original para evitar problemas com rotas montadas
   const isPublicGet = req.method === 'GET' && (
     req.originalUrl.startsWith('/api/cake') ||
-    req.originalUrl.startsWith('/api/samedaycake') ||
+    req.originalUrl.startsWith('/api/sameday-cakes') ||
+    req.originalUrl.startsWith('/api/sameday-times') ||
     req.originalUrl.startsWith('/api/gift') ||
     req.originalUrl.startsWith('/api/timeslots') ||
     req.originalUrl.startsWith('/api/storeinfo') ||
-    req.originalUrl.startsWith('/api/newsletters')
+    req.originalUrl.startsWith('/api/newsletters') ||
+    req.originalUrl.startsWith('/api/sameday-orders/public')
   );
 
   const isPublicPost = req.method === 'POST' && (
     req.originalUrl === '/api/reservar' ||
     req.originalUrl === '/api/gift-orders/reservar' ||
+    req.originalUrl === '/api/sameday-orders/request' ||
+    req.originalUrl.startsWith('/api/sameday-orders/payment') ||
     req.originalUrl.startsWith('/api/newsletters')
   );
 
@@ -108,7 +114,9 @@ app.use("/api", stripeRoutes);
 
 // Aplicar roteadores com proteção seletiva e caminhos corretos
 app.use('/api/cake', selectiveAuth, cakeRoutes);
-app.use('/api/samedaycake', selectiveAuth, sameDayCakeRoutes);
+app.use('/api/sameday-cakes', selectiveAuth, sameDayCakeRoutes);
+app.use('/api/sameday-times', selectiveAuth, sameDayTimeRoutes);
+app.use('/api/sameday-orders', selectiveAuth, sameDayOrderRoutes);
 app.use('/api/gift', selectiveAuth, giftRoutes);
 app.use('/api/timeslots', selectiveAuth, timeslotRoutes);
 app.use('/api/newsletters', selectiveAuth, newsletterRoutes);

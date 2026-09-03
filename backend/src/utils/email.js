@@ -654,6 +654,342 @@ async function sendGiftCompletedNotification(order) {
     }
 }
 
+async function sendSameDayOrderRequestToStore(orderData, orderId) {
+    try {
+        const config = await loadStoreConfig();
+        const resend = await getResendInstance();
+
+        const itemsHtml = orderData.items.map(item => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">${item.cake_name || item.name}</td>
+                <td style="padding: 10px;">${item.size}</td>
+                <td style="padding: 10px; text-align: center;">${item.amount}個</td>
+                <td style="padding: 10px; text-align: right;">¥${(item.price * item.amount).toLocaleString('ja-JP')}</td>
+            </tr>
+        `).join('');
+
+        const htmlContent = `
+        <div style="border: 1px solid #e0e0e0; padding: 25px; max-width: 600px; margin: 0 auto; font-family: 'Helvetica Neue', Arial, sans-serif; color: #333;">
+            <div style="background: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin-bottom: 20px;">
+                <h2 style="margin: 0 0 5px 0; color: #856404; font-size: 20px;">⚡ 【当日受取】新規予約リクエスト</h2>
+                <p style="margin: 0; color: #856404; font-size: 14px;"><strong>※店舗の在庫を確認し、管理画面（/list）にて【予約確定】または【在庫切れ】の対応を行ってください。</strong></p>
+            </div>
+
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">お客様情報</h3>
+                <p style="margin: 5px 0;"><strong>受付番号：</strong> #${String(orderId).padStart(4, '0')}</p>
+                <p style="margin: 5px 0;"><strong>お名前：</strong> ${orderData.first_name} ${orderData.last_name} 様</p>
+                <p style="margin: 5px 0;"><strong>電話番号：</strong> <a href="tel:${orderData.tel}">${orderData.tel}</a></p>
+                <p style="margin: 5px 0;"><strong>メールアドレス：</strong> ${orderData.email}</p>
+                <p style="margin: 5px 0;"><strong>受取希望日時：</strong> ${orderData.pickup_date} / ${orderData.pickup_hour}</p>
+                ${orderData.message ? `<p style="margin: 5px 0;"><strong>ご要望・メッセージ：</strong> ${orderData.message}</p>` : ''}
+            </div>
+
+            <h3 style="border-bottom: 2px solid #ddd; padding-bottom: 8px;">ご希望商品</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background: #f2f2f2;">
+                        <th style="padding: 10px; text-align: left;">商品名</th>
+                        <th style="padding: 10px; text-align: left;">サイズ</th>
+                        <th style="padding: 10px; text-align: center;">数量</th>
+                        <th style="padding: 10px; text-align: right;">小計</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsHtml}
+                </tbody>
+            </table>
+
+            <div style="background: #f1f3f5; padding: 15px; border-radius: 8px; text-align: right; margin-bottom: 20px;">
+                <span style="font-size: 16px;">合計金額 (税込): </span>
+                <strong style="font-size: 22px; color: #d63384;">¥${(orderData.total_amount || 0).toLocaleString('ja-JP')}</strong>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; font-size: 13px; color: #888;">
+                <p>${config.store_name} 自動通知システム</p>
+            </div>
+        </div>
+        `;
+
+        const result = await resend.emails.send({
+            from: `"${config.store_name}" <order@yoyaku.myvision88.com>`,
+            to: [config.mail_store],
+            subject: `⚡【当日受取リクエスト】新規予約の確認依頼 - 受付番号 #${String(orderId).padStart(4, '0')}`,
+            html: htmlContent
+        });
+
+        return { success: true, result };
+    } catch (error) {
+        console.error('Erro em sendSameDayOrderRequestToStore:', error);
+        // Tenta fallback com transporter
+        try {
+            const config = await loadStoreConfig();
+            const transporter = await getTransporter();
+            await transporter.sendMail({
+                from: `"${config.store_name}" <${config.mail_store}>`,
+                to: [config.mail_store],
+                subject: `⚡【当日受取リクエスト】新規予約の確認依頼 - 受付番号 #${String(orderId).padStart(4, '0')}`,
+                text: `当日受取ケーキの予約リクエストが入りました。受付番号 #${String(orderId).padStart(4, '0')}`
+            });
+            return { success: true, fallback: true };
+        } catch (e) {
+            console.error('Erro no fallback do email da loja:', e);
+            throw error;
+        }
+    }
+}
+
+async function sendSameDayOrderRequestToClient(orderData, orderId) {
+    try {
+        const config = await loadStoreConfig();
+        const resend = await getResendInstance();
+
+        const itemsHtml = orderData.items.map(item => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">${item.cake_name || item.name}</td>
+                <td style="padding: 10px;">${item.size}</td>
+                <td style="padding: 10px; text-align: center;">${item.amount}個</td>
+                <td style="padding: 10px; text-align: right;">¥${(item.price * item.amount).toLocaleString('ja-JP')}</td>
+            </tr>
+        `).join('');
+
+        const htmlContent = `
+        <div style="border: 1px solid #e0e0e0; padding: 25px; max-width: 600px; margin: 0 auto; font-family: 'Helvetica Neue', Arial, sans-serif; color: #333;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #2b2b2b; margin: 0 0 10px 0;">🎂 ご予約リクエストを受け付けました</h2>
+                <span style="display: inline-block; background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 14px;">
+                    現在、店舗にて在庫を確認中です
+                </span>
+            </div>
+
+            <div style="background: #fff8e1; border: 1px solid #ffe082; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <p style="margin: 0 0 8px 0; font-weight: bold; color: #b78103;">⚠️ まだご予約は完了しておりません</p>
+                <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #5d4037;">
+                    「当日受取ケーキ」は在庫に限りがあるため、現在スタッフが実物の在庫状況を確認しております。<br>
+                    在庫の確認が取れ次第、<strong>【予約確定メール】</strong>をお送りいたしますので、今しばらくお待ちください。
+                </p>
+            </div>
+
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">リクエスト内容</h3>
+                <p style="margin: 5px 0;"><strong>受付番号：</strong> #${String(orderId).padStart(4, '0')}</p>
+                <p style="margin: 5px 0;"><strong>お名前：</strong> ${orderData.first_name} ${orderData.last_name} 様</p>
+                <p style="margin: 5px 0;"><strong>受取希望日時：</strong> ${orderData.pickup_date} / ${orderData.pickup_hour}</p>
+            </div>
+
+            <h3 style="border-bottom: 2px solid #ddd; padding-bottom: 8px;">ご注文商品</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background: #f2f2f2;">
+                        <th style="padding: 10px; text-align: left;">商品名</th>
+                        <th style="padding: 10px; text-align: left;">サイズ</th>
+                        <th style="padding: 10px; text-align: center;">数量</th>
+                        <th style="padding: 10px; text-align: right;">小計</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsHtml}
+                </tbody>
+            </table>
+
+            <div style="background: #f1f3f5; padding: 15px; border-radius: 8px; text-align: right; margin-bottom: 20px;">
+                <span style="font-size: 16px;">合計予定金額 (税込): </span>
+                <strong style="font-size: 22px; color: #333;">¥${(orderData.total_amount || 0).toLocaleString('ja-JP')}</strong>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 25px;">
+                <p style="margin: 0; font-size: 14px;"><strong style="font-size: 16px;">${config.store_name}</strong></p>
+                <p style="margin: 5px 0; font-size: 14px;">OPEN ${config.open_hour}</p>
+                <p style="margin: 5px 0; font-size: 14px;">TEL: <a href="tel:${config.tel}" style="color: #007bff; text-decoration: none;">${config.tel}</a></p>
+            </div>
+        </div>
+        `;
+
+        const result = await resend.emails.send({
+            from: `"${config.store_name}" <order@yoyaku.myvision88.com>`,
+            to: [orderData.email],
+            subject: `🎂【MyVision88】当日受取ケーキの予約リクエストを受け付けました（確認中）- 受付番号 #${String(orderId).padStart(4, '0')}`,
+            html: htmlContent
+        });
+
+        return { success: true, result };
+    } catch (error) {
+        console.error('Erro em sendSameDayOrderRequestToClient:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function sendSameDayOrderConfirmedToClient(orderData, orderId) {
+    try {
+        const qrCodeBuffer = await QRCode.toBuffer(String(orderId), { type: 'png', width: 350 });
+        const qrCodeContentId = 'qrcode_sameday_order';
+
+        const config = await loadStoreConfig();
+        const resend = await getResendInstance();
+
+        const paymentUrl = `${config.site_back}/sameday/payment/${orderId}`;
+
+        const itemsHtml = orderData.items.map(item => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">${item.cake_name || item.name}</td>
+                <td style="padding: 10px;">${item.size}</td>
+                <td style="padding: 10px; text-align: center;">${item.amount}個</td>
+                <td style="padding: 10px; text-align: right;">¥${(item.price * item.amount).toLocaleString('ja-JP')}</td>
+            </tr>
+        `).join('');
+
+        const htmlContent = `
+        <div style="border: 1px solid #e0e0e0; padding: 25px; max-width: 600px; margin: 0 auto; font-family: 'Helvetica Neue', Arial, sans-serif; color: #333;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #28a745; margin: 0 0 10px 0;">🎉 ご予約が確定いたしました！</h2>
+                <p style="color: #555; font-size: 15px; margin: 0;">商品の在庫が確保されました。ご来店をお待ちしております。</p>
+            </div>
+
+            <div style="background: #e8f5e9; border: 1px solid #c8e6c9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin-top: 0; color: #2e7d32; border-bottom: 1px solid #a5d6a7; padding-bottom: 5px;">予約内容</h3>
+                <p style="margin: 5px 0;"><strong>受付番号：</strong> <span style="font-size: 18px; font-weight: bold; color: #2e7d32;">#${String(orderId).padStart(4, '0')}</span></p>
+                <p style="margin: 5px 0;"><strong>お名前：</strong> ${orderData.first_name} ${orderData.last_name} 様</p>
+                <p style="margin: 5px 0;"><strong>受取日時：</strong> <strong style="color: #d32f2f;">${orderData.pickup_date} / ${orderData.pickup_hour}</strong></p>
+            </div>
+
+            <h3 style="border-bottom: 2px solid #ddd; padding-bottom: 8px;">ご予約商品</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background: #f2f2f2;">
+                        <th style="padding: 10px; text-align: left;">商品名</th>
+                        <th style="padding: 10px; text-align: left;">サイズ</th>
+                        <th style="padding: 10px; text-align: center;">数量</th>
+                        <th style="padding: 10px; text-align: right;">小計</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsHtml}
+                </tbody>
+            </table>
+
+            <div style="background: #f1f3f5; padding: 15px; border-radius: 8px; text-align: right; margin-bottom: 20px;">
+                <span style="font-size: 16px;">お支払い合計 (税込): </span>
+                <strong style="font-size: 24px; color: #28a745;">¥${(orderData.total_amount || 0).toLocaleString('ja-JP')}</strong>
+            </div>
+
+            <!-- Botão e Opções de Pagamento -->
+            <div style="background: #f8f9fa; border: 2px dashed #007bff; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px;">
+                <h3 style="margin-top: 0; color: #007bff;">💳 お支払い方法について</h3>
+                <p style="font-size: 14px; margin-bottom: 15px; color: #555;">
+                    「店頭での現金・カード払い」または「事前オンラインクレジットカード決済」をご利用いただけます。
+                </p>
+                <a href="${paymentUrl}" style="display: inline-block; background: #007bff; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 6px; font-weight: bold; font-size: 16px; margin-bottom: 10px;">
+                    お支払い・予約確認ページへ進む →
+                </a>
+                <p style="font-size: 12px; color: #888; margin: 5px 0 0 0;">※事前決済をしていただくと、店頭でのお受け取りがスムーズになります。</p>
+            </div>
+
+            <!-- QR Code -->
+            <div style="text-align: center; margin: 25px 0;">
+                <p style="margin: 0 0 5px 0; font-weight: bold; font-size: 15px;">受取確認用 QRコード</p>
+                <p style="margin: 0 0 10px 0; color: #d32f2f; font-size: 13px;">店頭での受取時にこちらの画面をご提示ください。</p>
+                <img src="cid:${qrCodeContentId}" width="260" style="display: block; margin: 0 auto; border: 1px solid #ddd; padding: 5px; border-radius: 8px;" />
+            </div>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 25px;">
+                <p style="margin: 0; font-size: 14px;"><strong style="font-size: 16px;">${config.store_name}</strong></p>
+                <p style="margin: 5px 0; font-size: 14px;">OPEN ${config.open_hour}</p>
+                <p style="margin: 5px 0; font-size: 14px;">TEL: <a href="tel:${config.tel}" style="color: #007bff; text-decoration: none;">${config.tel}</a></p>
+            </div>
+        </div>
+        `;
+
+        const result = await resend.emails.send({
+            from: `"${config.store_name}" <order@yoyaku.myvision88.com>`,
+            to: [orderData.email, config.mail_store],
+            subject: `🎂【予約確定】当日受取ケーキのご予約が確定いたしました - 受付番号 #${String(orderId).padStart(4, '0')}`,
+            html: htmlContent,
+            attachments: [{
+                filename: 'qrcode.png',
+                content: qrCodeBuffer,
+                contentDisposition: 'inline',
+                contentId: qrCodeContentId
+            }]
+        });
+
+        return { success: true, result };
+    } catch (error) {
+        console.error('Erro em sendSameDayOrderConfirmedToClient:', error);
+        throw error;
+    }
+}
+
+async function sendSameDayOrderRejectedToClient(orderData, orderId) {
+    try {
+        const config = await loadStoreConfig();
+        const resend = await getResendInstance();
+
+        const itemsHtml = orderData.items.map(item => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">${item.cake_name || item.name}</td>
+                <td style="padding: 10px;">${item.size}</td>
+                <td style="padding: 10px; text-align: center;">${item.amount}個</td>
+            </tr>
+        `).join('');
+
+        const htmlContent = `
+        <div style="border: 1px solid #e0e0e0; padding: 25px; max-width: 600px; margin: 0 auto; font-family: 'Helvetica Neue', Arial, sans-serif; color: #333;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #dc3545; margin: 0 0 10px 0;">⚠️ 商品のご用意ができませんでした</h2>
+                <p style="color: #666; font-size: 15px; margin: 0;">大変申し訳ございません。ご希望の商品は本日既に完売いたしました。</p>
+            </div>
+
+            <div style="background: #fdf2f2; border: 1px solid #f8d7da; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #721c24;">
+                    ${orderData.first_name} ${orderData.last_name} 様<br><br>
+                    この度は「当日受取ケーキ」をご注文いただき誠にありがとうございました。<br>
+                    店舗にて実物の在庫状況を確認いたしましたところ、ご希望いただきました商品は<strong>本日既に完売・在庫切れ</strong>となっており、ご用意することができませんでした。<br><br>
+                    ご期待に沿えず大変申し訳ございません。何卒ご了承のほどよろしくお願い申し上げます。
+                </p>
+            </div>
+
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">対象のリクエスト</h3>
+                <p style="margin: 5px 0;"><strong>受付番号：</strong> #${String(orderId).padStart(4, '0')}</p>
+                <p style="margin: 5px 0;"><strong>受取希望日時：</strong> ${orderData.pickup_date} / ${orderData.pickup_hour}</p>
+            </div>
+
+            <h3 style="border-bottom: 2px solid #ddd; padding-bottom: 8px;">商品内容</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background: #f2f2f2;">
+                        <th style="padding: 10px; text-align: left;">商品名</th>
+                        <th style="padding: 10px; text-align: left;">サイズ</th>
+                        <th style="padding: 10px; text-align: center;">数量</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsHtml}
+                </tbody>
+            </table>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 25px;">
+                <p style="margin: 0; font-size: 14px;"><strong style="font-size: 16px;">${config.store_name}</strong></p>
+                <p style="margin: 5px 0; font-size: 14px;">OPEN ${config.open_hour}</p>
+                <p style="margin: 5px 0; font-size: 14px;">TEL: <a href="tel:${config.tel}" style="color: #007bff; text-decoration: none;">${config.tel}</a></p>
+            </div>
+        </div>
+        `;
+
+        const result = await resend.emails.send({
+            from: `"${config.store_name}" <order@yoyaku.myvision88.com>`,
+            to: [orderData.email],
+            subject: `⚠️【在庫切れのお知らせ】当日受取ケーキのご用意ができませんでした - 受付番号 #${String(orderId).padStart(4, '0')}`,
+            html: htmlContent
+        });
+
+        return { success: true, result };
+    } catch (error) {
+        console.error('Erro em sendSameDayOrderRejectedToClient:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     sendNewOrderConfirmation,
     sendOrderUpdateNotification,
@@ -661,5 +997,9 @@ module.exports = {
     sendOrderCompletedNotification,
     sendNewGiftOrderConfirmation,
     sendGiftCancellationNotification,
-    sendGiftCompletedNotification
+    sendGiftCompletedNotification,
+    sendSameDayOrderRequestToStore,
+    sendSameDayOrderRequestToClient,
+    sendSameDayOrderConfirmedToClient,
+    sendSameDayOrderRejectedToClient
 };

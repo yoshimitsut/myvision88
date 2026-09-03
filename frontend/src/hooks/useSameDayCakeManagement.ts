@@ -8,7 +8,7 @@ export const useSameDayCakeManagement = () => {
   const [cakes, setCakes] = useState<Cake[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'list' | 'add'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'add' | 'time'>('list');
   const [editingCake, setEditingCake] = useState<Cake | null>(null);
 
   const [newCake, setNewCake] = useState({

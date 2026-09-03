@@ -78,7 +78,7 @@ export default function SameDayCakes() {
                 >
                   <div className="sameday-item-image-wrapper">
                     {cake.image ? (
-                       <img src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`} alt={cake.name} loading="lazy" />
+                      <img src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`} alt={cake.name} loading="lazy" />
                     ) : (
                       <div className="sameday-no-image">📷</div>
                     )}
@@ -146,7 +146,7 @@ export default function SameDayCakes() {
                     onClick={handleReserve}
                     disabled={!selectedSize || selectedCake.sizes?.filter(s => s.is_active !== 0 && s.stock > 0).length === 0}
                   >
-                    注文する (Pedir)
+                    注文する
                   </button>
                 </div>
               </div>

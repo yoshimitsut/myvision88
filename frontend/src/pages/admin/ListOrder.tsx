@@ -12,11 +12,13 @@ import { STATUS_OPTIONS } from '../../types/types';
 
 import { formatDateJP } from "../../utils/formatDateJP";
 import ListGiftOrder from "./ListGiftOrder";
+import ListSameDayOrder from "./ListSameDayOrder";
 
 import './ListOrder.css';
 
 export default function ListOrder() {
-  const [viewType, setViewType] = useState<"cake" | "gift">("cake");
+  const [viewType, setViewType] = useState<"cake" | "gift" | "sameday">("cake");
+  const [sameDayPendingCount, setSameDayPendingCount] = useState(0);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [showScanner, setShowScanner] = useState(false);
@@ -1531,7 +1533,7 @@ export default function ListOrder() {
         {/* Category Pills Row */}
         <div className="category-pills-row">
           <button
-            className={`category-pill ${activeTab === 'all' ? 'active-solid' : ''}`}
+            className={`category-pill ${activeTab === 'all' && viewType === 'cake' ? 'active-solid' : ''}`}
             onClick={() => {
               setActiveTab('all');
               setViewType('cake');
@@ -1543,18 +1545,41 @@ export default function ListOrder() {
             className={`category-pill pill-cake ${viewType === 'cake' ? 'active-cake' : ''}`}
             onClick={() => setViewType('cake')}
           >
-            ケーキ <span className="pill-count">{activeOrders.length || orders.length}</span>
+            🎂 ケーキ <span className="pill-count">{activeOrders.length || orders.length}</span>
           </button>
           <button
             className={`category-pill pill-gift ${viewType === 'gift' ? 'active-gift' : ''}`}
             onClick={() => setViewType('gift')}
           >
-            ギフト <span className="pill-count">1</span>
+            🎁 ギフト
+          </button>
+          <button
+            className={`category-pill pill-sameday ${viewType === 'sameday' ? 'active-sameday' : ''}`}
+            onClick={() => setViewType('sameday')}
+            style={{ position: 'relative' }}
+          >
+            ⚡ 当日ケーキ
+            {sameDayPendingCount > 0 && (
+              <span style={{
+                marginLeft: '6px',
+                background: '#e03131',
+                color: 'white',
+                borderRadius: '10px',
+                padding: '2px 7px',
+                fontSize: '11px',
+                fontWeight: 'bold',
+                display: 'inline-block'
+              }}>
+                {sameDayPendingCount}
+              </span>
+            )}
           </button>
         </div>
 
         {viewType === "gift" ? (
           <ListGiftOrder />
+        ) : viewType === "sameday" ? (
+          <ListSameDayOrder onPendingCountChange={setSameDayPendingCount} />
         ) : (
           <>
             {showScanner && (

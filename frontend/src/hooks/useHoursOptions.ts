@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import type { TimeslotSQL } from '../types/types';
 
 export const useHoursOptions = (
-  selectedDate: Date | null, 
+  selectedDate: Date | null,
   timeSlotsData: TimeslotSQL[]
 ) => {
   return useMemo(() => {

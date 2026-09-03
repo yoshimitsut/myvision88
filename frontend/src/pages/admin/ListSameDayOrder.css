@@ -1,0 +1,497 @@
+/* ListSameDayOrder.css */
+.lsdo-container {
+  width: 100%;
+  padding: 10px 0;
+  font-family: inherit;
+}
+
+.lsdo-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.lsdo-search-box {
+  position: relative;
+  flex: 1;
+  max-width: 450px;
+}
+
+.lsdo-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #adb5bd;
+}
+
+.lsdo-search-input {
+  width: 100%;
+  padding: 10px 36px 10px 38px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.lsdo-search-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.lsdo-search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #adb5bd;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.lsdo-refresh-btn {
+  padding: 10px 18px;
+  background: white;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #495057;
+  transition: all 0.2s;
+}
+
+.lsdo-refresh-btn:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.lsdo-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 12px;
+}
+
+.lsdo-tab {
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.lsdo-tab:hover {
+  background: #e9ecef;
+}
+
+.lsdo-tab.active {
+  background: #343a40;
+  color: white;
+  border-color: #343a40;
+}
+
+.lsdo-tab.active.tab-pending {
+  background: #e67700;
+  border-color: #e67700;
+}
+
+.lsdo-tab.active.tab-confirmed {
+  background: #2b8a3e;
+  border-color: #2b8a3e;
+}
+
+.lsdo-tab.active.tab-completed {
+  background: #007bff;
+  border-color: #007bff;
+}
+
+.lsdo-tab.active.tab-rejected {
+  background: #c92a2a;
+  border-color: #c92a2a;
+}
+
+.lsdo-tab-badge {
+  background: #e03131;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.badge-pending {
+  animation: pulse-badge 1.5s infinite;
+}
+
+@keyframes pulse-badge {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.lsdo-tab-count {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.lsdo-loading, .lsdo-empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.lsdo-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #f1f3f5;
+  border-top: 3px solid #007bff;
+  border-radius: 50%;
+  animation: sdp-spin 1s linear infinite;
+  margin: 0 auto 15px auto;
+}
+
+.lsdo-empty-icon {
+  font-size: 42px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.lsdo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+.lsdo-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.lsdo-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+.card-status-pending {
+  border-left: 6px solid #fcc419;
+}
+
+.card-status-confirmed {
+  border-left: 6px solid #40c057;
+}
+
+.card-status-completed {
+  border-left: 6px solid #228be6;
+}
+
+.card-status-rejected, .card-status-cancelled {
+  border-left: 6px solid #fa5252;
+  opacity: 0.85;
+}
+
+.lsdo-card-header {
+  padding: 14px 18px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #edf2f7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.lsdo-card-number {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lsdo-order-label {
+  font-size: 11px;
+  background: #343a40;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.lsdo-card-number strong {
+  font-size: 18px;
+  color: #212529;
+}
+
+.lsdo-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.lsdo-status-pill {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.status-pending {
+  background: #fff3bf;
+  color: #d9480f;
+  border: 1px solid #ffd43b;
+}
+
+.status-confirmed {
+  background: #d3f9d8;
+  color: #2b8a3e;
+  border: 1px solid #b2f2bb;
+}
+
+.status-completed {
+  background: #d0ebff;
+  color: #1864ab;
+  border: 1px solid #a5d8ff;
+}
+
+.status-rejected, .status-cancelled {
+  background: #ffe3e3;
+  color: #c92a2a;
+  border: 1px solid #ffc9c9;
+}
+
+.lsdo-pay-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.pay-paid {
+  background: #e6fcf5;
+  color: #0ca678;
+  border: 1px solid #63e6be;
+}
+
+.pay-store {
+  background: #f1f3f5;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.lsdo-card-body {
+  padding: 18px;
+  flex: 1;
+}
+
+.lsdo-customer-info {
+  margin-bottom: 16px;
+}
+
+.lsdo-customer-name {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.lsdo-customer-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: #495057;
+}
+
+.lsdo-customer-details a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.lsdo-pickup-time {
+  color: #d6336c;
+  font-size: 14px;
+}
+
+.lsdo-date-sub {
+  font-size: 11px;
+  color: #868e96;
+}
+
+.lsdo-customer-msg {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fff9db;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #856404;
+}
+
+.lsdo-items-box {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.lsdo-items-heading {
+  font-size: 12px;
+  font-weight: 700;
+  color: #868e96;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.lsdo-item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #dee2e6;
+  font-size: 13px;
+}
+
+.lsdo-item-row:last-of-type {
+  border-bottom: none;
+}
+
+.lsdo-item-img {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.lsdo-item-name-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.lsdo-item-name {
+  font-weight: 600;
+  color: #212529;
+}
+
+.lsdo-item-size-badge {
+  font-size: 11px;
+  color: #868e96;
+}
+
+.lsdo-item-price-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 12px;
+}
+
+.lsdo-item-price-box strong {
+  color: #333;
+}
+
+.lsdo-total-row {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 2px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.lsdo-total-row strong {
+  font-size: 16px;
+  color: #2b8a3e;
+}
+
+.lsdo-card-actions {
+  padding: 14px 18px;
+  background: #fafbfc;
+  border-top: 1px solid #edf2f7;
+}
+
+.lsdo-action-group-pending {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.lsdo-btn {
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.lsdo-btn-confirm {
+  background: #28a745;
+  color: white;
+}
+
+.lsdo-btn-confirm:hover {
+  background: #218838;
+}
+
+.lsdo-btn-reject {
+  background: #dc3545;
+  color: white;
+}
+
+.lsdo-btn-reject:hover {
+  background: #c82333;
+}
+
+.lsdo-action-group-confirmed {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.lsdo-btn-complete {
+  background: #007bff;
+  color: white;
+}
+
+.lsdo-btn-complete:hover {
+  background: #0069d9;
+}
+
+.lsdo-btn-cancel {
+  background: #6c757d;
+  color: white;
+}
+
+.lsdo-btn-cancel:hover {
+  background: #5a6268;
+}
+
+.lsdo-completed-msg {
+  text-align: center;
+  font-size: 13px;
+  color: #2b8a3e;
+  font-weight: 600;
+}
