@@ -9,7 +9,8 @@ import type { OptionType, TimeOptionType, Cake } from "../../types/types";
 import "../public/OrderCake.css"; // Reuse existing order styles
 
 import { useOrderForm } from '../../hooks/useOrderForm';
-import { useSameDayTimeSlots } from '../../hooks/useSameDayTimeSlots';
+import { useTimeSlots } from '../../hooks/useTimeSlots';
+import { useHoursOptions } from '../../hooks/useHoursOptions';
 
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -29,20 +30,11 @@ export default function OrderSameDayCake() {
   // States for cake data from same-day API
   const [cakesData, setCakesData] = useState<Cake[]>([]);
 
-  // Use custom hook for same-day time slots
-  const { timeSlots } = useSameDayTimeSlots();
+  // Use regular time slots (same configuration as OrderCake)
+  const { timeSlotsData } = useTimeSlots();
 
-  // Format options for react-select
-  const hoursOptions = useMemo(() => {
-    return timeSlots
-      .filter(slot => slot.is_active)
-      .map(slot => ({
-        id: slot.id,
-        value: slot.time,
-        label: slot.time,
-        isDisabled: false
-      }));
-  }, [timeSlots]);
+  // Filter available hours for today using the regular timeslot config
+  const hoursOptions = useHoursOptions(today, timeSlotsData);
 
   const initialCake = {
     cake_id: 0,
