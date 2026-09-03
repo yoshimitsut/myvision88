@@ -41,7 +41,7 @@ export const useSameDayCakeManagement = () => {
   const fetchCakes = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/samedaycake`);
+      const response = await fetch(`${API_URL}/api/sameday-cakes`);
       const data = await response.json();
 
       if (data.success && Array.isArray(data.same_day_cakes)) {
@@ -124,7 +124,7 @@ export const useSameDayCakeManagement = () => {
         formData.append('image', selectedImage);
       }
 
-      const response = await protectedFetch(`${API_URL}/api/samedaycake`, {
+      const response = await protectedFetch(`${API_URL}/api/sameday-cakes`, {
         method: 'POST',
         body: formData,
       });
@@ -179,7 +179,7 @@ export const useSameDayCakeManagement = () => {
         formData.append('image', selectedImage);
       }
 
-      const response = await protectedFetch(`${API_URL}/api/samedaycake/${editingCake.id}`, {
+      const response = await protectedFetch(`${API_URL}/api/sameday-cakes/${editingCake.id}`, {
         method: 'PUT',
         body: formData,
       });
@@ -229,7 +229,7 @@ export const useSameDayCakeManagement = () => {
     if (!confirm('このケーキを削除してもよろしいですか？')) return;
 
     try {
-      const response = await protectedFetch(`${API_URL}/api/samedaycake/${cakeId}`, {
+      const response = await protectedFetch(`${API_URL}/api/sameday-cakes/${cakeId}`, {
         method: 'DELETE',
       });
 

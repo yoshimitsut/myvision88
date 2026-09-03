@@ -16,7 +16,7 @@ export default function SameDayCakes() {
   useEffect(() => {
     window.scrollTo(0, 0);
     setLoading(true);
-    fetch(`${API_URL}/api/samedaycake`)
+    fetch(`${API_URL}/api/sameday-cakes`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.same_day_cakes)) {

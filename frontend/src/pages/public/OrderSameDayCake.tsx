@@ -66,7 +66,7 @@ export default function OrderSameDayCake() {
 
   // Load same day cakes
   useEffect(() => {
-    fetch(`${API_URL}/api/samedaycake`)
+    fetch(`${API_URL}/api/sameday-cakes`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.same_day_cakes)) {

@@ -2,7 +2,7 @@ import './SameDayCakeManagement.css';
 import CakeForm from '../../components/order/CakeForm';
 import { useSameDayCakeManagement } from '../../hooks/useSameDayCakeManagement';
 import { useSameDayTimeSlots } from '../../hooks/useSameDayTimeSlots';
-import { useHoursOptions } from '../../hooks/useHoursOptions';
+
 import { useState } from 'react';
 
 export default function SameDayCakeManagement() {
@@ -36,8 +36,7 @@ export default function SameDayCakeManagement() {
   } = useSameDayCakeManagement();
 
   const { timeSlots, toggleTimeSlot, deleteTimeSlot, addTimeSlot } = useSameDayTimeSlots();
-  // Use regular time slots for same-day orders
-  useHoursOptions(new Date(), timeSlots);
+
 
 
 
