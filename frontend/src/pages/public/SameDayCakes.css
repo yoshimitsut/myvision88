@@ -3,7 +3,8 @@
   min-height: 100vh;
   background-color: var(--store-secondary-color, #fdfbf7);
   font-family: 'Inter', 'Noto Sans JP', sans-serif;
-  padding-top: 80px; /* Space for fixed header */
+  padding-top: 80px;
+  /* Space for fixed header */
   position: relative;
 }
 
@@ -128,8 +129,15 @@
 }
 
 @keyframes modalFadeIn {
-  from { opacity: 0; transform: translateY(20px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .sameday-close-modal-btn {
@@ -146,7 +154,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 10;
   color: #333;
   transition: all 0.2s ease;
@@ -301,21 +309,40 @@
   cursor: not-allowed;
 }
 
+.input-group-today-cake {
+  width: 100%;
+  border-radius: 10px;
+  box-sizing: border-box;
+  padding-bottom: 20px;
+}
+
+.input-group-today-cake input {
+  width: 100%;
+  padding: 20px 0px 13px 10px;
+  border: 1px solid #c1c1c1;
+  border-radius: 10px;
+  color: #000;
+  outline: none;
+  font-weight: bold;
+  font-size: 1.2rem;
+  box-sizing: border-box;
+}
+
 @media (max-width: 768px) {
   .sameday-modal-content {
     flex-direction: column;
     max-height: 90vh;
     overflow-y: auto;
   }
-  
+
   .sameday-modal-main-image {
     min-height: 250px;
   }
-  
+
   .sameday-modal-details {
     padding: 25px;
   }
-  
+
   .sameday-header-section h1 {
     font-size: 2rem;
   }

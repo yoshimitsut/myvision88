@@ -483,7 +483,7 @@ export default function OrderSameDayCake() {
             <h2 className="section-title">お客様情報</h2>
 
             <div className="input-group-row">
-              <div className="input-group">
+              <div className="input-group-today-cake">
                 <div className="field-label-row">
                   <label htmlFor="firstName">姓 (ふりがな)</label>
                   <span className="field-required-badge">必須</span>
@@ -499,7 +499,7 @@ export default function OrderSameDayCake() {
                   className="modern-input"
                 />
               </div>
-              <div className="input-group">
+              <div className="input-group-today-cake">
                 <div className="field-label-row">
                   <label htmlFor="lastName">名 (ふりがな)</label>
                   <span className="field-required-badge">必須</span>
@@ -517,7 +517,7 @@ export default function OrderSameDayCake() {
               </div>
             </div>
 
-            <div className="input-group">
+            <div className="input-group-today-cake">
               <div className="field-label-row">
                 <label htmlFor="email">メールアドレス</label>
                 <span className="field-required-badge">必須</span>
@@ -533,7 +533,7 @@ export default function OrderSameDayCake() {
               />
             </div>
 
-            <div className="input-group">
+            <div className="input-group-today-cake">
               <div className="field-label-row">
                 <label htmlFor="tel">電話番号</label>
                 <span className="field-required-badge">必須</span>
@@ -556,7 +556,7 @@ export default function OrderSameDayCake() {
           <div className="form-section date-time-section">
             <h2 className="section-title">受け取り時間</h2>
 
-            <div className="input-group date-picker-group">
+            <div className="input-group-today-cake date-picker-group">
               <div className="field-label-row">
                 <label>お受け取り日</label>
               </div>
@@ -565,7 +565,7 @@ export default function OrderSameDayCake() {
               </div>
             </div>
 
-            <div className="input-group time-select-group">
+            <div className="input-group-today-cake time-select-group">
               <div className="field-label-row">
                 <label>ご来店時間</label>
                 <span className="field-required-badge">必須</span>
