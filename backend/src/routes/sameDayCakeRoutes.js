@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
           JSON_OBJECT('id', s.id, 'size', s.size, 'price', s.price, 'stock', s.stock, 'is_active', s.is_active)
         ) AS sizes
        FROM same_day_cakes c
-       LEFT JOIN same_day_cake_sizes s ON s.cake_id = c.id
+       LEFT JOIN same_day_cake_sizes s ON s.same_day_cake_id = c.id
        GROUP BY c.id
        ORDER BY c.id DESC`
     );
@@ -55,7 +55,7 @@ router.get('/:id', async (req, res) => {
           JSON_OBJECT('id', s.id, 'size', s.size, 'price', s.price, 'stock', s.stock, 'is_active', s.is_active)
         ) AS sizes
        FROM same_day_cakes c
-       LEFT JOIN same_day_cake_sizes s ON s.cake_id = c.id
+       LEFT JOIN same_day_cake_sizes s ON s.same_day_cake_id = c.id
        WHERE c.id = ?
        GROUP BY c.id`,
       [req.params.id]
@@ -89,7 +89,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       const parsedSizes = JSON.parse(sizes);
       for (const s of parsedSizes) {
         await conn.query(
-          'INSERT INTO same_day_cake_sizes (cake_id, size, price, stock, is_active) VALUES (?, ?, ?, ?, ?)',
+          'INSERT INTO same_day_cake_sizes (same_day_cake_id, size, price, stock, is_active) VALUES (?, ?, ?, ?, ?)',
           [cakeId, s.size, s.price, s.stock ?? 0, s.is_active ?? 1]
         );
       }
@@ -134,7 +134,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
           );
         } else {
           await conn.query(
-            'INSERT INTO same_day_cake_sizes (cake_id, size, price, stock, is_active) VALUES (?, ?, ?, ?, ?)',
+            'INSERT INTO same_day_cake_sizes (same_day_cake_id, size, price, stock, is_active) VALUES (?, ?, ?, ?, ?)',
             [id, s.size, s.price, s.stock ?? 0, s.is_active ?? 1]
           );
         }
