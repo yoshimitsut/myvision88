@@ -52,8 +52,14 @@ const PORT = process.env.PORT || 3001;
 // });
 // app.use('/api/', limiter);
 
-app.use(cors());
-app.options('*', cors());
+const corsOptions = {
+  origin: ['http://localhost:5173', 'https://yoyaku.myvision88.com', 'https://myvision88.com'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+  credentials: true
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
