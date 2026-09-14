@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './OnlineSalesSidebar.css';
 
@@ -53,7 +53,7 @@ export default function OnlineSalesSidebar() {
     try {
       const newStatus = currentStatus ? 0 : 1;
       const token = sessionStorage.getItem('store_token');
-      
+
       const res = await fetch(`${API_URL}/api/same-day-cakes/sizes/${sizeId}/toggle`, {
         method: 'PATCH',
         headers: {
@@ -82,17 +82,17 @@ export default function OnlineSalesSidebar() {
   return (
     <div className="online-sales-sidebar">
       <h3 className="online-sales-title">オンライン販売</h3>
-      
+
       <div className="online-sales-list">
         {cakes.filter(c => c.is_active).map(cake => (
           cake.sizes.map(size => (
             <div key={`${cake.id}-${size.id}`} className="online-sales-item">
               <div className="online-sales-img-wrapper">
                 {cake.image && (
-                  <img 
-                    src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`} 
-                    alt={cake.name} 
-                    className="online-sales-img" 
+                  <img
+                    src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`}
+                    alt={cake.name}
+                    className="online-sales-img"
                   />
                 )}
               </div>
@@ -101,10 +101,10 @@ export default function OnlineSalesSidebar() {
                 <div className="online-sales-size">{size.size}</div>
                 <div className="online-sales-toggle-wrapper">
                   <label className="online-sales-switch">
-                    <input 
-                      type="checkbox" 
-                      checked={!!size.is_active} 
-                      onChange={() => toggleSizeStatus(size.id, size.is_active)} 
+                    <input
+                      type="checkbox"
+                      checked={!!size.is_active}
+                      onChange={() => toggleSizeStatus(size.id, size.is_active)}
                     />
                     <span className="online-sales-slider round"></span>
                   </label>
