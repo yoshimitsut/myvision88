@@ -24,7 +24,7 @@ export default function SameDayCakes() {
           setCakes(activeCakes);
         }
       })
-      .catch((err) => console.error("Erro ao carregar bolos do dia:", err))
+      .catch((err) => console.error("本日のケーキの読み込みエラー:", err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -59,7 +59,7 @@ export default function SameDayCakes() {
     <div className="sameday-page">
       <header className="sameday-header-section">
         <h1>🎂 当日受取ケーキ</h1>
-        <p>Bolos disponíveis para retirada no mesmo dia</p>
+        <p>ケーキは当日お受け取り可能です。</p>
       </header>
 
       <main className="sameday-main">

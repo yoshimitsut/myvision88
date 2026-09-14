@@ -42,7 +42,7 @@ export default function SameDayCakeManagement() {
     <div className="sdc-management">
       <div className="sdc-header">
         <h1>🎂 当日受取ケーキ管理</h1>
-        <p className="sdc-subtitle">Bolos disponíveis para retirada no mesmo dia</p>
+        <p className="sdc-subtitle">ケーキは当日お受け取り可能です。</p>
       </div>
 
       {/* Abas de navegação */}
