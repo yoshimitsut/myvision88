@@ -13,6 +13,7 @@ import { STATUS_OPTIONS } from '../../types/types';
 import { formatDateJP } from "../../utils/formatDateJP";
 import ListGiftOrder from "./ListGiftOrder";
 import ListSameDayOrder from "./ListSameDayOrder";
+import OnlineSalesSidebar from "../../components/admin/OnlineSalesSidebar";
 
 import './ListOrder.css';
 
@@ -1521,14 +1522,16 @@ export default function ListOrder() {
       setActiveTab,
       setShowScanner
     }}>
-      {/* Breadcrumbs */}
-      <div className="admin-breadcrumbs">
-        <span>予約管理</span> / <span>予約ステータス</span> / <span className="current">すべて</span>
-      </div>
+      <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Breadcrumbs */}
+          <div className="admin-breadcrumbs">
+            <span>予約管理</span> / <span>予約ステータス</span> / <span className="current">すべて</span>
+          </div>
 
-      {/* Main Card Container */}
-      <div className="admin-card-container">
-        <h2 className="admin-page-title">予約ステータス</h2>
+          {/* Main Card Container */}
+          <div className="admin-card-container">
+            <h2 className="admin-page-title">予約ステータス</h2>
 
         {/* Category Pills Row */}
         <div className="category-pills-row">
@@ -1723,6 +1726,12 @@ export default function ListOrder() {
             )}
           </>
         )}
+      </div>
+      </div>
+      
+      <div style={{ width: '320px', flexShrink: 0 }}>
+        <OnlineSalesSidebar />
+      </div>
       </div>
     </AdminLayout>
   );

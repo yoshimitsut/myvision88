@@ -1,0 +1,182 @@
+.online-sales-sidebar {
+  background-color: #e5ede8;
+  border-radius: 12px;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.online-sales-title {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.online-sales-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.online-sales-item {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.online-sales-img-wrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-right: 12px;
+  flex-shrink: 0;
+  background-color: #555;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.online-sales-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.online-sales-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.online-sales-name {
+  font-weight: bold;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+  color: #222;
+}
+
+.online-sales-size {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.online-sales-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Switch styling */
+.online-sales-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.online-sales-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.online-sales-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+}
+
+.online-sales-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .online-sales-slider {
+  background-color: #28a745;
+}
+
+input:focus + .online-sales-slider {
+  box-shadow: 0 0 1px #28a745;
+}
+
+input:checked + .online-sales-slider:before {
+  transform: translateX(20px);
+}
+
+.online-sales-slider.round {
+  border-radius: 20px;
+}
+
+.online-sales-slider.round:before {
+  border-radius: 50%;
+}
+
+.online-sales-status-text {
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.online-sales-status-text.active {
+  color: #28a745;
+}
+
+.online-sales-status-text.inactive {
+  color: #888;
+}
+
+.online-sales-stock-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 6px 10px;
+  min-width: 50px;
+}
+
+.online-sales-stock-label {
+  font-size: 0.7rem;
+  color: #888;
+  margin-bottom: 2px;
+}
+
+.online-sales-stock-number {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.online-sales-edit-btn {
+  width: 100%;
+  background-color: #2d7a5b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.online-sales-edit-btn:hover {
+  background-color: #215c44;
+}

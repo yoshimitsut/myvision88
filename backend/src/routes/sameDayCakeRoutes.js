@@ -351,6 +351,33 @@ router.post('/upload', upload, async (req, res) => {
   }
 });
 
+// 🔹 Rota para alterar apenas o is_active de um size
+router.patch('/sizes/:sizeId/toggle', async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const sizeId = req.params.sizeId;
+    const { is_active } = req.body;
+    
+    if (is_active === undefined) {
+      return res.status(400).json({ success: false, error: 'is_active is required' });
+    }
+
+    const isActiveVal = (is_active === 'true' || is_active === true || is_active === '1' || is_active === 1) ? 1 : 0;
+
+    await connection.query(
+      'UPDATE same_day_cake_sizes SET is_active = ? WHERE id = ?',
+      [isActiveVal, sizeId]
+    );
+
+    res.json({ success: true, message: 'Status updated successfully' });
+  } catch (err) {
+    console.error('Erro ao atualizar status do size:', err);
+    res.status(500).json({ success: false, error: 'Erro ao atualizar status' });
+  } finally {
+    connection.release();
+  }
+});
+
 // 🔹 Todas as outras rotas (GET, DELETE, etc)
 router.get('/', async (req, res) => {
   try {
