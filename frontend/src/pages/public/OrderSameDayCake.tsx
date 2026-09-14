@@ -12,6 +12,11 @@ import { useOrderForm } from '../../hooks/useOrderForm';
 import { useTimeSlots } from '../../hooks/useTimeSlots';
 import { useHoursOptions } from '../../hooks/useHoursOptions';
 
+const FRUIT_OPTIONS = [
+  { value: "無し", label: "通常盛り", price: 0, priceText: "+0円" },
+  { value: "有り", label: "フルーツ増し", price: 648, priceText: "+648円" }
+] as const;
+
 
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
@@ -197,7 +202,10 @@ export default function OrderSameDayCake() {
         cake_name: c.name,
         size: c.size,
         amount: c.amount,
-        price: c.price
+        price: c.price,
+        fruit_option: c.fruit_option,
+        message_cake: c.message_cake || '',
+        candle_option: (c as any).candle_option || ''
       }))
     };
 
@@ -421,26 +429,104 @@ export default function OrderSameDayCake() {
                 </div>
               </div>
 
-              {/* Quantity */}
+              {/* 4. フルーツ盛り (Fruit Option Pills Grid) */}
               <div className='order-field-group'>
                 <div className="field-label-row">
-                  <span className="field-label-text">個数</span>
+                  <span className="field-label-text">フルーツ盛り</span>
                   <span className="field-required-badge">必須</span>
                 </div>
-                <div className='quantity-pills-grid'>
-                  {Array.from({ length: 5 }, (_, i) => {
-                    const quantity = i + 1;
-                    const isSelected = cakes[0].amount === quantity;
+                <div className="option-pills-grid">
+                  {FRUIT_OPTIONS.map(option => {
+                    const isSelected = cakes[0].fruit_option === option.value;
                     return (
                       <div
-                        key={quantity}
-                        className={`pill-option-card quantity-pill ${isSelected ? 'selected' : ''}`}
-                        onClick={() => updateCake(0, "amount", quantity)}
-                        style={{ pointerEvents: cakes[0].cake_id ? 'auto' : 'none' }}
+                        key={option.value}
+                        className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                        onClick={() => {
+                          updateCake(0, "fruit_option", option.value);
+                        }}
                       >
-                        {quantity}
+                        {isSelected && <span className="option-pill-checkmark">✓</span>}
+                        <span className="option-pill-title">{option.label}</span>
+                        <span className="option-pill-price">{option.priceText}</span>
                       </div>
-                    )
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 5. メッセージプレート (Message Plate Option Pills Grid) */}
+              <div className='order-field-group'>
+                <div className="field-label-row">
+                  <span className="field-label-text">メッセージプレート</span>
+                  <span className="field-required-badge">必須</span>
+                </div>
+                <div className="option-pills-grid">
+                  {[
+                    { value: "お名前＋おたんじょうびおめでとう", label: "お名前＋おたんじょうびおめでとう", priceText: "+¥100" },
+                    { value: "お名前＋Happy Birthday", label: "お名前＋Happy Birthday", priceText: "+¥100" },
+                    { value: "その他", label: "その他", priceText: "+¥100" }
+                  ].map(pOpt => {
+                    const currentPlateType = (cakes[0] as any).plate_type || "";
+                    const isSelected = currentPlateType === pOpt.value;
+                    return (
+                      <div
+                        key={pOpt.value}
+                        className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                        onClick={() => {
+                          updateCake(0, "plate_type" as any, pOpt.value);
+                          if (pOpt.value !== "その他") {
+                            updateCake(0, "message_cake", pOpt.label);
+                          } else {
+                            updateCake(0, "message_cake", "");
+                          }
+                        }}
+                      >
+                        {isSelected && <span className="option-pill-checkmark">✓</span>}
+                        <span className="option-pill-title">{pOpt.label}</span>
+                        <span className="option-pill-price">{pOpt.priceText}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="plate-message-input-box" style={{ marginTop: '10px' }}>
+                  <input
+                    type="text"
+                    className="order-styled-input"
+                    placeholder="お名前・メッセージをご記入ください (例: たろうくん お誕生日おめでとう)"
+                    value={cakes[0].message_cake || ""}
+                    onChange={(e) => updateCake(0, "message_cake", e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* 6. キャンドル (Candles Option Pills Grid) */}
+              <div className='order-field-group'>
+                <div className="field-label-row">
+                  <span className="field-label-text">キャンドル</span>
+                  <span className="field-required-badge">必須</span>
+                </div>
+                <div className="option-pills-grid">
+                  {[
+                    { value: "ノーマル", label: "ノーマル", priceText: "¥0" },
+                    { value: "ナンバーキャンドル", label: "ナンバーキャンドル", priceText: "¥100" },
+                    { value: "なし", label: "なし", priceText: "¥0" }
+                  ].map(cOpt => {
+                    const isSelected = (cakes[0] as any).candle_option === cOpt.value && (cakes[0] as any).candle_option !== "";
+                    return (
+                      <div
+                        key={cOpt.value}
+                        className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                        onClick={() => {
+                          updateCake(0, "candle_option" as any, cOpt.value);
+                        }}
+                      >
+                        {isSelected && <span className="option-pill-checkmark">✓</span>}
+                        <span className="option-pill-title">{cOpt.label}</span>
+                        {cOpt.priceText && <span className="option-pill-price">{cOpt.priceText}</span>}
+                      </div>
+                    );
                   })}
                 </div>
               </div>

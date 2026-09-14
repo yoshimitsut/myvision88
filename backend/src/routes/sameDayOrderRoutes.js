@@ -64,15 +64,18 @@ router.post('/request', async (req, res) => {
     for (const item of items) {
       await conn.query(
         `INSERT INTO same_day_order_items 
-         (order_id, same_day_cake_id, cake_name, size, amount, price) 
-         VALUES (?,?,?,?,?,?)`,
+         (order_id, same_day_cake_id, cake_name, size, amount, price, fruit_option, message_cake, candle_option) 
+         VALUES (?,?,?,?,?,?,?,?,?)`,
         [
           orderId,
           item.same_day_cake_id || item.cake_id,
           item.cake_name || item.name,
           item.size,
           item.amount || 1,
-          item.price || 0
+          item.price || 0,
+          item.fruit_option || null,
+          item.message_cake || null,
+          item.candle_option || null
         ]
       );
     }
@@ -135,6 +138,9 @@ router.get('/list', async (req, res) => {
         sdoi.size,
         sdoi.amount,
         sdoi.price,
+        sdoi.fruit_option,
+        sdoi.message_cake,
+        sdoi.candle_option,
         sdc.image AS cake_image
       FROM same_day_orders sdo
       LEFT JOIN same_day_order_items sdoi ON sdo.id_order = sdoi.order_id
@@ -205,6 +211,9 @@ router.get('/list', async (req, res) => {
           size: row.size,
           amount: row.amount,
           price: row.price,
+          fruit_option: row.fruit_option,
+          message_cake: row.message_cake,
+          candle_option: row.candle_option,
           image: row.cake_image
         });
       }
