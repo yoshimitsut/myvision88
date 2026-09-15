@@ -37,10 +37,10 @@ router.get('/', async (req, res) => {
        ORDER BY c.id DESC`
     );
     const parsed = cakes.map(c => ({ ...c, sizes: typeof c.sizes === 'string' ? JSON.parse(c.sizes) : c.sizes }));
-    res.json(parsed);
+    res.json({ success: true, same_day_cakes: parsed });
   } catch (err) {
     console.error('Erro ao listar same day cakes:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -60,12 +60,12 @@ router.get('/:id', async (req, res) => {
        GROUP BY c.id`,
       [req.params.id]
     );
-    if (!cakes.length) return res.status(404).json({ error: 'Não encontrado' });
+    if (!cakes.length) return res.status(404).json({ success: false, error: 'Não encontrado' });
     const cake = { ...cakes[0], sizes: typeof cakes[0].sizes === 'string' ? JSON.parse(cakes[0].sizes) : cakes[0].sizes };
-    res.json(cake);
+    res.json({ success: true, cake });
   } catch (err) {
     console.error('Erro ao buscar same day cake:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
