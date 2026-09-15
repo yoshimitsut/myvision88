@@ -33,7 +33,7 @@ export default function OnlineSalesSidebar() {
   const fetchCakes = async () => {
     try {
       const token = sessionStorage.getItem('store_token');
-      const res = await fetch(`${API_URL}/api/same-day-cakes`, {
+      const res = await fetch(`${API_URL}/api/sameday-cakes`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -54,7 +54,7 @@ export default function OnlineSalesSidebar() {
       const newStatus = currentStatus ? 0 : 1;
       const token = sessionStorage.getItem('store_token');
 
-      const res = await fetch(`${API_URL}/api/same-day-cakes/sizes/${sizeId}/toggle`, {
+      const res = await fetch(`${API_URL}/api/sameday-cakes/sizes/${sizeId}/toggle`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

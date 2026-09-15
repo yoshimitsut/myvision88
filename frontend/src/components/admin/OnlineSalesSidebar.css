@@ -1,0 +1,178 @@
+.online-sales-sidebar {
+  background-color: #e6eae6;
+  padding: 20px;
+  border-radius: 8px;
+  font-family: sans-serif;
+  box-sizing: border-box;
+}
+
+.online-sales-title {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 18px;
+  color: #333;
+  font-weight: bold;
+}
+
+.online-sales-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.online-sales-item {
+  background-color: white;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.online-sales-img-wrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.online-sales-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.online-sales-info {
+  flex-grow: 1;
+  margin-left: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.online-sales-name {
+  font-weight: bold;
+  font-size: 14px;
+  color: #222;
+  margin-bottom: 2px;
+}
+
+.online-sales-size {
+  font-size: 12px;
+  color: #777;
+  margin-bottom: 4px;
+}
+
+.online-sales-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.online-sales-status-text {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.online-sales-status-text.active {
+  color: #1a9e69;
+}
+
+.online-sales-status-text.inactive {
+  color: #888;
+}
+
+.online-sales-stock-box {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 45px;
+}
+
+.online-sales-stock-label {
+  font-size: 10px;
+  color: #999;
+}
+
+.online-sales-stock-number {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+  line-height: 1.2;
+}
+
+/* Toggle Switch Styles */
+.online-sales-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.online-sales-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.online-sales-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+}
+
+.online-sales-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .3s;
+}
+
+input:checked + .online-sales-slider {
+  background-color: #1a9e69;
+}
+
+input:checked + .online-sales-slider:before {
+  transform: translateX(16px);
+}
+
+.online-sales-slider.round {
+  border-radius: 20px;
+}
+
+.online-sales-slider.round:before {
+  border-radius: 50%;
+}
+
+/* Edit Button */
+.online-sales-edit-btn {
+  width: 100%;
+  background-color: #2b7d59;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.online-sales-edit-btn:hover {
+  background-color: #236548;
+}
