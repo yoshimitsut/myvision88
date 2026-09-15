@@ -1,6 +1,5 @@
 .gift-management {
   max-width: 1200px;
-  margin: 0 auto;
   padding: 20px;
 }
 
@@ -33,20 +32,21 @@
 }
 
 /* Grid de produtos */
-.gift-grid {
+.gift-grid-manegment {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 20px;
 }
 
-.gift-card {
+.gift-card-manegment {
+  background-color: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
   overflow: hidden;
   transition: box-shadow 0.3s ease;
 }
 
-.gift-card:hover {
+.gift-card-manegment:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -70,8 +70,9 @@
   color: #ccc;
 }
 
-.gift-info-actions {
+.gift-info-actions-manegement {
   padding: 16px;
+  background-color: #fff;
 }
 
 .gift-info h3 {
@@ -185,7 +186,7 @@
   height: 120px;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .image-preview-item img {

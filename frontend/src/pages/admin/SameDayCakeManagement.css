@@ -2,7 +2,6 @@
 
 .sdc-management {
   max-width: 1200px;
-  margin: 0 auto;
   padding: 20px;
   font-family: Arial, sans-serif;
 }
@@ -326,7 +325,7 @@
   background: white;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .sdc-time-table th,
@@ -376,4 +375,3 @@
 .status-btn:hover {
   opacity: 0.8;
 }
-

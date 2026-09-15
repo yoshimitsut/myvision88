@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './GiftManagement.css';
+import AdminLayout from '../../components/admin/AdminLayout';
 
 interface GiftSize {
   id: number;
@@ -372,346 +373,346 @@ export default function GiftManagement() {
   if (error) return <div className="error">エラー: {error}</div>;
 
   return (
-    <div className="gift-management">
-      <h1>🍪 ギフト管理</h1>
+    <AdminLayout>
+      <div className="gift-management">
+        <h1>🍪 ギフト管理</h1>
 
-      {/* ナビゲーションタブ */}
-      <div className="gift-tabs">
-        <button
-          className={`tab-button ${activeTab === 'list' ? 'active' : ''}`}
-          onClick={() => setActiveTab('list')}
-        >
-          📋 ギフト一覧
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'add' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveTab('add');
-            setEditingGift(null);
-            clearForm();
-          }}
-        >
-          ➕ {editingGift ? 'ギフトを編集' : 'ギフトを追加'}
-        </button>
-      </div>
+        {/* ナビゲーションタブ */}
+        <div className="gift-tabs">
+          <button
+            className={`tab-button ${activeTab === 'list' ? 'active' : ''}`}
+            onClick={() => setActiveTab('list')}
+          >
+            📋 ギフト一覧
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'add' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('add');
+              setEditingGift(null);
+              clearForm();
+            }}
+          >
+            ➕ {editingGift ? 'ギフトを編集' : 'ギフトを追加'}
+          </button>
+        </div>
 
-      {/* タブの内容 */}
-      <div className="tab-content">
-        {activeTab === 'list' && (
-          <div className="gift-list-admin">
-            <h2>登録済みギフト一覧</h2>
+        {/* タブの内容 */}
+        <div className="tab-content">
+          {activeTab === 'list' && (
+            <div className="gift-list-admin">
+              <h2>登録済みギフト一覧</h2>
 
-            {giftList.length === 0 ? (
-              <p className="no-gift">登録されているギフトがありません。</p>
-            ) : (
-              <div className="gift-grid">
-                {giftList.map(gift => (
-                  <div key={gift.id} className="gift-card">
-                    <div className="gift-image">
-                      {gift.image ? (
-                        <img
-                          src={`${API_URL}/image/myvision88/${gift.image}`}
-                          alt={gift.name}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/default-gift.jpg';
-                          }}
-                        />
-                      ) : (
-                        <div className="no-image">📷 画像なし</div>
-                      )}
-                    </div>
-
-                    <div className='gift-info-actions'>
-                      <div className="gift-info">
-                        <h3>{gift.name}</h3>
-                        {gift.description && (
-                          <p className="gift-description">{gift.description}</p>
+              {giftList.length === 0 ? (
+                <p className="no-gift">登録されているギフトがありません。</p>
+              ) : (
+                <div className="gift-grid-manegment">
+                  {giftList.map(gift => (
+                    <div key={gift.id} className="gift-card-manegment">
+                      <div className="gift-image">
+                        {gift.image ? (
+                          <img
+                            src={`${API_URL}/image/myvision88/${gift.image}`}
+                            alt={gift.name}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/default-gift.jpg';
+                            }}
+                          />
+                        ) : (
+                          <div className="no-image">📷 画像なし</div>
                         )}
+                      </div>
 
-                        <div className="gift-sizes">
-                          <h4>サイズ/種類:</h4>
-                          {gift.sizes.length === 0 ? (
-                            <p className="no-sizes">登録されているサイズがありません</p>
-                          ) : (
-                            <ul>
-                              {gift.sizes.map(size => (
-                                <li key={size.id}>
-                                  <span className="size-name">{size.size}</span>
-                                  <span className="size-details">
-                                    在庫: {size.stock} | ¥{size.price.toLocaleString('ja-JP')}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
+                      <div className='gift-info-actions-manegement'>
+                        <div className="gift-info">
+                          <h3>{gift.name}</h3>
+                          {gift.description && (
+                            <p className="gift-description">{gift.description}</p>
                           )}
+
+                          <div className="gift-sizes">
+                            <h4>サイズ/種類:</h4>
+                            {gift.sizes.length === 0 ? (
+                              <p className="no-sizes">登録されているサイズがありません</p>
+                            ) : (
+                              <ul>
+                                {gift.sizes.map(size => (
+                                  <li key={size.id}>
+                                    <span className="size-name">{size.size}</span>
+                                    <span className="size-details">
+                                      在庫: {size.stock} | ¥{size.price.toLocaleString('ja-JP')}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="gift-actions">
+                          <button
+                            className="edit-btn"
+                            onClick={() => handleEditGift(gift)}
+                          >
+                            ✏️ 編集
+                          </button>
+                          <button
+                            className="delete-btn"
+                            onClick={() => handleDeleteGift(gift.id)}
+                          >
+                            🗑️ 削除
+                          </button>
                         </div>
                       </div>
-
-                      <div className="gift-actions">
-                        <button
-                          className="edit-btn"
-                          onClick={() => handleEditGift(gift)}
-                        >
-                          ✏️ 編集
-                        </button>
-                        <button
-                          className="delete-btn"
-                          onClick={() => handleDeleteGift(gift.id)}
-                        >
-                          🗑️ 削除
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'add' && (
-          <div className="gift-form-container">
-            <h2>{editingGift ? 'ギフトを編集' : '新しいギフトを追加'}</h2>
-
-            <form onSubmit={editingGift ? handleUpdateGift : handleAddGift} className="gift-form" encType="multipart/form-data">
-              <div className="form-group">
-                <label htmlFor="name">ギフト名 *</label>
-                <input
-                  type="text"
-                  id="name"
-                  value={newGift.name}
-                  onChange={(e) => setNewGift(prev => ({ ...prev, name: e.target.value }))}
-                  required
-                  placeholder="例: マカロン, フィナンシェ, クッキー"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="description">説明</label>
-                <textarea
-                  id="description"
-                  value={newGift.description}
-                  onChange={(e) => setNewGift(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="ギフトの説明（任意）"
-                  rows={3}
-                />
-              </div>
-
-              {/* 🔹 画像セクション */}
-              <div className="form-group">
-                <label>ギフト画像</label>
-
-                <div className="images-preview-grid">
-                  {/* 既存の画像 */}
-                  {existingImages.map((img, index) => (
-                    <div
-                      key={`existing-${img}`}
-                      className={`image-preview-item${
-                        dragSource === 'existing' && dragIndex === index ? ' dragging' : ''
-                      }${dragSource === 'existing' && dragOverIndex === index ? ' drag-over' : ''}`}
-                      draggable
-                      onDragStart={() => handleDragStart(index, 'existing')}
-                      onDragOver={(e) => handleDragOver(e, index)}
-                      onDragLeave={() => setDragOverIndex(null)}
-                      onDrop={() => handleDropExisting(index)}
-                      onDragEnd={handleDragEnd}
-                    >
-                      <div className="image-order-badge">{index + 1}</div>
-                      <img
-                        src={`${API_URL}/image/${FOLDER_URL}/${img}`}
-                        alt={`既存画像 ${index + 1}`}
-                      />
-                      <div className="image-controls">
-                        <button
-                          type="button"
-                          className="move-btn"
-                          onClick={() => moveExistingImage(index, -1)}
-                          disabled={index === 0}
-                          title="左へ移動"
-                        >
-                          ◀
-                        </button>
-                        <button
-                          type="button"
-                          className="remove-image-btn"
-                          onClick={() => removeExistingImage(index)}
-                        >
-                          ❌
-                        </button>
-                        <button
-                          type="button"
-                          className="move-btn"
-                          onClick={() => moveExistingImage(index, 1)}
-                          disabled={index === existingImages.length - 1}
-                          title="右へ移動"
-                        >
-                          ▶
-                        </button>
-                      </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
 
-                  {/* 新しく選択された画像 */}
-                  {imagePreviews.map((preview, index) => (
-                    <div
-                      key={`new-${index}`}
-                      className={`image-preview-item${
-                        dragSource === 'new' && dragIndex === index ? ' dragging' : ''
-                      }${dragSource === 'new' && dragOverIndex === index ? ' drag-over' : ''}`}
-                      draggable
-                      onDragStart={() => handleDragStart(index, 'new')}
-                      onDragOver={(e) => handleDragOver(e, index)}
-                      onDragLeave={() => setDragOverIndex(null)}
-                      onDrop={() => handleDropNew(index)}
-                      onDragEnd={handleDragEnd}
-                    >
-                      <div className="image-order-badge new">
-                        {existingImages.length + index + 1}
+          {activeTab === 'add' && (
+            <div className="gift-form-container">
+              <h2>{editingGift ? 'ギフトを編集' : '新しいギフトを追加'}</h2>
+
+              <form onSubmit={editingGift ? handleUpdateGift : handleAddGift} className="gift-form" encType="multipart/form-data">
+                <div className="form-group">
+                  <label htmlFor="name">ギフト名 *</label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={newGift.name}
+                    onChange={(e) => setNewGift(prev => ({ ...prev, name: e.target.value }))}
+                    required
+                    placeholder="例: マカロン, フィナンシェ, クッキー"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="description">説明</label>
+                  <textarea
+                    id="description"
+                    value={newGift.description}
+                    onChange={(e) => setNewGift(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="ギフトの説明（任意）"
+                    rows={3}
+                  />
+                </div>
+
+                {/* 🔹 画像セクション */}
+                <div className="form-group">
+                  <label>ギフト画像</label>
+
+                  <div className="images-preview-grid">
+                    {/* 既存の画像 */}
+                    {existingImages.map((img, index) => (
+                      <div
+                        key={`existing-${img}`}
+                        className={`image-preview-item${dragSource === 'existing' && dragIndex === index ? ' dragging' : ''
+                          }${dragSource === 'existing' && dragOverIndex === index ? ' drag-over' : ''}`}
+                        draggable
+                        onDragStart={() => handleDragStart(index, 'existing')}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragLeave={() => setDragOverIndex(null)}
+                        onDrop={() => handleDropExisting(index)}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <div className="image-order-badge">{index + 1}</div>
+                        <img
+                          src={`${API_URL}/image/${FOLDER_URL}/${img}`}
+                          alt={`既存画像 ${index + 1}`}
+                        />
+                        <div className="image-controls">
+                          <button
+                            type="button"
+                            className="move-btn"
+                            onClick={() => moveExistingImage(index, -1)}
+                            disabled={index === 0}
+                            title="左へ移動"
+                          >
+                            ◀
+                          </button>
+                          <button
+                            type="button"
+                            className="remove-image-btn"
+                            onClick={() => removeExistingImage(index)}
+                          >
+                            ❌
+                          </button>
+                          <button
+                            type="button"
+                            className="move-btn"
+                            onClick={() => moveExistingImage(index, 1)}
+                            disabled={index === existingImages.length - 1}
+                            title="右へ移動"
+                          >
+                            ▶
+                          </button>
+                        </div>
                       </div>
-                      <img src={preview} alt={`新規画像 ${index + 1}`} />
-                      <div className="image-controls">
+                    ))}
+
+                    {/* 新しく選択された画像 */}
+                    {imagePreviews.map((preview, index) => (
+                      <div
+                        key={`new-${index}`}
+                        className={`image-preview-item${dragSource === 'new' && dragIndex === index ? ' dragging' : ''
+                          }${dragSource === 'new' && dragOverIndex === index ? ' drag-over' : ''}`}
+                        draggable
+                        onDragStart={() => handleDragStart(index, 'new')}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragLeave={() => setDragOverIndex(null)}
+                        onDrop={() => handleDropNew(index)}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <div className="image-order-badge new">
+                          {existingImages.length + index + 1}
+                        </div>
+                        <img src={preview} alt={`新規画像 ${index + 1}`} />
+                        <div className="image-controls">
+                          <button
+                            type="button"
+                            className="move-btn"
+                            onClick={() => moveNewImage(index, -1)}
+                            disabled={index === 0}
+                            title="左へ移動"
+                          >
+                            ◀
+                          </button>
+                          <button
+                            type="button"
+                            className="remove-image-btn"
+                            onClick={() => removeSelectedImage(index)}
+                          >
+                            ❌
+                          </button>
+                          <button
+                            type="button"
+                            className="move-btn"
+                            onClick={() => moveNewImage(index, 1)}
+                            disabled={index === imagePreviews.length - 1}
+                            title="右へ移動"
+                          >
+                            ▶
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {(existingImages.length > 0 || imagePreviews.length > 0) && (
+                    <small className="help-text" style={{ marginTop: '5px' }}>
+                      💡 ドラッグ＆ドロップ、または矢印ボタンで画像の順番を変更できます。1番目の画像がメイン画像になります。
+                    </small>
+                  )}
+
+                  {/* ファイル入力 */}
+                  <input
+                    type="file"
+                    id="image-upload"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageSelect}
+                    className="image-upload-input"
+                  />
+                  <label htmlFor="image-upload" className="image-upload-label">
+                    📁 画像を追加 (複数選択可)
+                  </label>
+
+                  {selectedImages.length > 0 && (
+                    <div className="file-info">
+                      <small>{selectedImages.length} 個の新しい画像が選択されています</small>
+                    </div>
+                  )}
+
+                  <small className="help-text">
+                    対応形式: JPG, PNG, GIF。最大サイズ: 5MB/枚
+                  </small>
+                </div>
+
+                {/* ギフトのサイズ/種類 */}
+                <div className="sizes-section">
+                  <div className="sizes-header">
+                    <h3>サイズ/種類と価格 *</h3>
+                    <button type="button" onClick={addNewSize} className="add-size-btn">
+                      ➕ サイズ/種類を追加
+                    </button>
+                  </div>
+
+                  {newSizes.map((size, index) => (
+                    <div key={index} className="size-row">
+                      <div className="size-input-group">
+                        <label>サイズ/種類</label>
+                        <input
+                          type="text"
+                          value={size.size}
+                          onChange={(e) => updateSize(index, 'size', e.target.value)}
+                          placeholder="例: 小袋, 箱入り, 5個入り"
+                          required
+                        />
+                      </div>
+
+                      <div className="size-input-group">
+                        <label>在庫</label>
+                        <input
+                          type="number"
+                          value={size.stock}
+                          onChange={(e) => updateSize(index, 'stock', e.target.value)}
+                          min="0"
+                          required
+                        />
+                      </div>
+
+                      <div className="size-input-group">
+                        <label>価格 (¥)</label>
+                        <input
+                          type="number"
+                          value={size.price}
+                          onChange={(e) => updateSize(index, 'price', e.target.value)}
+                          min="0"
+                          required
+                        />
+                      </div>
+
+                      {newSizes.length > 1 && (
                         <button
                           type="button"
-                          className="move-btn"
-                          onClick={() => moveNewImage(index, -1)}
-                          disabled={index === 0}
-                          title="左へ移動"
-                        >
-                          ◀
-                        </button>
-                        <button
-                          type="button"
-                          className="remove-image-btn"
-                          onClick={() => removeSelectedImage(index)}
+                          onClick={() => removeSize(index)}
+                          className="remove-size-btn"
                         >
                           ❌
                         </button>
-                        <button
-                          type="button"
-                          className="move-btn"
-                          onClick={() => moveNewImage(index, 1)}
-                          disabled={index === imagePreviews.length - 1}
-                          title="右へ移動"
-                        >
-                          ▶
-                        </button>
-                      </div>
+                      )}
                     </div>
                   ))}
                 </div>
 
-                {(existingImages.length > 0 || imagePreviews.length > 0) && (
-                  <small className="help-text" style={{ marginTop: '5px' }}>
-                    💡 ドラッグ＆ドロップ、または矢印ボタンで画像の順番を変更できます。1番目の画像がメイン画像になります。
-                  </small>
-                )}
-
-                {/* ファイル入力 */}
-                <input
-                  type="file"
-                  id="image-upload"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageSelect}
-                  className="image-upload-input"
-                />
-                <label htmlFor="image-upload" className="image-upload-label">
-                  📁 画像を追加 (複数選択可)
-                </label>
-
-                {selectedImages.length > 0 && (
-                  <div className="file-info">
-                    <small>{selectedImages.length} 個の新しい画像が選択されています</small>
-                  </div>
-                )}
-
-                <small className="help-text">
-                  対応形式: JPG, PNG, GIF。最大サイズ: 5MB/枚
-                </small>
-              </div>
-
-              {/* ギフトのサイズ/種類 */}
-              <div className="sizes-section">
-                <div className="sizes-header">
-                  <h3>サイズ/種類と価格 *</h3>
-                  <button type="button" onClick={addNewSize} className="add-size-btn">
-                    ➕ サイズ/種類を追加
+                <div className="form-actions">
+                  <button
+                    type="submit"
+                    className="submit-btn"
+                    disabled={uploading}
+                  >
+                    {uploading ? '⏳ 処理中...' : editingGift ? '💾 ギフトを更新' : '➕ ギフトを追加'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab('list');
+                      setEditingGift(null);
+                      clearForm();
+                    }}
+                    className="cancel-btn"
+                    disabled={uploading}
+                  >
+                    ↩️ 戻る
                   </button>
                 </div>
-
-                {newSizes.map((size, index) => (
-                  <div key={index} className="size-row">
-                    <div className="size-input-group">
-                      <label>サイズ/種類</label>
-                      <input
-                        type="text"
-                        value={size.size}
-                        onChange={(e) => updateSize(index, 'size', e.target.value)}
-                        placeholder="例: 小袋, 箱入り, 5個入り"
-                        required
-                      />
-                    </div>
-
-                    <div className="size-input-group">
-                      <label>在庫</label>
-                      <input
-                        type="number"
-                        value={size.stock}
-                        onChange={(e) => updateSize(index, 'stock', e.target.value)}
-                        min="0"
-                        required
-                      />
-                    </div>
-
-                    <div className="size-input-group">
-                      <label>価格 (¥)</label>
-                      <input
-                        type="number"
-                        value={size.price}
-                        onChange={(e) => updateSize(index, 'price', e.target.value)}
-                        min="0"
-                        required
-                      />
-                    </div>
-
-                    {newSizes.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeSize(index)}
-                        className="remove-size-btn"
-                      >
-                        ❌
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="form-actions">
-                <button
-                  type="submit"
-                  className="submit-btn"
-                  disabled={uploading}
-                >
-                  {uploading ? '⏳ 処理中...' : editingGift ? '💾 ギフトを更新' : '➕ ギフトを追加'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab('list');
-                    setEditingGift(null);
-                    clearForm();
-                  }}
-                  className="cancel-btn"
-                  disabled={uploading}
-                >
-                  ↩️ 戻る
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
+              </form>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
