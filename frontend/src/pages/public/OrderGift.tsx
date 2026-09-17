@@ -35,6 +35,55 @@ interface ShippingAddress {
   address2: string;
 }
 
+// ==================== OPÇÕES DE NOSHI (熨斗) ====================
+const NOSHI_CATEGORIES = [
+  { id: '1', label: '紅白蝶結び一般' },
+  { id: '2', label: 'ご結婚' },
+  { id: '3', label: 'ご出産' },
+  { id: '4', label: 'お見舞・快気祝' },
+  { id: '5', label: '仏事用（黒白）' },
+];
+
+const NOSHI_MESSAGES: Record<string, string[]> = {
+  '1': [
+    '無地（紅白蝶結び）',
+    '御礼（紅白蝶結び）',
+    '御祝（紅白蝶結び）',
+    '記念品（紅白蝶結び）',
+    '内祝（紅白蝶結び）お祝いのお返し',
+    'お世話になりました（紅白蝶結び）',
+    '粗品（紅白蝶結び）',
+    '御挨拶（紅白蝶結び）',
+    'いつもありがとう（紅白蝶結び）',
+    '心ばかり（紅白蝶結び）',
+    '御誕生日御祝（紅白蝶結び）',
+    'お誕生日おめでとう（紅白蝶結び）',
+    '初節句御祝（紅白蝶結び）',
+  ],
+  '2': [
+    '無地（紅白10本結び切り）',
+    '寿（紅白10本結び切り）',
+    '御祝（紅白10本結び切り）',
+    '内祝（紅白10本結び切り）婚礼祝いのお返し',
+    '御挨拶（紅白10本結び切り）',
+  ],
+  '3': [
+    '内祝（紅白蝶結び）お祝いのお返し',
+  ],
+  '4': [
+    '御見舞（紅白5本結び切り）',
+    '快気祝（紅白5本結び切り）',
+  ],
+  '5': [
+    '無地（黒白）',
+    '志（黒白）',
+    '満中陰志（黒白）',
+    '御供（黒白）',
+    '御仏前（黒白）',
+    '御霊前（黒白）',
+  ],
+};
+
 // ==================== COMPONENTE PRINCIPAL ====================
 export default function OrderGift() {
   const navigate = useNavigate();
@@ -68,6 +117,22 @@ export default function OrderGift() {
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'store'>('card');
   const [paymentStep, setPaymentStep] = useState<'form' | 'payment'>('form');
   const [paymentKey, setPaymentKey] = useState(0);
+
+  const [noshiRequired, setNoshiRequired] = useState<'' | '必要' | '不要'>('');
+  const [noshiCategory, setNoshiCategory] = useState('');
+  const [noshiMessage, setNoshiMessage] = useState('');
+
+  const handleNoshiRequiredChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value as '' | '必要' | '不要';
+    setNoshiRequired(value);
+    setNoshiCategory('');
+    setNoshiMessage('');
+  };
+
+  const handleNoshiCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setNoshiCategory(e.target.value);
+    setNoshiMessage('');
+  };
 
   // Load cart from sessionStorage
   useEffect(() => {
@@ -134,6 +199,11 @@ export default function OrderGift() {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
+    if (noshiRequired === '必要' && (!noshiCategory || !noshiMessage)) {
+      alert('熨斗の表書きを選択してください。');
+      setIsSubmitting(false);
+      return;
+    }
     // Validate delivery address if shipping
     if (deliveryMethod === 'shipping') {
       if (!shippingAddress.postalCode || !shippingAddress.prefecture ||
@@ -174,6 +244,9 @@ export default function OrderGift() {
         status: 'b',
         message: formData.message,
         total_amount: totalAmount,
+        noshi_required: noshiRequired,
+        noshi_category: noshiRequired === '必要' ? noshiCategory : null,
+        noshi_message: noshiRequired === '必要' ? noshiMessage : null,
         items: cartItems.map(item => ({
           gift_id: item.gift_id,
           size: item.size,
@@ -428,6 +501,58 @@ export default function OrderGift() {
                   onChange={handleInputChange}
                   required
                 />
+
+                {/* ==================== のし紙 ==================== */}
+                <div className="og-noshi-fields" style={{ marginTop: '1rem' }}>
+                  <div className="og-address-field">
+                    <label htmlFor="noshiRequired">熨斗（のし）</label>
+                    <select
+                      id="noshiRequired"
+                      value={noshiRequired}
+                      onChange={handleNoshiRequiredChange}
+                    >
+                      <option value="">選択してください</option>
+                      <option value="必要">必要</option>
+                      <option value="不要">不要</option>
+                    </select>
+                  </div>
+
+                  {noshiRequired === '必要' && (
+                    <div className="og-address-field" style={{ marginTop: '0.75rem' }}>
+                      <label htmlFor="noshiCategory">用途を選択</label>
+                      <select
+                        id="noshiCategory"
+                        value={noshiCategory}
+                        onChange={handleNoshiCategoryChange}
+                      >
+                        <option value="">選択してください</option>
+                        {NOSHI_CATEGORIES.map(cat => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {noshiCategory && (
+                    <div className="og-address-field" style={{ marginTop: '0.75rem' }}>
+                      <label htmlFor="noshiMessage">表書きを選択</label>
+                      <select
+                        id="noshiMessage"
+                        value={noshiMessage}
+                        onChange={(e) => setNoshiMessage(e.target.value)}
+                      >
+                        <option value="">選択してください</option>
+                        {NOSHI_MESSAGES[noshiCategory]?.map((msg, i) => (
+                          <option key={i} value={msg}>
+                            {msg}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
