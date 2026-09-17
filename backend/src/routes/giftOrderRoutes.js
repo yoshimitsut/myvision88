@@ -19,8 +19,9 @@ router.post('/reservar', async (req, res) => {
       `INSERT INTO gift_orders 
        (first_name, last_name, tel, email, delivery_method, 
         postal_code, prefecture, city, address1, address2,
-        status, message, payment_intent_id, payment_status, total_amount) 
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        status, message, payment_intent_id, payment_status, total_amount,
+        noshi_required, noshi_category, noshi_message) 
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         newOrder.first_name,
         newOrder.last_name,
@@ -36,7 +37,10 @@ router.post('/reservar', async (req, res) => {
         newOrder.message || '',
         newOrder.payment_intent_id || null,
         newOrder.payment_intent_id ? 'paid' : 'pending',
-        newOrder.total_amount || 0
+        newOrder.total_amount || 0,
+        newOrder.noshi_required || null,
+        newOrder.noshi_category || null,
+        newOrder.noshi_message || null,
       ]
     );
 
@@ -262,7 +266,7 @@ router.put('/:id_order', async (req, res) => {
     // Se for cancelamento, devolver estoque e enviar email
     if (status === 'e' && previousStatus !== 'e') {
       const [orderItems] = await conn.query('SELECT * FROM gift_order_items WHERE order_id=?', [id_order]);
-      
+
       // Devolver estoque
       for (const item of orderItems) {
         await conn.query(
