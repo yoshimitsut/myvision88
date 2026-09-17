@@ -182,8 +182,8 @@ router.post('/', (req, res, next) => {
       if (Array.isArray(sizesArray) && sizesArray.length > 0) {
         for (const size of sizesArray) {
           await connection.query(
-            'INSERT INTO gift_sizes (gift_id, size, stock, price) VALUES (?, ?, ?, ?)',
-            [giftId, size.size, size.stock || 0, size.price || 0]
+            'INSERT INTO gift_sizes (gift_id, size, stock, price, box_size) VALUES (?, ?, ?, ?, ?)',
+            [giftId, size.size, size.stock || 0, size.price || 0, size.box_size || 60]
           );
         }
       }
@@ -321,8 +321,8 @@ router.put('/:id', (req, res, next) => {
       if (Array.isArray(sizesArray) && sizesArray.length > 0) {
         for (const size of sizesArray) {
           await connection.query(
-            'INSERT INTO gift_sizes (gift_id, size, stock, price) VALUES (?, ?, ?, ?)',
-            [giftId, size.size, size.stock || 0, size.price || 0]
+            'INSERT INTO gift_sizes (gift_id, size, stock, price, box_size) VALUES (?, ?, ?, ?, ?)',
+            [giftId, size.size, size.stock || 0, size.price || 0, size.box_size || 60]
           );
         }
       }

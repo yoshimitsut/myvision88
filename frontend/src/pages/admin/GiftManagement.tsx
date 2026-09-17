@@ -7,6 +7,7 @@ interface GiftSize {
   size: string;
   stock: number;
   price: number;
+  box_size: number; // Kuroneko box size (60,80,...)
 }
 
 interface Gift {
@@ -35,7 +36,7 @@ export default function GiftManagement() {
     image: ''
   });
   const [newSizes, setNewSizes] = useState<Omit<GiftSize, 'id'>[]>([
-    { size: '', stock: 0, price: 0 }
+    { size: '', stock: 0, price: 0, box_size: 60 }
   ]);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -184,7 +185,7 @@ export default function GiftManagement() {
   // 🔹 フォームをクリア
   const clearForm = () => {
     setNewGift({ name: '', description: '', image: '' });
-    setNewSizes([{ size: '', stock: 0, price: 0 }]);
+    setNewSizes([{ size: '', stock: 0, price: 0, box_size: 60 }]);
     setSelectedImages([]);
     setImagePreviews([]);
     setExistingImages([]);
@@ -309,8 +310,23 @@ export default function GiftManagement() {
 
   // 🔹 新しいサイズを追加
   const addNewSize = () => {
-    setNewSizes(prev => [...prev, { size: '', stock: 0, price: 0 }]);
+    setNewSizes(prev => [...prev, { size: '', stock: 0, price: 0, box_size: 60 }]);
   };
+
+  // 🔹 サイズを更新
+  const updateSize = (index: number, key: keyof GiftSize, value: any) => {
+    setNewSizes(prev => {
+      const updated = [...prev];
+      // Ensure numeric fields are stored as numbers
+      const numericKeys: (keyof GiftSize)[] = ['stock', 'price', 'box_size'];
+      updated[index] = {
+        ...updated[index],
+        [key]: numericKeys.includes(key) ? Number(value) : value,
+      };
+      return updated;
+    });
+  };
+  
 
   // 🔹 サイズを削除
   const removeSize = (index: number) => {
@@ -319,14 +335,7 @@ export default function GiftManagement() {
     }
   };
 
-  // 🔹 サイズを更新
-  const updateSize = (index: number, field: keyof Omit<GiftSize, 'id'>, value: string | number) => {
-    setNewSizes(prev =>
-      prev.map((size, i) =>
-        i === index ? { ...size, [field]: field === 'size' ? value : Number(value) || 0 } : size
-      )
-    );
-  };
+
 
   // 🔹 ギフトを削除
   const handleDeleteGift = async (giftId: number) => {
@@ -362,10 +371,11 @@ export default function GiftManagement() {
       description: gift.description || '',
       image: gift.image || ''
     });
-    setNewSizes(gift.sizes.length > 0 ? gift.sizes : [{ size: '', stock: 0, price: 0 }]);
+    setNewSizes(gift.sizes.length > 0 ? gift.sizes : [{ size: '', stock: 0, price: 0, box_size: 60 }]);
     setExistingImages(gift.images || []);
     setImagePreviews([]);
     setSelectedImages([]);
+    // Switch to the add/edit tab so the form becomes visible
     setActiveTab('add');
   };
 
@@ -640,50 +650,64 @@ export default function GiftManagement() {
                   </div>
 
                   {newSizes.map((size, index) => (
-                    <div key={index} className="size-row">
-                      <div className="size-input-group">
-                        <label>サイズ/種類</label>
-                        <input
-                          type="text"
-                          value={size.size}
-                          onChange={(e) => updateSize(index, 'size', e.target.value)}
-                          placeholder="例: 小袋, 箱入り, 5個入り"
-                          required
-                        />
-                      </div>
+                    <div className="size-row" key={index}>
+  <div className="size-input-group">
+    <label>サイズ/種類</label>
+    <input
+      type="text"
+      value={size.size}
+      onChange={(e) => updateSize(index, 'size', e.target.value)}
+      placeholder="例: 小袋, 箱入り, 5個入り"
+      required
+    />
+  </div>
 
-                      <div className="size-input-group">
-                        <label>在庫</label>
-                        <input
-                          type="number"
-                          value={size.stock}
-                          onChange={(e) => updateSize(index, 'stock', e.target.value)}
-                          min="0"
-                          required
-                        />
-                      </div>
+  <div className="size-input-group">
+    <label>在庫</label>
+    <input
+      type="number"
+      value={size.stock}
+      onChange={(e) => updateSize(index, 'stock', e.target.value)}
+      min="0"
+      required
+    />
+  </div>
 
-                      <div className="size-input-group">
-                        <label>価格 (¥)</label>
-                        <input
-                          type="number"
-                          value={size.price}
-                          onChange={(e) => updateSize(index, 'price', e.target.value)}
-                          min="0"
-                          required
-                        />
-                      </div>
+  <div className="size-input-group">
+    <label>価格 (¥)</label>
+    <input
+      type="number"
+      value={size.price}
+      onChange={(e) => updateSize(index, 'price', e.target.value)}
+      min="0"
+      required
+    />
+  </div>
 
-                      {newSizes.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeSize(index)}
-                          className="remove-size-btn"
-                        >
-                          ❌
-                        </button>
-                      )}
-                    </div>
+  <div className="size-input-group">
+    <label>箱サイズ (例: 60)</label>
+    <input
+      type="number"
+      value={size.box_size}
+      onChange={(e) => updateSize(index, 'box_size', e.target.value)}
+      min="60"
+      step="20"
+      required
+    />
+  </div>
+
+  {newSizes.length > 1 && (
+    <button
+      type="button"
+      onClick={() => removeSize(index)}
+      className="remove-size-btn"
+    >
+      ❌
+    </button>
+  )}
+</div>
+
+                    
                   ))}
                 </div>
 
