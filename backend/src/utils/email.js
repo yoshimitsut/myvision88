@@ -21,7 +21,7 @@ async function getTransporter() {
         getStoreConfig('mail_store'),
         getStoreConfig('mail_pass')
     ]);
-    
+
     return nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,
@@ -50,7 +50,7 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
     try {
         const qrCodeBuffer = await QRCode.toBuffer(String(orderId), { type: 'png', width: 400 });
         const qrCodeContentId = 'qrcode_order_id';
-        
+
         // Carrega as configurações uma única vez
         const config = await loadStoreConfig();
         const resend = await getResendInstance();
@@ -71,10 +71,10 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
             <h3 style="border-bottom: 2px solid #333; padding-bottom: 5px;">ご注文商品</h3>
                     
             ${newOrder.cakes.map(cake => {
-                const fruitPrice = cake.fruit_option === '有り' ? 648 : 0;
-                const cakeTotalPrice = (cake.price + fruitPrice) * cake.amount;
+            const fruitPrice = cake.fruit_option === '有り' ? 648 : 0;
+            const cakeTotalPrice = (cake.price + fruitPrice) * cake.amount;
 
-                return `
+            return `
                     <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
                         <tr>
                             <td style="width: 120px; padding: 15px 0px 15px 15px; vertical-align: top;">
@@ -102,10 +102,10 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
                 <h3 style="margin: 0; color: #000;">合計金額</h3>
                 <p style="font-size: 24px; font-weight: bold; margin: 10px 0 0 0;">
                     ¥${Math.trunc(newOrder.cakes.reduce((total, cake) => {
-                        const fruitPrice = cake.fruit_option === '有り' ? 648 : 0;
-                        return total + ((cake.price + fruitPrice) * cake.amount)
-                        }, 0)).toLocaleString("ja-JP")
-                    }
+                const fruitPrice = cake.fruit_option === '有り' ? 648 : 0;
+                return total + ((cake.price + fruitPrice) * cake.amount)
+            }, 0)).toLocaleString("ja-JP")
+            }
                     <span style="font-size: 14px; font-weight: normal;">(税込)</span>
                 </p>
                 <p><strong style="color: red;">事前にお支払いで受け取りスムーズ</strong></p>
@@ -156,11 +156,11 @@ async function sendOrderUpdateNotification(orderData) {
     try {
         const qrCodeBuffer = await QRCode.toBuffer(String(orderData.id_order).padStart(4, "0"), { type: 'png', width: 400 });
         const qrCodeContentId = 'qrcode_order_id';
-        
+
         // Carrega as configurações uma única vez
         const config = await loadStoreConfig();
         const transporter = await getTransporter();
-        
+
         const cakeListHtml = orderData.cakes.map(cake => {
             const fruitPrice = cake.fruit_option === '有り' ? 648 : 0;
             const cakeTotalPrice = (cake.price + fruitPrice) * cake.amount;
@@ -239,7 +239,7 @@ async function sendOrderUpdateNotification(orderData) {
                 contentId: qrCodeContentId,
 
                 contentDisposition: 'inline',
-                contentType: 'image/png', 
+                contentType: 'image/png',
                 cid: qrCodeContentId
             }]
         };
@@ -267,7 +267,7 @@ async function sendCancellationNotification(order, cakesDetails) {
         `).join('');
 
         const formattedDate = formatDateJP(order.date);
-        
+
         // Carrega as configurações uma única vez
         const config = await loadStoreConfig();
         const transporter = await getTransporter();
@@ -400,7 +400,7 @@ async function sendNewGiftOrderConfirmation(newOrder, orderId) {
         const QRCode = require('qrcode');
         const qrCodeBuffer = await QRCode.toBuffer(`G-${String(orderId)}`, { type: 'png', width: 400 });
         const qrCodeContentId = 'qrcode_gift_order_id';
-        
+
         const config = await loadStoreConfig();
         const resend = await getResendInstance();
 
@@ -409,7 +409,7 @@ async function sendNewGiftOrderConfirmation(newOrder, orderId) {
         }, 0);
 
         const deliveryLabel = newOrder.delivery_method === 'shipping' ? '配送' : '店舗受取';
-        
+
         const addressHtml = newOrder.delivery_method === 'shipping' ? `
             <div style="background: #f0f8ff; padding: 12px; border-radius: 6px; margin: 10px 0;">
                 <p style="margin: 5px 0;"><strong>配送先住所:</strong></p>
@@ -436,7 +436,7 @@ async function sendNewGiftOrderConfirmation(newOrder, orderId) {
             // Pasta de upload padrão é 'myvision88' se config.folder_img não estiver definido ou for diferente
             const folder = config.folder_img || 'myvision88';
             const imagePath = path.join(process.cwd(), 'uploads', folder, item.image);
-            
+
             if (item.image && fs.existsSync(imagePath)) {
                 attachments.push({
                     filename: item.image,
@@ -459,13 +459,21 @@ async function sendNewGiftOrderConfirmation(newOrder, orderId) {
             ${addressHtml}
             <p>メッセージ: ${newOrder.message || '無し'}</p>
 
+            ${newOrder.noshi_required === '必要' ? `
+                <div style="background: #fdf5e6; padding: 12px; border-radius: 6px; margin: 10px 0; border: 1px solid #f5deb3;">
+                    <p style="margin: 5px 0; color: #856404;"><strong>🎁 熨斗（のし）設定</strong></p>
+                    <p style="margin: 5px 0;"><strong>種類:</strong> ${newOrder.noshi_category || '指定なし'}</p>
+                    <p style="margin: 5px 0;"><strong>名入れ (Nome):</strong> ${newOrder.noshi_message || '無し'}</p>
+                </div>
+                ` : ''}
+                
             <h3 style="border-bottom: 2px solid #333; padding-bottom: 5px;">ご注文商品</h3>
                     
             ${itemsWithCid.map(item => {
-                const itemTotal = item.price * item.amount;
-                const imgSrc = item.cid ? `cid:${item.cid}` : `${config.site_back}/image/${config.folder_img}/${item.image}`;
-                
-                return `
+            const itemTotal = item.price * item.amount;
+            const imgSrc = item.cid ? `cid:${item.cid}` : `${config.site_back}/image/${config.folder_img}/${item.image}`;
+
+            return `
                     <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse; background: #f9f9f9; border-radius: 8px; overflow: hidden;">
                         <tr>
                             <td style="width: 120px; padding: 15px 0px 15px 15px; vertical-align: top;">
@@ -485,7 +493,7 @@ async function sendNewGiftOrderConfirmation(newOrder, orderId) {
                         </tr>
                     </table>
                 `;
-            }).join('')}
+        }).join('')}
 
             <div style="max-width: 400px; background: #ddd; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
                 <h3 style="margin: 0; color: #000;">合計金額</h3>
@@ -543,7 +551,7 @@ async function sendGiftCancellationNotification(order, itemsDetails) {
         `).join('');
 
         const formattedDate = formatDateJP(order.created_at);
-        
+
         const config = await loadStoreConfig();
         const transporter = await getTransporter();
 
