@@ -159,6 +159,7 @@ export type GiftSize = {
   size: string;
   stock: number;
   price: number;
+  box_size: number;
 };
 
 export type Gift = {

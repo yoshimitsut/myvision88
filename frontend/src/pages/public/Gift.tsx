@@ -13,6 +13,7 @@ interface CartItem {
   size: string;
   price: number;
   amount: number;
+  box_size: number;
   image: string | null;
 }
 
@@ -66,6 +67,7 @@ export default function Gift() {
       size: sizeObj.size,
       price: sizeObj.price,
       amount: selectedAmount,
+      box_size: sizeObj.box_size || 60,
       image: selectedGift.images && selectedGift.images.length > 0 ? selectedGift.images[0] : selectedGift.image || null
     };
 

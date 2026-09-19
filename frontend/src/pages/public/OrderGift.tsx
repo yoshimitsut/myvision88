@@ -16,6 +16,7 @@ interface CartItem {
   size: string;
   price: number;
   amount: number;
+  box_size?: number; // pode ser undefined para itens do carrinho antigo salvo
   image: string | null;
 }
 
@@ -150,8 +151,37 @@ export default function OrderGift() {
     }
   }, [navigate]);
 
-  // Calculate total
-  const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.amount), 0);
+  // ==================== SHIPPING CALCULATION ====================
+  const calculateShippingCost = () => {
+    if (deliveryMethod !== 'shipping' || !shippingAddress.prefecture) return 0;
+    
+    // Obter o maior box_size dos itens no carrinho.
+    // Se algum item não tiver box_size (carrinho antigo), assume 60.
+    const maxBoxSize = cartItems.reduce((max, item) => Math.max(max, item.box_size || 60), 60);
+    const isSize80 = maxBoxSize >= 80;
+
+    const pref = shippingAddress.prefecture;
+    
+    const hokkaido = ['北海道'];
+    const tohoku = ['青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県'];
+    const kyushu = ['福岡県', '佐賀県', '長崎県', '熊本県', '大分県', '宮崎県', '鹿児島県'];
+    const okinawa = ['沖縄県'];
+    
+    // Everything else (Kanto, Kansai, Chubu, Chugoku, Shikoku, Shinetsu, Hokuriku)
+    
+    if (hokkaido.includes(pref)) return isSize80 ? 2790 : 2160;
+    if (tohoku.includes(pref)) return isSize80 ? 2680 : 2050;
+    if (kyushu.includes(pref)) return isSize80 ? 2400 : 1770;
+    if (okinawa.includes(pref)) return isSize80 ? 1940 : 1370;
+    
+    // Default para as demais regiões
+    return isSize80 ? 2560 : 1930;
+  };
+
+  // Calculate totals
+  const subTotalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.amount), 0);
+  const shippingFee = calculateShippingCost();
+  const totalAmount = subTotalAmount + shippingFee;
 
   // ==================== HANDLERS ====================
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -451,8 +481,18 @@ export default function OrderGift() {
                     </div>
                   </div>
                 ))}
+                <div className="og-cart-total" style={{ borderTop: 'none', paddingBottom: '4px', paddingTop: '4px' }}>
+                  <span>小計</span>
+                  <span>¥{subTotalAmount.toLocaleString()}</span>
+                </div>
+                {deliveryMethod === 'shipping' && shippingAddress.prefecture && (
+                  <div className="og-cart-total" style={{ borderTop: 'none', paddingBottom: '4px', paddingTop: '4px', fontSize: '0.9rem', color: '#666' }}>
+                    <span>送料 (ヤマト運輸)</span>
+                    <span>¥{shippingFee.toLocaleString()}</span>
+                  </div>
+                )}
               </div>
-              <div className="og-cart-total">
+              <div className="og-cart-total" style={{ marginTop: '0', paddingTop: '12px' }}>
                 <span>合計</span>
                 <span className="og-total-price">¥{totalAmount.toLocaleString()}</span>
               </div>
@@ -749,7 +789,17 @@ export default function OrderGift() {
                 <span>配送方法</span>
                 <span>{deliveryMethod === 'pickup' ? '店舗受取' : '配送'}</span>
               </div>
-              <div className="og-summary-total">
+              <div className="og-summary-item" style={{ borderBottom: 'none', paddingBottom: '4px' }}>
+                <span>小計</span>
+                <span>¥{subTotalAmount.toLocaleString()}</span>
+              </div>
+              {deliveryMethod === 'shipping' && shippingAddress.prefecture && (
+                <div className="og-summary-item" style={{ borderBottom: 'none', paddingBottom: '4px', paddingTop: '4px', fontSize: '0.9rem', color: '#666' }}>
+                  <span>送料 (ヤマト運輸)</span>
+                  <span>¥{shippingFee.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="og-summary-total" style={{ paddingTop: '12px' }}>
                 <strong>合計:</strong>
                 <strong>¥{totalAmount.toLocaleString()}</strong>
               </div>
