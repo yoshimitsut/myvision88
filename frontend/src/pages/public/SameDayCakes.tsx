@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
 import './SameDayCakes.css';
 import type { Cake } from '../../types/types';
+import { getTodayJP } from '../../utils/dateUtils';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
@@ -17,7 +17,7 @@ export default function SameDayCakes() {
   useEffect(() => {
     window.scrollTo(0, 0);
     setLoading(true);
-    const today = format(new Date(), 'yyyy-MM-dd');
+    const today = getTodayJP();
     fetch(`${API_URL}/api/sameday-cakes?date=${today}`)
       .then((res) => res.json())
       .then((data) => {
