@@ -27,16 +27,27 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 // =============================================
 router.get('/', async (req, res) => {
   try {
-    const [cakes] = await pool.query(
-      `SELECT c.*, 
+    const { date } = req.query;
+    
+    let query = `
+      SELECT c.*, 
         JSON_ARRAYAGG(
           JSON_OBJECT('id', s.id, 'size', s.size, 'price', s.price, 'stock', s.stock, 'is_active', s.is_active)
         ) AS sizes
        FROM same_day_cakes c
        LEFT JOIN same_day_cake_sizes s ON s.same_day_cake_id = c.id
-       GROUP BY c.id
-       ORDER BY c.id DESC`
-    );
+    `;
+    const queryParams = [];
+
+    if (date) {
+      query += ` WHERE c.sale_date = ? `;
+      queryParams.push(date);
+    }
+
+    query += ` GROUP BY c.id ORDER BY c.id DESC`;
+
+    const [cakes] = await pool.query(query, queryParams);
+    
     const parsed = cakes.map(c => ({ ...c, sizes: typeof c.sizes === 'string' ? JSON.parse(c.sizes) : c.sizes }));
     res.json({ success: true, same_day_cakes: parsed });
   } catch (err) {
@@ -77,12 +88,12 @@ router.post('/', upload.single('image'), async (req, res) => {
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    const { name, is_active, sizes } = req.body;
+    const { name, is_active, sizes, sale_date } = req.body;
     const image = req.file ? req.file.filename : null;
 
     const [result] = await conn.query(
-      'INSERT INTO same_day_cakes (name, image, is_active) VALUES (?, ?, ?)',
-      [name, image, is_active ?? 1]
+      'INSERT INTO same_day_cakes (name, image, is_active, sale_date) VALUES (?, ?, ?, ?)',
+      [name, image, is_active ?? 1, sale_date || null]
     );
     const cakeId = result.insertId;
 
@@ -114,10 +125,10 @@ router.put('/:id', upload.single('image'), async (req, res) => {
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    const { name, is_active, sizes } = req.body;
+    const { name, is_active, sizes, sale_date } = req.body;
     const { id } = req.params;
 
-    const fields = { name, is_active };
+    const fields = { name, is_active, sale_date };
     if (req.file) fields.image = req.file.filename;
 
     const setClauses = Object.keys(fields).map(k => `${k} = ?`).join(', ');

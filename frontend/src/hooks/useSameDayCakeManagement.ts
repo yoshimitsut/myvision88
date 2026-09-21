@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Cake, SizeOption } from '../types/types';
+import { getTodayJP } from '../utils/dateUtils';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
@@ -10,6 +11,10 @@ export const useSameDayCakeManagement = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'list' | 'add' | 'time'>('list');
   const [editingCake, setEditingCake] = useState<Cake | null>(null);
+
+  // Filtro por data (hoje no Japão garantido para evitar bugs de fuso durante testes no BR)
+  const today = getTodayJP();
+  const [selectedDate, setSelectedDate] = useState<string>(today);
 
   const [newCake, setNewCake] = useState({
     name: '',
@@ -34,14 +39,23 @@ export const useSameDayCakeManagement = () => {
       'Authorization': `Bearer ${token}`
     };
 
-    return fetch(url, { ...options, headers });
+    const res = await fetch(url, { ...options, headers });
+    
+    if (res.status === 401) {
+      sessionStorage.removeItem('store_token');
+      sessionStorage.removeItem('store_authenticated');
+      window.location.href = '/store-login';
+      throw new Error('Não autorizado');
+    }
+    
+    return res;
   }, []);
 
-  // Busca os bolos de retirada no dia
+  // Busca os bolos de retirada no dia selecionado
   const fetchCakes = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/sameday-cakes`);
+      const response = await protectedFetch(`${API_URL}/api/sameday-cakes?date=${selectedDate}`);
       const data = await response.json();
 
       if (data.success && Array.isArray(data.same_day_cakes)) {
@@ -54,11 +68,11 @@ export const useSameDayCakeManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedDate, protectedFetch]);
 
   useEffect(() => {
     fetchCakes();
-  }, [fetchCakes]);
+  }, [fetchCakes, selectedDate]);
 
   // Seleciona imagem
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,6 +132,7 @@ export const useSameDayCakeManagement = () => {
       formData.append('name', newCake.name.trim());
       formData.append('description', newCake.description?.trim() || '');
       formData.append('is_active', newCake.is_active ? '1' : '0');
+      formData.append('sale_date', selectedDate);
       formData.append('sizes', JSON.stringify(validSizes));
 
       if (selectedImage) {
@@ -169,6 +184,7 @@ export const useSameDayCakeManagement = () => {
       formData.append('name', newCake.name.trim());
       formData.append('description', newCake.description?.trim() || '');
       formData.append('is_active', newCake.is_active ? '1' : '0');
+      formData.append('sale_date', selectedDate);
       formData.append('sizes', JSON.stringify(validSizes));
 
       if (newCake.image && !selectedImage) {
@@ -270,6 +286,8 @@ export const useSameDayCakeManagement = () => {
     error,
     activeTab,
     setActiveTab,
+    selectedDate,
+    setSelectedDate,
     editingCake,
     setEditingCake,
     newCake,

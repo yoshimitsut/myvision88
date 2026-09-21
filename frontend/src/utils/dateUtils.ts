@@ -3,6 +3,15 @@ export const createLocalDate = (year: number, month: number, day: number): Date 
   return new Date(year, month - 1, day);
 };
 
+export const getTodayJP = (): string => {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date());
+};
+
 export const formatDateForBackend = (date: Date | null): string => {
   if (!date) return '';
   

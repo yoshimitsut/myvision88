@@ -11,6 +11,8 @@ export default function SameDayCakeManagement() {
     error,
     activeTab,
     setActiveTab,
+    selectedDate,
+    setSelectedDate,
     editingCake,
     setEditingCake,
     newCake,
@@ -65,7 +67,17 @@ export default function SameDayCakeManagement() {
           >
             ➕ {editingCake ? 'ケーキを編集' : 'ケーキを追加'}
           </button>
-
+          
+          <div className="sdc-date-filter" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <label htmlFor="sale_date" style={{ fontWeight: 'bold' }}>販売日 (Data):</label>
+            <input 
+              type="date" 
+              id="sale_date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+            />
+          </div>
         </div>
 
         {/* Conteúdo das abas */}
