@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './OnlineSalesSidebar.css';
+import { getTodayJP } from '../../utils/dateUtils';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
@@ -33,7 +34,9 @@ export default function OnlineSalesSidebar() {
   const fetchCakes = async () => {
     try {
       const token = sessionStorage.getItem('store_token');
-      const res = await fetch(`${API_URL}/api/sameday-cakes`, {
+      const today = getTodayJP();
+
+      const res = await fetch(`${API_URL}/api/sameday-cakes?date=${today}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
