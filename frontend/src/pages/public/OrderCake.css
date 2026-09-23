@@ -397,12 +397,40 @@
   padding-bottom: 10px;
 }
 
-.order-item {
+.order-item-summary {
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
   border-bottom: 1px dashed #ccc;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding-bottom: 12px;
 }
+
+.order-item-name {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: bold;
+}
+
+.order-item-sub {
+  size: .85em;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 10px;
+  width: 98%;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+
 
 .order-total {
   display: flex;

@@ -1048,9 +1048,35 @@ export default function OrderCake() {
                 const itemTotal = (cake.price + fruitPrice) * cake.amount;
 
                 return (
-                  <div key={index} className="order-item">
-                    <span>{cakeData?.name} ({cake.size}) x{cake.amount}</span>
-                    <span>￥{itemTotal.toLocaleString()}</span>
+                  <div key={index} className="order-item-summary">
+                    <div className='order-item-name'>
+                      <span>{cakeData?.name} x{cake.amount}</span>
+                      {/* <span>￥{cake.price.toLocaleString()}</span> */}
+                    </div>
+                    <div className='order-item-sub'>
+
+                      <div>
+                        <span>・サイズ: {cake.size}</span>
+                        <span>￥{cake.price.toLocaleString()}</span>
+                      </div>
+
+                      <div>
+                        <span>・フルーツ盛り: {cake.fruit_option || '無し'}</span>
+                        <span>{cake.fruit_option === '有り' ? '+￥648' : '+￥0'}</span>
+                      </div>
+
+                      {cake.message_cake && (
+                        <div>
+                          <span>・メッセージ: {cake.message_cake}</span>
+
+                        </div>
+                      )}
+                      {cake.candle_option && (
+                        <div>
+                          <span>・キャンドル: {cake.candle_option}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
