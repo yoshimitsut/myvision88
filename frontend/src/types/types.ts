@@ -236,3 +236,8 @@ export type SameDayOrder = {
   items: SameDayOrderItem[];
 };
 
+export type Option = {
+  id: number;
+  description: string;
+  price: number;
+};

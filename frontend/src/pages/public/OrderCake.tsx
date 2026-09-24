@@ -6,7 +6,7 @@ import { ja } from 'date-fns/locale';
 
 import Select from 'react-select';
 import type { StylesConfig, CSSObjectWithLabel, OptionProps, ControlProps } from 'react-select';
-import type { OrderCake, OptionType, TimeOptionType } from "../../types/types";
+import type { OrderCake, OptionType, TimeOptionType, Option } from "../../types/types";
 
 import { PaymentFormStripe } from '../../components/order/PaymentFormStripe';
 
@@ -87,6 +87,15 @@ const DayCell = ({ day, date, isSelectable }: DayCellProps) => {
   );
 };
 
+const findOptionByDescription = (
+  options: Option[],
+  search: string
+): Option | undefined => {
+  return options.find(
+    (opt) => opt.description.trim().toLocaleLowerCase() === search.toLocaleLowerCase()
+  );
+}
+
 // ==================== COMPONENTE PRINCIPAL ====================
 export default function OrderCake() {
   const navigate = useNavigate();
@@ -151,6 +160,24 @@ export default function OrderCake() {
     handleInputChange,
     resetForm
   } = useOrderForm([initialCake]);
+
+  const candleOptions: Option[] = [
+    {
+      id: 1,
+      description: "ノーマル",
+      price: 150,
+    },
+    {
+      id: 2,
+      description: "ナンバーキャンドル",
+      price: 100,
+    },
+    {
+      id: 3,
+      description: "なし",
+      price: 0,
+    },
+  ]
 
   // Rola para o topo ao carregar a página
   useEffect(() => {
@@ -818,19 +845,16 @@ export default function OrderCake() {
                         <span className="field-required-badge">必須</span>
                       </div>
                       <div className="option-pills-grid">
-                        {[
-                          { value: "ノーマル", label: "ノーマル", priceText: "¥0" },
-                          { value: "ナンバーキャンドル", label: "ナンバーキャンドル", priceText: "¥100" },
-                          { value: "なし", label: "なし", priceText: "¥0" }
-                        ].map(cOpt => {
-                          const isSelected = (item as any).candle_option === cOpt.value && (item as any).candle_option !== "";
+                        {candleOptions.map(cOpt => {
+                          const isSelected =
+                            (item as any).candle_option === cOpt.description && (item as any).candle_option !== "";
                           return (
                             <div
-                              key={cOpt.value}
+                              key={cOpt.id}
                               className={`option-pill-card ${isSelected ? 'selected' : ''}`}
                               onClick={() => {
                                 if (stepProgress.messageSelected) {
-                                  updateCake(index, "candle_option" as any, cOpt.value)
+                                  updateCake(index, "candle_option" as any, cOpt.description)
                                   updateStepProgress("candlesSelected", true);
                                 }
                               }}
@@ -840,10 +864,10 @@ export default function OrderCake() {
                               }}
                             >
                               {isSelected && <span className="option-pill-checkmark">✓</span>}
-                              <span className="option-pill-title">{cOpt.label}</span>
-                              {cOpt.priceText && <span className="option-pill-price">{cOpt.priceText}</span>}
+                              <span className="option-pill-title">{cOpt.description}</span>
+                              {cOpt.price > 0 && <span className="option-pill-price">{cOpt.price}</span>}
                             </div>
-                          );
+                          )
                         })}
                       </div>
                     </div>
@@ -1046,7 +1070,8 @@ export default function OrderCake() {
                 const cakeData = cakesData?.find(c => c.id === cake.cake_id);
                 const fruitPrice = FRUIT_OPTIONS.find(f => f.value === cake.fruit_option)?.price || 0;
                 const itemTotal = (cake.price + fruitPrice) * cake.amount;
-
+                const candleOpt = findOptionByDescription(candleOptions, cake.candle_option);
+                const candlePrice = candleOpt?.price ?? 0;
                 return (
                   <div key={index} className="order-item-summary">
                     <div className='order-item-name'>
@@ -1074,6 +1099,7 @@ export default function OrderCake() {
                       {cake.candle_option && (
                         <div>
                           <span>・キャンドル: {cake.candle_option}</span>
+                          {candlePrice > 0 && <span>+￥{candlePrice.toLocaleString()} </span>}
                         </div>
                       )}
                     </div>
