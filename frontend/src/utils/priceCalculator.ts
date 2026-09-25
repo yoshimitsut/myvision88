@@ -1,4 +1,4 @@
-import type { OrderCake, Cake, SizeOption } from '../types/types';
+import type { OrderCake, Cake, SizeOption, Option } from '../types/types';
 
 interface FruitOption {
   value: string;
@@ -15,14 +15,18 @@ const hasSize = (size: SizeOption): size is SizeOption & { size: string } => {
 export const calculateTotalPrice = (
   cakes: OrderCake[],
   cakesData: Cake[] | null,
-  fruitOptions: readonly FruitOption[]
+  fruitOptions: readonly FruitOption[],
+  candleOptions: Option[],
+  plateOptions: Option[]
 ): number => {
   if (!cakesData) return 0;
 
   return cakes.reduce<number>((total, cake) => {
     if (!cake.size) return total;
     const fruitPrice = fruitOptions.find(f => f.value === cake.fruit_option)?.price ?? 0;
-    return total + (cake.price + fruitPrice) * cake.amount;
+    const candlePrice = candleOptions.find(c => c.description === cake.candle_option)?.price ?? 0;
+    const platePrice = plateOptions.find(p => p.description === cake.plate_type)?.price ?? 0;
+    return total + (cake.price + fruitPrice) * cake.amount + candlePrice + platePrice;
   }, 0);
 };
 

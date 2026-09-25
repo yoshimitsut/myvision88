@@ -6,7 +6,7 @@ import { ja } from 'date-fns/locale';
 
 import Select from 'react-select';
 import type { StylesConfig, CSSObjectWithLabel, OptionProps, ControlProps } from 'react-select';
-import type { OrderCake, OptionType, TimeOptionType } from "../../types/types";
+import type { OrderCake, OptionType, TimeOptionType, Option } from "../../types/types";
 
 import { PaymentFormStripe } from '../../components/order/PaymentFormStripe';
 
@@ -47,6 +47,19 @@ const FRUIT_OPTIONS: readonly FruitOption[] = [
   { value: "無し", label: "通常盛り", price: 0, priceText: "+0円" },
   { value: "有り", label: "フルーツ増し", price: 648, priceText: "+648円" }
 ] as const;
+
+const candleOptions: Option[] = [
+  { id: 1, description: "ノーマル", price: 150 },
+  { id: 2, description: "ナンバーキャンドル", price: 100 },
+  { id: 3, description: "なし", price: 0 },
+];
+
+const plateOptions: Option[] = [
+  { id: 1, description: "お名前＋おたんじょうびおめでとう", price: 110 },
+  { id: 2, description: "お名前＋Happy Birthday", price: 120 },
+  { id: 3, description: "その他", price: 130 },
+  { id: 4, description: "なし", price: 0 },
+];
 
 // ==================== COMPONENTES ====================
 interface CalendarContainerProps {
@@ -160,7 +173,7 @@ export default function OrderCake() {
 
   // Calcular total do pedido
   useEffect(() => {
-    const total = calculateTotalPrice(cakes, cakesData, FRUIT_OPTIONS);
+    const total = calculateTotalPrice(cakes, cakesData, FRUIT_OPTIONS, candleOptions, plateOptions);
     setTotalAmount(total);
   }, [cakes, cakesData]);
 

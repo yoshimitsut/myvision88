@@ -211,7 +211,7 @@ export default function OrderCake() {
 
   // Calcular total do pedido
   useEffect(() => {
-    const total = calculateTotalPrice(cakes, cakesData, FRUIT_OPTIONS);
+    const total = calculateTotalPrice(cakes, cakesData, FRUIT_OPTIONS, candleOptions, plateOptions);
     setTotalAmount(total);
   }, [cakes, cakesData]);
 
@@ -1140,7 +1140,7 @@ export default function OrderCake() {
               })}
               <div className="order-total">
                 <strong>合計:</strong>
-                <strong>￥{itemTotal.toLocaleString()}</strong>
+                <strong>￥{totalAmount.toLocaleString()}</strong>
               </div>
             </div>
 
