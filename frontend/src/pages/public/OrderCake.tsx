@@ -1131,7 +1131,7 @@ export default function OrderCake() {
                       {cake.candle_option && (
                         <div>
                           <span>・キャンドル: {cake.candle_option}</span>
-                          {candlePrice > 0 && <span>+￥{candlePrice.toLocaleString()} </span>}
+                          <span>+￥{candleOpt?.description === 'なし' ? '0' : candlePrice.toLocaleString()} </span>
                         </div>
                       )}
                     </div>
