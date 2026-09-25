@@ -25,6 +25,7 @@ const newsletterRoutes = require('./routes/newsletter');
 const storeInfo = require('./routes/storeInfo');
 const stripeRoutes = require('./routes/stripe');
 const authRoutes = require('./routes/authRoutes');
+const candleRoutes = require('./routes/candleRoutes');
 
 // Middleware de Autenticação
 const authMiddleware = require('./middleware/authMiddleware');
@@ -88,7 +89,8 @@ const selectiveAuth = (req, res, next) => {
     req.originalUrl.startsWith('/api/timeslots') ||
     req.originalUrl.startsWith('/api/storeinfo') ||
     req.originalUrl.startsWith('/api/newsletters') ||
-    req.originalUrl.startsWith('/api/sameday-orders/public')
+    req.originalUrl.startsWith('/api/sameday-orders/public') ||
+    req.originalUrl.startsWith('/api/candles')
   );
 
   const isPublicPost = req.method === 'POST' && (
@@ -121,6 +123,7 @@ app.use('/api/gift', selectiveAuth, giftRoutes);
 app.use('/api/timeslots', selectiveAuth, timeslotRoutes);
 app.use('/api/newsletters', selectiveAuth, newsletterRoutes);
 app.use('/api/storeinfo', selectiveAuth, storeInfo);
+app.use('/api/candles', selectiveAuth, candleRoutes);
 
 // OrderRoutes é montado na raiz /api porque já contém /reservar e /list internamente
 app.use('/api', selectiveAuth, orderRoutes);

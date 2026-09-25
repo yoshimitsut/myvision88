@@ -44,6 +44,15 @@ export type OrderCake = {
   plate_type?: string;
 };
 
+export type Candle = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  is_active: boolean;
+};
+
 export type Order = {
   id_order: number;
   id_client: string;
