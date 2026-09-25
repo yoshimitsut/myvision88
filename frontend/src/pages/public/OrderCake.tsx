@@ -89,12 +89,13 @@ const DayCell = ({ day, date, isSelectable }: DayCellProps) => {
 
 const findOptionByDescription = (
   options: Option[],
-  search: string
+  search: string | undefined
 ): Option | undefined => {
+  if (!search) return undefined;
   return options.find(
     (opt) => opt.description.trim().toLocaleLowerCase() === search.toLocaleLowerCase()
   );
-}
+};
 
 // ==================== COMPONENTE PRINCIPAL ====================
 export default function OrderCake() {
@@ -146,7 +147,8 @@ export default function OrderCake() {
     price: 0,
     message_cake: "",
     fruit_option: "" as const,
-    candle_option: ""
+    candle_option: "",
+    plate_type: "" // new plate type field
   };
 
   const {
@@ -174,6 +176,29 @@ export default function OrderCake() {
     },
     {
       id: 3,
+      description: "なし",
+      price: 0,
+    },
+  ]
+
+  const plateOptions: Option[] = [
+    {
+      id: 1,
+      description: "お名前＋おたんじょうびおめでとう",
+      price: 110,
+    },
+    {
+      id: 2,
+      description: "お名前＋Happy Birthday",
+      price: 120,
+    },
+    {
+      id: 3,
+      description: "その他",
+      price: 130,
+    },
+    {
+      id: 4,
       description: "なし",
       price: 0,
     },
@@ -865,7 +890,7 @@ export default function OrderCake() {
                             >
                               {isSelected && <span className="option-pill-checkmark">✓</span>}
                               <span className="option-pill-title">{cOpt.description}</span>
-                              {cOpt.price > 0 && <span className="option-pill-price">{cOpt.price}</span>}
+                              {cOpt.price > 0 && <span className="option-pill-price">+¥{cOpt.price.toLocaleString()}</span>}
                             </div>
                           )
                         })}
@@ -1068,10 +1093,17 @@ export default function OrderCake() {
               <h3>ご注文内容</h3>
               {cakes.filter(cake => cake.cake_id !== 0 && cake.size !== "").map((cake, index) => {
                 const cakeData = cakesData?.find(c => c.id === cake.cake_id);
+
                 const fruitPrice = FRUIT_OPTIONS.find(f => f.value === cake.fruit_option)?.price || 0;
-                const itemTotal = (cake.price + fruitPrice) * cake.amount;
+
                 const candleOpt = findOptionByDescription(candleOptions, cake.candle_option);
                 const candlePrice = candleOpt?.price ?? 0;
+
+                const plateOpt = findOptionByDescription(plateOptions, cake.plate_type);
+                const platePrice = plateOpt?.price ?? 0;
+
+                const itemTotal = ((cake.price + fruitPrice) * cake.amount) + candlePrice + platePrice;
+
                 return (
                   <div key={index} className="order-item-summary">
                     <div className='order-item-name'>
@@ -1092,8 +1124,8 @@ export default function OrderCake() {
 
                       {cake.message_cake && (
                         <div>
-                          <span>・メッセージ: {cake.message_cake}</span>
-
+                          <span>・メッセージプレート: {cake.message_cake}</span><br />
+                          {platePrice > 0 && <span>+￥{platePrice.toLocaleString()}</span>}
                         </div>
                       )}
                       {cake.candle_option && (
@@ -1108,7 +1140,7 @@ export default function OrderCake() {
               })}
               <div className="order-total">
                 <strong>合計:</strong>
-                <strong>￥{totalAmount.toLocaleString()}</strong>
+                <strong>￥{itemTotal.toLocaleString()}</strong>
               </div>
             </div>
 
