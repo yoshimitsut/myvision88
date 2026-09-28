@@ -40,14 +40,14 @@ export const useSameDayCakeManagement = () => {
     };
 
     const res = await fetch(url, { ...options, headers });
-    
+
     if (res.status === 401) {
       sessionStorage.removeItem('store_token');
       sessionStorage.removeItem('store_authenticated');
       window.location.href = '/store-login';
       throw new Error('Não autorizado');
     }
-    
+
     return res;
   }, []);
 
@@ -275,7 +275,7 @@ export const useSameDayCakeManagement = () => {
       ? cake.sizes.map(s => ({ ...s, is_active: s.is_active === undefined ? 1 : s.is_active }))
       : [{ size: '', stock: 0, price: 0, is_active: 1 }]
     );
-    setImagePreview(cake.image ? `${API_URL}/image/${FOLDER_URL}/${cake.image}` : null);
+    setImagePreview(cake.image ? `${API_URL}/image/${FOLDER_URL}/samedaycakes/${cake.image}` : null);
     setSelectedImage(null);
     setActiveTab('add');
   };

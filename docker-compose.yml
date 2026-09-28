@@ -41,6 +41,7 @@ services:
       - VIRTUAL_HOST=${API_DOMAIN}
       - VIRTUAL_PORT=3001
       - LETSENCRYPT_HOST=${API_DOMAIN}
+      - CLIENT_MAX_BODY_SIZE=10m
     expose:
       - "3001"
     depends_on:

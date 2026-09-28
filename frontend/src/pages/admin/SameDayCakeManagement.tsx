@@ -67,11 +67,11 @@ export default function SameDayCakeManagement() {
           >
             ➕ {editingCake ? 'ケーキを編集' : 'ケーキを追加'}
           </button>
-          
+
           <div className="sdc-date-filter" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <label htmlFor="sale_date" style={{ fontWeight: 'bold' }}>販売日 (Data):</label>
-            <input 
-              type="date" 
+            <input
+              type="date"
               id="sale_date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
@@ -95,7 +95,7 @@ export default function SameDayCakeManagement() {
                       <div className="sdc-card-image">
                         {cake.image ? (
                           <img
-                            src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`}
+                            src={`${API_URL}/image/${FOLDER_URL}/samedaycakes/${cake.image}`}
                             alt={cake.name}
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = '/default-cake.jpg';
@@ -104,9 +104,7 @@ export default function SameDayCakeManagement() {
                         ) : (
                           <div className="sdc-no-image">📷 画像なし</div>
                         )}
-                        <div className={`sdc-status-badge ${cake.is_active ? 'active' : 'inactive'}`}>
-                          {cake.is_active ? '● アクティブ' : '○ 非アクティブ'}
-                        </div>
+
                       </div>
 
                       <div className="sdc-card-body">

@@ -8,7 +8,7 @@ const fs = require('fs');
 // =============================================
 // Configuração do Multer para upload de imagens
 // =============================================
-const UPLOAD_DIR = path.join(process.cwd(), 'uploads/myvision88');
+const UPLOAD_DIR = path.join(process.cwd(), 'uploads/myvision88/samedaycakes');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -28,7 +28,7 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 router.get('/', async (req, res) => {
   try {
     const { date } = req.query;
-    
+
     let query = `
       SELECT c.*, 
         JSON_ARRAYAGG(
@@ -47,7 +47,7 @@ router.get('/', async (req, res) => {
     query += ` GROUP BY c.id ORDER BY c.id DESC`;
 
     const [cakes] = await pool.query(query, queryParams);
-    
+
     const parsed = cakes.map(c => ({ ...c, sizes: typeof c.sizes === 'string' ? JSON.parse(c.sizes) : c.sizes }));
     res.json({ success: true, same_day_cakes: parsed });
   } catch (err) {
