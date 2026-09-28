@@ -108,7 +108,7 @@ export default function CandleManagement() {
                     id="candle-image-upload"
                   />
                   {imagePreview ? (
-                    <img src={imagePreview} alt="Preview" className="image-preview" />
+                    <img src={imagePreview} alt="Preview" className="image-preview-candle" />
                   ) : currentCandle.image && isEditing ? (
                     <img src={`${API_URL}/image/${FOLDER_URL}/${currentCandle.image}`} alt="Current" className="image-preview" />
                   ) : (

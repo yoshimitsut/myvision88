@@ -13,7 +13,7 @@
 .candle-list {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   overflow: hidden;
   margin-bottom: 2rem;
 }
@@ -91,14 +91,22 @@
   color: #d93025;
 }
 
-.btn-edit:hover { background-color: #d2e3fc; }
-.btn-toggle:hover { background-color: #e8eaed; }
-.btn-delete:hover { background-color: #fad2cf; }
+.btn-edit:hover {
+  background-color: #d2e3fc;
+}
+
+.btn-toggle:hover {
+  background-color: #e8eaed;
+}
+
+.btn-delete:hover {
+  background-color: #fad2cf;
+}
 
 .candle-form-card {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   padding: 1.5rem;
 }
 
@@ -136,7 +144,7 @@
 .form-control:focus {
   outline: none;
   border-color: #1a73e8;
-  box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
 }
 
 .image-upload-area {
@@ -147,7 +155,7 @@
   position: relative;
 }
 
-.image-preview {
+.image-preview-candle {
   max-width: 100%;
   max-height: 200px;
   object-fit: contain;

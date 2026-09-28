@@ -195,6 +195,17 @@
   object-fit: cover;
 }
 
+
+.remove-image-btn {
+  margin-top: 8px;
+  padding: 4px 8px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 .image-preview-item .remove-image-btn {
   position: absolute;
   top: 5px;
@@ -311,18 +322,7 @@
 
 .image-preview img {
   max-width: 200px;
-  max-height: 200px;
   border-radius: 8px;
-}
-
-.remove-image-btn {
-  margin-top: 8px;
-  padding: 4px 8px;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .image-upload-input {
