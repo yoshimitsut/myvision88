@@ -98,6 +98,50 @@
   width: 100%;
 }
 
+.option-pills-grid-candle {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  width: 100%;
+
+
+
+  .option-pill-card-candle {
+    position: relative;
+    background-color: #f7f6f2;
+    border: 1px solid #e2ded4;
+    border-radius: 8px;
+    padding: 12px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+  }
+
+  .option-pill-card-candle:hover {
+    background-color: #ede9de;
+  }
+
+  .option-pill-card-candle.selected {
+    background-color: var(--primary-color, #768a6e) !important;
+    border-color: var(--primary-color, #768a6e) !important;
+    color: #ffffff !important;
+  }
+
+  .option-pill-card-candle.selected .option-pill-title,
+  .option-pill-card-candle.selected .option-pill-price {
+    color: #ffffff !important;
+  }
+
+  .option-pill-title-candle {
+    font-size: 0.8rem;
+  }
+}
+
 .option-pill-card {
   position: relative;
   background-color: #f7f6f2;

@@ -24,7 +24,11 @@ export const calculateTotalPrice = (
   return cakes.reduce<number>((total, cake) => {
     if (!cake.size) return total;
     const fruitPrice = fruitOptions.find(f => f.value === cake.fruit_option)?.price ?? 0;
-    const candlePrice = candleOptions.find(c => c.description === cake.candle_option)?.price ?? 0;
+    const currentCandles = (cake.candle_option || "").split(",").filter(Boolean);
+    const candlePrice = currentCandles.reduce((sum, candleDesc) => {
+      const candle = candleOptions.find(c => c.description === candleDesc.trim());
+      return sum + (candle?.price ?? 0);
+    }, 0);
     const platePrice = plateOptions.find(p => p.description === cake.plate_type)?.price ?? 0;
     return total + (cake.price + fruitPrice) * cake.amount + candlePrice + platePrice;
   }, 0);

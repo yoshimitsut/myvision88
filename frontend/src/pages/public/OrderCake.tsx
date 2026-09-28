@@ -20,6 +20,7 @@ import { useExcludedDates } from '../../hooks/useExcludedDates';
 import { useHoursOptions } from '../../hooks/useHoursOptions';
 import { useOrderForm } from '../../hooks/useOrderForm';
 import { useDateValidation } from '../../hooks/useDateValidation';
+import { useCandlesData } from '../../hooks/useCandlesData'
 
 // ==================== IMPORTS PARA PAGAMENTO ====================
 import { calculateTotalPrice } from '../../utils/priceCalculator';
@@ -131,6 +132,7 @@ export default function OrderCake() {
 
   // Hooks personalizados
   const cakesData = useCakesData();
+  const { candlesData } = useCandlesData();
   const { timeSlotsData, availableDates } = useTimeSlots();
   const today = useMemo(() => new Date(), []);
   const maxDate = useMemo(() => endOfMonth(addDays(today, 30)), [today]);
@@ -163,23 +165,12 @@ export default function OrderCake() {
     resetForm
   } = useOrderForm([initialCake]);
 
-  const candleOptions: Option[] = [
-    {
-      id: 1,
-      description: "ノーマル",
-      price: 150,
-    },
-    {
-      id: 2,
-      description: "ナンバーキャンドル",
-      price: 100,
-    },
-    {
-      id: 3,
-      description: "なし",
-      price: 0,
-    },
-  ]
+  const candleOptions: Option[] = candlesData.map(candle => ({
+    id: candle.id,
+    description: candle.name,
+    price: candle.price,
+    image: candle.image
+  }));
 
   const plateOptions: Option[] = [
     {
@@ -869,17 +860,29 @@ export default function OrderCake() {
                         <span className="field-label-text">キャンドル</span>
                         <span className="field-required-badge">必須</span>
                       </div>
-                      <div className="option-pills-grid">
+                      <div className="option-pills-grid-candle">
                         {candleOptions.map(cOpt => {
-                          const isSelected =
-                            (item as any).candle_option === cOpt.description && (item as any).candle_option !== "";
+                          const currentCandles = ((item as any).candle_option || "").split(",").filter(Boolean);
+                          const isSelected = currentCandles.includes(cOpt.description);
+
                           return (
                             <div
                               key={cOpt.id}
-                              className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                              className={`option-pill-card-candle ${isSelected ? 'selected' : ''}`}
                               onClick={() => {
                                 if (stepProgress.messageSelected) {
-                                  updateCake(index, "candle_option" as any, cOpt.description)
+                                  let newCandles = [...currentCandles];
+                                  if (isSelected) {
+                                    newCandles = newCandles.filter(c => c !== cOpt.description);
+                                  } else {
+                                    if (cOpt.description === 'なし' || cOpt.description === 'なし（0円）') {
+                                      newCandles = [cOpt.description];
+                                    } else {
+                                      newCandles = newCandles.filter(c => c !== 'なし' && c !== 'なし（0円）');
+                                      newCandles.push(cOpt.description);
+                                    }
+                                  }
+                                  updateCake(index, "candle_option" as any, newCandles.join(","));
                                   updateStepProgress("candlesSelected", true);
                                 }
                               }}
@@ -888,9 +891,19 @@ export default function OrderCake() {
                                 opacity: stepProgress.messageSelected ? 1 : 0.5
                               }}
                             >
-                              {isSelected && <span className="option-pill-checkmark">✓</span>}
+                              {isSelected && <span className="option-pill-checkmark-">✓</span>}
+
+                              {cOpt.image && (
+                                <img src={`${API_URL}/image/${FOLDER_URL}/${cOpt.image}`.replace(/([^:]\/)\/+/g, "$1")}
+                                  alt={cOpt.description}
+                                  style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }}
+                                />
+                              )}
+
                               <span className="option-pill-title">{cOpt.description}</span>
-                              {cOpt.price > 0 && <span className="option-pill-price">+¥{cOpt.price.toLocaleString()}</span>}
+                              {cOpt.price > 0 ? (<span className="option-pill-price">+¥{cOpt.price.toLocaleString()}</span>
+                              ) : (
+                                <span className="option-pill-price">¥0</span>)}
                             </div>
                           )
                         })}
@@ -1094,15 +1107,14 @@ export default function OrderCake() {
               {cakes.filter(cake => cake.cake_id !== 0 && cake.size !== "").map((cake, index) => {
                 const cakeData = cakesData?.find(c => c.id === cake.cake_id);
 
-                const fruitPrice = FRUIT_OPTIONS.find(f => f.value === cake.fruit_option)?.price || 0;
-
-                const candleOpt = findOptionByDescription(candleOptions, cake.candle_option);
-                const candlePrice = candleOpt?.price ?? 0;
+                const currentCandles = (cake.candle_option || "").split(",").filter(Boolean);
+                const candlePrice = currentCandles.reduce((sum, candleDesc) => {
+                  const cOpt = candleOptions.find(c => c.description === candleDesc.trim());
+                  return sum + (cOpt?.price ?? 0);
+                }, 0);
 
                 const plateOpt = findOptionByDescription(plateOptions, cake.plate_type);
                 const platePrice = plateOpt?.price ?? 0;
-
-                const itemTotal = ((cake.price + fruitPrice) * cake.amount) + candlePrice + platePrice;
 
                 return (
                   <div key={index} className="order-item-summary">
@@ -1131,7 +1143,7 @@ export default function OrderCake() {
                       {cake.candle_option && (
                         <div>
                           <span>・キャンドル: {cake.candle_option}</span>
-                          <span>+￥{candleOpt?.description === 'なし' ? '0' : candlePrice.toLocaleString()} </span>
+                          <span>+￥{candlePrice.toLocaleString()} </span>
                         </div>
                       )}
                     </div>

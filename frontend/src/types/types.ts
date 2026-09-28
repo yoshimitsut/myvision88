@@ -250,4 +250,5 @@ export type Option = {
   id: number;
   description: string;
   price: number;
+  image?: string;
 };
