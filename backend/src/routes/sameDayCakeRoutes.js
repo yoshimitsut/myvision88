@@ -8,7 +8,7 @@ const fs = require('fs');
 // =============================================
 // Configuração do Multer para upload de imagens
 // =============================================
-const UPLOAD_DIR = path.join(process.cwd(), 'uploads/myvision88/samedaycakes');
+const UPLOAD_DIR = path.join(process.cwd(), 'uploads/myvision88');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

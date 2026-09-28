@@ -95,7 +95,7 @@ export default function SameDayCakeManagement() {
                       <div className="sdc-card-image">
                         {cake.image ? (
                           <img
-                            src={`${API_URL}/image/${FOLDER_URL}/samedaycakes/${cake.image}`}
+                            src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`}
                             alt={cake.name}
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = '/default-cake.jpg';
@@ -104,7 +104,9 @@ export default function SameDayCakeManagement() {
                         ) : (
                           <div className="sdc-no-image">📷 画像なし</div>
                         )}
-
+                        <div className={`sdc-status-badge ${cake.is_active ? 'active' : 'inactive'}`}>
+                          {cake.is_active ? '● アクティブ' : '○ 非アクティブ'}
+                        </div>
                       </div>
 
                       <div className="sdc-card-body">
