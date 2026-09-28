@@ -93,7 +93,7 @@ export default function CakeManagement() {
                       <div className="cake-image-container">
                         {cake.image ? (
                           <img
-                            src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`}
+                            src={`https://api.myvision88.com/image/myvision88/生デコレーション.jpg`}
                             alt={cake.name}
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = '/default-cake.jpg';
