@@ -36,11 +36,12 @@ export type OrderCake = {
   size?: string;
   amount: number;
   message_cake?: string;
+  message_plate?: string;
+  candle_option?: string;
   price: number;
   name: string;
   stock?: number;
   fruit_option: "有り" | "無し" | "";
-  candle_option: string;
   plate_type?: string;
 };
 

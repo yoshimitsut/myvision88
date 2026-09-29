@@ -376,7 +376,9 @@ export default function OrderCake() {
           size: c.size,
           message_cake: c.message_cake || "",
           fruit_option: c.fruit_option,
-          fruit_price: fruitPrice
+          fruit_price: fruitPrice,
+          message_plate: c.message_plate || "",
+          candle_option: c.candle_option,
         };
       })
     };
@@ -818,9 +820,9 @@ export default function OrderCake() {
                                 if (stepProgress.fruitSelected) {
                                   updateCake(index, "plate_type" as any, pOpt.value);
                                   if (pOpt.value !== "その他") {
-                                    updateCake(index, "message_cake", pOpt.label);
+                                    updateCake(index, "message_plate", pOpt.label);
                                   } else {
-                                    updateCake(index, "message_cake", "");
+                                    updateCake(index, "message_plate", "");
                                   }
                                   updateStepProgress("messageSelected", true);
                                 }

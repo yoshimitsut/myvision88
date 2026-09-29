@@ -73,6 +73,8 @@ export interface OrderData {
   payment_id?: string;
   payment_details?: StripePaymentIntent;
   payment_intent_id?: string;
+  messege_plate?: string;
+  candle_option?: string;
   cakes: Array<{
     cake_id: number;
     name: string;

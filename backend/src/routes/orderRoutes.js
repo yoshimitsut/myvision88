@@ -55,8 +55,8 @@ router.post('/reservar', async (req, res) => {
 
       // inserir na tabela order_cakes
       await conn.query(
-        'INSERT INTO order_cakes (order_id, cake_id, size, amount, message_cake, fruit_option) VALUES (?,?,?,?,?,?)',
-        [orderId, orderCake.cake_id, orderCake.size, orderCake.amount, orderCake.message_cake, orderCake.fruit_option]
+        'INSERT INTO order_cakes (order_id, cake_id, size, amount, message_cake, fruit_option, message_plate, candle_option) VALUES (?,?,?,?,?,?,?,?)',
+        [orderId, orderCake.cake_id, orderCake.size, orderCake.amount, orderCake.message_cake, orderCake.fruit_option, orderCake.message_plate, orderCake.candle_option]
       );
 
       // atualizar estoque
@@ -89,7 +89,9 @@ router.post('/reservar', async (req, res) => {
         size: cake.size,
         message_cake: cake.message_cake,
         price: cake.price,
-        fruit_option: cake.fruit_option
+        fruit_option: cake.fruit_option,
+        message_plate: cake.message_plate,
+        candle_option: cake.candle_option
       }))
     };
 
@@ -149,9 +151,9 @@ router.put('/orders/:id_order', async (req, res) => {
     await conn.query('DELETE FROM order_cakes WHERE order_id = ?', [id_order]);
     for (const cake of cakes) {
       await conn.query(
-        `INSERT INTO order_cakes (order_id, cake_id, amount, size, message_cake, fruit_option)
-        VALUES (?, ?, ?, ?, ?, ?)`,
-        [id_order, cake.cake_id, cake.amount, cake.size, cake.message_cake || '', cake.fruit_option]
+        `INSERT INTO order_cakes (order_id, cake_id, amount, size, message_cake, fruit_option, message_plate, candle_option)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [id_order, cake.cake_id, cake.amount, cake.size, cake.message_cake || '', cake.fruit_option, cake.message_plate || '', cake.candle_option || '']
       );
     }
 
@@ -194,7 +196,9 @@ router.put('/orders/:id_order', async (req, res) => {
         size: cake.size,
         message_cake: cake.message_cake,
         price: cake.price,
-        fruit_option: cake.fruit_option
+        fruit_option: cake.fruit_option,
+        message_plate: cake.message_plate,
+        candle_option: cake.candle_option
       }))
     };
 
@@ -332,6 +336,8 @@ router.get('/list', async (req, res) => {
         oc.amount,
         oc.message_cake,
         oc.fruit_option,
+        oc.message_plate,
+        oc.candle_option,
         cs.price AS price,
         cs.stock AS stock
       FROM orders o
@@ -424,6 +430,8 @@ router.get('/list', async (req, res) => {
           amount: row.amount,
           message_cake: row.message_cake,
           fruit_option: row.fruit_option,
+          message_plate: row.message_plate,
+          candle_option: row.candle_option,
           price: row.price,
           stock: row.stock
         });
