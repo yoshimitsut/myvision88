@@ -176,8 +176,14 @@ router.post('/', (req, res, next) => {
         for (const size of sizesArray) {
           const sizeIsActive = (size.is_active === undefined || size.is_active === true || size.is_active === 'true' || size.is_active === 1 || size.is_active === '1') ? 1 : 0;
           await connection.query(
-            'INSERT INTO cake_sizes (cake_id, size, stock, price, is_active) VALUES (?, ?, ?, ?, ?)',
-            [cakeId, size.size, size.stock || 0, size.price || 0, sizeIsActive]
+            'INSERT INTO cake_sizes (cake_id, size, stock, price, is_active, has_fruit_option, has_candle_option, has_message_plate, has_online_payment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+              cakeId, size.size, size.stock || 0, size.price || 0, sizeIsActive,
+              size.has_fruit_option !== undefined ? size.has_fruit_option : 1,
+              size.has_candle_option !== undefined ? size.has_candle_option : 1,
+              size.has_message_plate !== undefined ? size.has_message_plate : 1,
+              size.has_online_payment !== undefined ? size.has_online_payment : 1
+            ]
           );
         }
       }
@@ -300,8 +306,16 @@ router.put('/:id', (req, res, next) => {
         for (const size of sizesArray) {
           const sizeIsActive = (size.is_active === undefined || size.is_active === true || size.is_active === 'true' || size.is_active === 1 || size.is_active === '1') ? 1 : 0;
           await connection.query(
-            'INSERT INTO cake_sizes (cake_id, size, stock, price, is_active) VALUES (?, ?, ?, ?, ?)',
-            [cakeId, size.size, size.stock || 0, size.price || 0, sizeIsActive]
+            `INSERT INTO cake_sizes (cake_id, size, stock, price, is_active, 
+            has_fruit_option, has_candle_option, has_message_plate, has_online_payment) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              cakeId, size.size, size.stock || 0, size.price || 0, sizeIsActive,
+              size.has_fruit_option !== undefined ? size.has_fruit_option : 1,
+              size.has_candle_option !== undefined ? size.has_candle_option : 1,
+              size.has_message_plate !== undefined ? size.has_message_plate : 1,
+              size.has_online_payment !== undefined ? size.has_online_payment : 1
+            ]
           );
         }
       }

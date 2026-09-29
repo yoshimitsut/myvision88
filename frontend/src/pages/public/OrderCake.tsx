@@ -299,6 +299,42 @@ export default function OrderCake() {
     }
   }, [hoursOptions, pickupHour, selectedDate]);
 
+  useEffect(() => {
+    if (!cakesData.length) return;
+
+    cakes.forEach((item, index) => {
+      if (item.size) return;
+
+      const selectedCakeData = cakesData.find(c => c.id === item.cake_id);
+      const selectedSizeData = selectedCakeData?.sizes?.find(s => s.size === item.size);
+      if (!selectedSizeData) return;
+
+      if (selectedSizeData.has_fruit_option === 0) {
+        if (item.fruit_option !== "無し") {
+          updateCake(index, "fruit_option", "無し");
+        }
+        updateStepProgress("fruitSelected", true);
+      }
+
+      if (selectedSizeData.has_candle_option === 0) {
+        if (item.candle_option !== "無し") {
+          updateCake(index, "candle_option", "無し");
+        }
+        updateStepProgress("candleSelected", true);
+      }
+
+      if (selectedSizeData.has_message_plate === 0) {
+        if (item.message_cake !== "") {
+          updateCake(index, "message_cake", "");
+        }
+        if ((item as any).plate_type !== "") {
+          updateCake(index, "plate_type" as any, "");
+        }
+        updateStepProgress("messageSelected", true);
+      }
+    })
+  }, [cakes, cakesData])
+
   // ==================== FUNÇÕES DE VALIDAÇÃO ====================
   const { isDateAllowed } = useDateValidation(today, excludedDates, availableDates);
 
@@ -502,26 +538,31 @@ export default function OrderCake() {
 
   const PaymentMethodSelector = ({
     selectedMethod,
-    onChange
+    onChange,
+    disableCard
   }: {
     selectedMethod: 'card' | 'store';
     onChange: (method: 'card' | 'store') => void;
+    disableCard?: boolean;
   }) => (
     <div className="payment-method-selector">
       <h3>お支払い方法を選択</h3>
       <div className="payment-method-options">
-        <label className={`payment-method-option ${selectedMethod === 'card' ? 'active' : ''}`}>
-          <input
-            type="radio"
-            name="paymentMethod"
-            value="card"
-            checked={selectedMethod === 'card'}
-            onChange={() => onChange('card')}
-          />
-          <span className="method-icon">💳</span>
-          <span className="method-label">クレジットカード</span>
-          <span className="method-description">オンライン決済</span>
-        </label>
+
+        {!disableCard && (
+          <label className={`payment-method-option ${selectedMethod === 'card' ? 'active' : ''}`}>
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="card"
+              checked={selectedMethod === 'card'}
+              onChange={() => onChange('card')}
+            />
+            <span className="method-icon">💳</span>
+            <span className="method-label">クレジットカード</span>
+            <span className="method-description">オンライン決済</span>
+          </label>
+        )}
 
         <label className={`payment-method-option ${selectedMethod === 'store' ? 'active' : ''}`}>
           <input
@@ -536,8 +577,26 @@ export default function OrderCake() {
           <span className="method-description">店頭でお支払い</span>
         </label>
       </div>
+
+      {disableCard && (
+        <p style={{ fontSize: '12px', color: '#888', marginTop: '8px' }}>
+          選択された商品はオンライン決済に対応していないため、店舗支払いのみご利用いただけます。
+        </p>
+      )}
     </div>
   );
+
+  const anyCakeDisallowsOnlinePayment = cakes.some(item => {
+    const cd = cakesData?.find(c => c.id === item.cake_id);
+    const sd = cd?.sizes?.find(s => s.size === item.size);
+    return sd?.has_online_payment === 0;
+  });
+
+  useEffect(() => {
+    if (anyCakeDisallowsOnlinePayment && paymentMethod === 'card') {
+      setPaymentMethod('store');
+    }
+  }, [anyCakeDisallowsOnlinePayment, paymentMethod]);
 
   // ==================== STYLES TIPADOS ====================
   const getBaseStyles = <T extends OptionType>(): StylesConfig<T, false> => ({
@@ -613,6 +672,11 @@ export default function OrderCake() {
             <div className="cake-information">
               {cakes.map((item, index) => {
                 const selectedCakeData = cakesData?.find(c => c.id === item.cake_id);
+                const selectedSizeData = selectedCakeData?.sizes?.find(s => s.size === item.size);
+
+                const showFruitOption = selectedSizeData?.has_fruit_option !== 0;
+                const showMessagePlate = selectedSizeData?.has_message_plate !== 0;
+                const showCandleOption = selectedSizeData?.has_candle_option !== 0;
 
                 return (
                   <div className="box-cake" key={`${item.cake_id}-${index}`}>
@@ -766,151 +830,157 @@ export default function OrderCake() {
                     )}
 
                     {/* 4. フルーツ盛り (Fruit Option Pills Grid) */}
-                    <div className='order-field-group'>
-                      <div className="field-label-row">
-                        <span className="field-label-text">フルーツ盛り</span>
-                        <span className="field-required-badge">必須</span>
+                    {showFruitOption && (
+                      <div className='order-field-group'>
+                        <div className="field-label-row">
+                          <span className="field-label-text">フルーツ盛り</span>
+                          <span className="field-required-badge">必須</span>
+                        </div>
+                        <div className="option-pills-grid">
+                          {FRUIT_OPTIONS.map(option => {
+                            const isSelected = item.fruit_option === option.value;
+                            return (
+                              <div
+                                key={option.value}
+                                className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  if (stepProgress.sizeSelected) {
+                                    updateCake(index, "fruit_option", option.value);
+                                    updateStepProgress("fruitSelected", true);
+                                  }
+                                }}
+                                style={{
+                                  pointerEvents: stepProgress.sizeSelected ? 'auto' : 'none',
+                                  opacity: stepProgress.sizeSelected ? 1 : 0.5
+                                }}
+                              >
+                                {isSelected && <span className="option-pill-checkmark">✓</span>}
+                                <span className="option-pill-title">{option.label}</span>
+                                <span className="option-pill-price">{option.priceText}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div className="option-pills-grid">
-                        {FRUIT_OPTIONS.map(option => {
-                          const isSelected = item.fruit_option === option.value;
-                          return (
-                            <div
-                              key={option.value}
-                              className={`option-pill-card ${isSelected ? 'selected' : ''}`}
-                              onClick={() => {
-                                if (stepProgress.sizeSelected) {
-                                  updateCake(index, "fruit_option", option.value);
-                                  updateStepProgress("fruitSelected", true);
-                                }
-                              }}
-                              style={{
-                                pointerEvents: stepProgress.sizeSelected ? 'auto' : 'none',
-                                opacity: stepProgress.sizeSelected ? 1 : 0.5
-                              }}
-                            >
-                              {isSelected && <span className="option-pill-checkmark">✓</span>}
-                              <span className="option-pill-title">{option.label}</span>
-                              <span className="option-pill-price">{option.priceText}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                    )}
 
                     {/* 5. メッセージプレート (Message Plate Option Pills Grid) */}
-                    <div className='order-field-group'>
-                      <div className="field-label-row">
-                        <span className="field-label-text">メッセージプレート</span>
-                        <span className="field-required-badge">必須</span>
-                      </div>
-                      <div className="option-pills-grid">
-                        {[
-                          { value: "お名前＋おたんじょうびおめでとう", label: "お名前＋おたんじょうびおめでとう", priceText: "+¥100" },
-                          { value: "お名前＋Happy Birthday", label: "お名前＋Happy Birthday", priceText: "+¥100" },
-                          { value: "その他", label: "その他", priceText: "+¥100" }
-                        ].map(pOpt => {
-                          const currentPlateType = (item as any).plate_type || "";
-                          const isSelected = currentPlateType === pOpt.value;
-                          return (
-                            <div
-                              key={pOpt.value}
-                              className={`option-pill-card ${isSelected ? 'selected' : ''}`}
-                              onClick={() => {
-                                if (stepProgress.fruitSelected) {
-                                  updateCake(index, "plate_type" as any, pOpt.value);
-                                  if (pOpt.value !== "その他") {
-                                    updateCake(index, "message_plate", pOpt.label);
-                                  } else {
-                                    updateCake(index, "message_plate", "");
+                    {showMessagePlate && (
+                      <div className='order-field-group'>
+                        <div className="field-label-row">
+                          <span className="field-label-text">メッセージプレート</span>
+                          <span className="field-required-badge">必須</span>
+                        </div>
+                        <div className="option-pills-grid">
+                          {[
+                            { value: "お名前＋おたんじょうびおめでとう", label: "お名前＋おたんじょうびおめでとう", priceText: "+¥100" },
+                            { value: "お名前＋Happy Birthday", label: "お名前＋Happy Birthday", priceText: "+¥100" },
+                            { value: "その他", label: "その他", priceText: "+¥100" }
+                          ].map(pOpt => {
+                            const currentPlateType = (item as any).plate_type || "";
+                            const isSelected = currentPlateType === pOpt.value;
+                            return (
+                              <div
+                                key={pOpt.value}
+                                className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  if (stepProgress.fruitSelected) {
+                                    updateCake(index, "plate_type" as any, pOpt.value);
+                                    if (pOpt.value !== "その他") {
+                                      updateCake(index, "message_plate", pOpt.label);
+                                    } else {
+                                      updateCake(index, "message_plate", "");
+                                    }
+                                    updateStepProgress("messageSelected", true);
                                   }
-                                  updateStepProgress("messageSelected", true);
-                                }
-                              }}
-                              style={{
-                                pointerEvents: stepProgress.fruitSelected ? 'auto' : 'none',
-                                opacity: stepProgress.fruitSelected ? 1 : 0.5
-                              }}
-                            >
-                              {isSelected && <span className="option-pill-checkmark">✓</span>}
-                              <span className="option-pill-title">{pOpt.label}</span>
-                              <span className="option-pill-price">{pOpt.priceText}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
+                                }}
+                                style={{
+                                  pointerEvents: stepProgress.fruitSelected ? 'auto' : 'none',
+                                  opacity: stepProgress.fruitSelected ? 1 : 0.5
+                                }}
+                              >
+                                {isSelected && <span className="option-pill-checkmark">✓</span>}
+                                <span className="option-pill-title">{pOpt.label}</span>
+                                <span className="option-pill-price">{pOpt.priceText}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
 
-                      <div className="plate-message-input-box" style={{ marginTop: '10px' }}>
-                        <input
-                          type="text"
-                          className="order-styled-input"
-                          placeholder="お名前・メッセージをご記入ください (例: たろうくん お誕生日おめでとう)"
-                          value={item.message_cake || ""}
-                          onChange={(e) => updateCake(index, "message_cake", e.target.value)}
-                          disabled={!stepProgress.messageSelected}
-                          style={{
-                            opacity: stepProgress.messageSelected ? 1 : 0.5,
-                            pointerEvents: stepProgress.messageSelected ? 'auto' : 'none'
-                          }}
-                        />
+                        <div className="plate-message-input-box" style={{ marginTop: '10px' }}>
+                          <input
+                            type="text"
+                            className="order-styled-input"
+                            placeholder="お名前・メッセージをご記入ください (例: たろうくん お誕生日おめでとう)"
+                            value={item.message_cake || ""}
+                            onChange={(e) => updateCake(index, "message_cake", e.target.value)}
+                            disabled={!stepProgress.messageSelected}
+                            style={{
+                              opacity: stepProgress.messageSelected ? 1 : 0.5,
+                              pointerEvents: stepProgress.messageSelected ? 'auto' : 'none'
+                            }}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* 6. キャンドル (Candles Option Pills Grid) */}
-                    <div className='order-field-group'>
-                      <div className="field-label-row">
-                        <span className="field-label-text">キャンドル</span>
-                        <span className="field-required-badge">必須</span>
-                      </div>
-                      <div className="option-pills-grid-candle">
-                        {candleOptions.map(cOpt => {
-                          const currentCandles = ((item as any).candle_option || "").split(",").filter(Boolean);
-                          const isSelected = currentCandles.includes(cOpt.description);
+                    {showCandleOption && (
+                      <div className='order-field-group'>
+                        <div className="field-label-row">
+                          <span className="field-label-text">キャンドル</span>
+                          <span className="field-required-badge">必須</span>
+                        </div>
+                        <div className="option-pills-grid-candle">
+                          {candleOptions.map(cOpt => {
+                            const currentCandles = ((item as any).candle_option || "").split(",").filter(Boolean);
+                            const isSelected = currentCandles.includes(cOpt.description);
 
-                          return (
-                            <div
-                              key={cOpt.id}
-                              className={`option-pill-card-candle ${isSelected ? 'selected' : ''}`}
-                              onClick={() => {
-                                if (stepProgress.messageSelected) {
-                                  let newCandles = [...currentCandles];
-                                  if (isSelected) {
-                                    newCandles = newCandles.filter(c => c !== cOpt.description);
-                                  } else {
-                                    if (cOpt.description === 'なし' || cOpt.description === 'なし（0円）') {
-                                      newCandles = [cOpt.description];
+                            return (
+                              <div
+                                key={cOpt.id}
+                                className={`option-pill-card-candle ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  if (stepProgress.messageSelected) {
+                                    let newCandles = [...currentCandles];
+                                    if (isSelected) {
+                                      newCandles = newCandles.filter(c => c !== cOpt.description);
                                     } else {
-                                      newCandles = newCandles.filter(c => c !== 'なし' && c !== 'なし（0円）');
-                                      newCandles.push(cOpt.description);
+                                      if (cOpt.description === 'なし' || cOpt.description === 'なし（0円）') {
+                                        newCandles = [cOpt.description];
+                                      } else {
+                                        newCandles = newCandles.filter(c => c !== 'なし' && c !== 'なし（0円）');
+                                        newCandles.push(cOpt.description);
+                                      }
                                     }
+                                    updateCake(index, "candle_option" as any, newCandles.join(","));
+                                    updateStepProgress("candlesSelected", true);
                                   }
-                                  updateCake(index, "candle_option" as any, newCandles.join(","));
-                                  updateStepProgress("candlesSelected", true);
-                                }
-                              }}
-                              style={{
-                                pointerEvents: stepProgress.messageSelected ? 'auto' : 'none',
-                                opacity: stepProgress.messageSelected ? 1 : 0.5
-                              }}
-                            >
-                              {isSelected && <span className="option-pill-checkmark-">✓</span>}
+                                }}
+                                style={{
+                                  pointerEvents: stepProgress.messageSelected ? 'auto' : 'none',
+                                  opacity: stepProgress.messageSelected ? 1 : 0.5
+                                }}
+                              >
+                                {isSelected && <span className="option-pill-checkmark-">✓</span>}
 
-                              {cOpt.image && (
-                                <img src={`${API_URL}/image/${FOLDER_URL}/${cOpt.image}`.replace(/([^:]\/)\/+/g, "$1")}
-                                  alt={cOpt.description}
-                                  style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }}
-                                />
-                              )}
+                                {cOpt.image && (
+                                  <img src={`${API_URL}/image/${FOLDER_URL}/${cOpt.image}`.replace(/([^:]\/)\/+/g, "$1")}
+                                    alt={cOpt.description}
+                                    style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }}
+                                  />
+                                )}
 
-                              <span className="option-pill-title">{cOpt.description}</span>
-                              {cOpt.price > 0 ? (<span className="option-pill-price">+¥{cOpt.price.toLocaleString()}</span>
-                              ) : (
-                                <span className="option-pill-price">¥0</span>)}
-                            </div>
-                          )
-                        })}
+                                <span className="option-pill-title">{cOpt.description}</span>
+                                {cOpt.price > 0 ? (<span className="option-pill-price">+¥{cOpt.price.toLocaleString()}</span>
+                                ) : (
+                                  <span className="option-pill-price">¥0</span>)}
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {cakes.length > 1 && (
                       <div className='btn-div'>
@@ -1161,6 +1231,7 @@ export default function OrderCake() {
             <PaymentMethodSelector
               selectedMethod={paymentMethod}
               onChange={setPaymentMethod}
+              disableCard={anyCakeDisallowsOnlinePayment}
             />
 
             {/* Bottom Submit CTA Button */}

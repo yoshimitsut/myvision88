@@ -11,6 +11,11 @@ export type SizeOption = {
   stock: number;
   isDisabled?: boolean;
   is_active?: number;
+  has_manage_stock?: number;
+  has_fruit_option?: number;
+  has_candle_option?: number;
+  has_message_plate?: number;
+  has_online_payment?: number;
 };
 
 export type Cake = {

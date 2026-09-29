@@ -19,7 +19,17 @@ export const useCakeManagement = () => {
   });
 
   const [newSizes, setNewSizes] = useState<Omit<SizeOption, 'id' | 'cake_id'>[]>([
-    { size: '', stock: 0, price: 0, is_active: 1 }
+    {
+      size: '',
+      stock: 0,
+      price: 0,
+      is_active: 1,
+      has_manage_stock: 1,
+      has_fruit_option: 1,
+      has_candle_option: 1,
+      has_message_plate: 1,
+      has_online_payment: 1
+    }
   ]);
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -87,7 +97,11 @@ export const useCakeManagement = () => {
   // 🔹 フォームをクリア
   const clearForm = useCallback(() => {
     setNewCake({ name: '', description: '', image: '', is_active: true });
-    setNewSizes([{ size: '', stock: 0, price: 0, is_active: 1 }]);
+    setNewSizes([{
+      size: '', stock: 0, price: 0, is_active: 1,
+      has_manage_stock: 1, has_fruit_option: 1, has_candle_option: 1,
+      has_message_plate: 1, has_online_payment: 1
+    }]);
     setSelectedImage(null);
     setImagePreview(null);
   }, []);
@@ -256,8 +270,16 @@ export const useCakeManagement = () => {
       is_active: cake.is_active === undefined ? true : Boolean(cake.is_active)
     });
     setNewSizes(cake.sizes.length > 0
-      ? cake.sizes.map(s => ({ ...s, is_active: s.is_active === undefined ? 1 : s.is_active }))
-      : [{ size: '', stock: 0, price: 0, is_active: 1 }]
+      ? cake.sizes.map(s => ({
+        ...s,
+        is_active: s.is_active ?? 1,
+        has_manage_stock: s.has_manage_stock ?? 1,
+        has_fruit_option: s.has_fruit_option ?? 1,
+        has_candle_option: s.has_candle_option ?? 1,
+        has_message_plate: s.has_message_plate ?? 1,
+        has_online_payment: s.has_online_payment ?? 1,
+      }))
+      : [{ size: '', stock: 0, price: 0, is_active: 1, has_manage_stock: 1, has_fruit_option: 1, has_candle_option: 1, has_message_plate: 1, has_online_payment: 1 }]
     );
     setImagePreview(cake.image ? `${API_URL}/image/${FOLDER_URL}/${cake.image}` : null);
     setSelectedImage(null);
