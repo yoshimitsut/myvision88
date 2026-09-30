@@ -691,8 +691,6 @@ ul {
 .list-btn {
   padding: 8px;
   cursor: pointer;
-  background-color: #ffffff;
-  border: 1px solid #ddd;
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -711,10 +709,6 @@ ul {
   img.icon-black {
     filter: brightness(0);
   }
-}
-
-.list-btn:hover {
-  background-color: #f0f0f0;
 }
 
 .list-order-table th.situation-cell,

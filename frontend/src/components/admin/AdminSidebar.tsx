@@ -167,9 +167,7 @@ export default function AdminSidebar({
           <span className="action-icon">📅</span>
           <span className="action-label">予定</span>
         </button>
-        <div className="sidebar-action-btn-wrapper" title="出力">
-          <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
-        </div>
+        <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
         <button className="sidebar-action-btn" onClick={() => navigate("/ordertable")} title="集計">
           <span className="action-icon">📊</span>
           <span className="action-label">集計</span>
