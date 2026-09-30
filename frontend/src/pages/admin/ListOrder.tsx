@@ -1522,8 +1522,8 @@ export default function ListOrder() {
       setActiveTab,
       setShowScanner
     }}>
-      <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="list-order-page-row">
+        <div className="list-order-main-col">
           {/* Breadcrumbs */}
           <div className="admin-breadcrumbs">
             <span>予約管理</span> / <span>予約ステータス</span> / <span className="current">すべて</span>
@@ -1533,205 +1533,205 @@ export default function ListOrder() {
           <div className="admin-card-container">
             <h2 className="admin-page-title">予約ステータス</h2>
 
-        {/* Category Pills Row */}
-        <div className="category-pills-row">
-          <button
-            className={`category-pill ${activeTab === 'all' && viewType === 'cake' ? 'active-solid' : ''}`}
-            onClick={() => {
-              setActiveTab('all');
-              setViewType('cake');
-            }}
-          >
-            すべて
-          </button>
-          <button
-            className={`category-pill pill-cake ${viewType === 'cake' ? 'active-cake' : ''}`}
-            onClick={() => setViewType('cake')}
-          >
-            🎂 ケーキ <span className="pill-count">{activeOrders.length || orders.length}</span>
-          </button>
-          <button
-            className={`category-pill pill-gift ${viewType === 'gift' ? 'active-gift' : ''}`}
-            onClick={() => setViewType('gift')}
-          >
-            🎁 ギフト
-          </button>
-          <button
-            className={`category-pill pill-sameday ${viewType === 'sameday' ? 'active-sameday' : ''}`}
-            onClick={() => setViewType('sameday')}
-            style={{ position: 'relative' }}
-          >
-            ⚡ 当日ケーキ
-            {sameDayPendingCount > 0 && (
-              <span style={{
-                marginLeft: '6px',
-                background: '#e03131',
-                color: 'white',
-                borderRadius: '10px',
-                padding: '2px 7px',
-                fontSize: '11px',
-                fontWeight: 'bold',
-                display: 'inline-block'
-              }}>
-                {sameDayPendingCount}
-              </span>
-            )}
-          </button>
-        </div>
-
-        {viewType === "gift" ? (
-          <ListGiftOrder />
-        ) : viewType === "sameday" ? (
-          <ListSameDayOrder onPendingCountChange={setSameDayPendingCount} />
-        ) : (
-          <>
-            {showScanner && (
-              <div style={{ position: 'relative', marginBottom: 20 }}>
-                <button
-                  onClick={() => setShowScanner(false)}
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    zIndex: 1000,
-                    background: 'red',
+            {/* Category Pills Row */}
+            <div className="category-pills-row">
+              <button
+                className={`category-pill ${activeTab === 'all' && viewType === 'cake' ? 'active-solid' : ''}`}
+                onClick={() => {
+                  setActiveTab('all');
+                  setViewType('cake');
+                }}
+              >
+                すべて
+              </button>
+              <button
+                className={`category-pill pill-cake ${viewType === 'cake' ? 'active-cake' : ''}`}
+                onClick={() => setViewType('cake')}
+              >
+                🎂 ケーキ <span className="pill-count">{activeOrders.length || orders.length}</span>
+              </button>
+              <button
+                className={`category-pill pill-gift ${viewType === 'gift' ? 'active-gift' : ''}`}
+                onClick={() => setViewType('gift')}
+              >
+                🎁 ギフト
+              </button>
+              <button
+                className={`category-pill pill-sameday ${viewType === 'sameday' ? 'active-sameday' : ''}`}
+                onClick={() => setViewType('sameday')}
+                style={{ position: 'relative' }}
+              >
+                ⚡ 当日ケーキ
+                {sameDayPendingCount > 0 && (
+                  <span style={{
+                    marginLeft: '6px',
+                    background: '#e03131',
                     color: 'white',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '30px',
-                    height: '30px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  ×
-                </button>
-                <div id="reader" style={{ width: '100%', maxWidth: '300px' }}></div>
-              </div>
-            )}
-
-            {foundScannedOrder && (
-              <div style={{ border: '1px solid #007bff', padding: 12, marginBottom: 20 }}>
-                <strong>
-                  <Select
-                    options={statusOptions}
-                    value={statusOptions.find((opt) => String(opt.value) === String(foundScannedOrder.status))}
-                    onChange={(selected) =>
-                      handleStatusChange(
-                        foundScannedOrder.id_order,
-                        selected?.value as "a" | "b" | "c" | "d" | "e"
-                      )
-                    }
-                    isDisabled={isUpdating}
-                    isLoading={isUpdating}
-                    styles={customStyles}
-                    isSearchable={false}
-                  />
-                </strong>
-                <strong>受付番号: </strong> {String(foundScannedOrder.id_order).padStart(4, "0")}<br />
-                <strong>お名前: </strong> {foundScannedOrder.first_name} {foundScannedOrder.last_name}<br />
-                <strong>電話番号: </strong> {foundScannedOrder.tel}<br />
-                <strong>受取日: </strong> {formatDateJP(foundScannedOrder.date)} - {foundScannedOrder.pickupHour}<br />
-                <strong>ご注文のケーキ: </strong>
-                <ul className='cake-list'>
-                  {foundScannedOrder.cakes.map((cake, index) => (
-                    <li key={`${cake.cake_id}-${index}`}>
-                      <span className='cake-name'>{cake.name}</span>
-                      <span className='cake-amount'>¥{cake.price.toLocaleString()}</span>
-                      <span className='cake-size'>サイズ: {cake.size}</span>
-                      <span className='cake-quantity'>個数: {cake.amount}</span>
-                      <span className='cake-fruitop'>フルーツ盛り: {cake.fruit_option}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-
-            {/* ========== 本日の予約タイムライン ========== */}
-            {todayOrdersByHour.length > 0 && (
-              <div className="today-timeline-panel">
-                <div className="today-timeline-header">
-                  <span className="today-timeline-title">🕐 本日の予約状況</span>
-                  <span className="today-timeline-date">
-                    {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
+                    borderRadius: '10px',
+                    padding: '2px 7px',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    display: 'inline-block'
+                  }}>
+                    {sameDayPendingCount}
                   </span>
-                </div>
-                <div className="today-timeline-scroll">
-                  {todayOrdersByHour.map(([hour, hourOrders]) => (
-                    <div key={hour} className="today-timeline-slot">
-                      <div className="today-timeline-slot-time">{hour}</div>
-                      <div className="today-timeline-slot-cards">
-                        {hourOrders.map(order => {
-                          const statusColor: Record<string, string> = {
-                            a: '#C40000', b: '#000DBD', c: '#287300',
-                            f: '#7332a8', e: '#000', d: '#6B6B6B'
-                          };
-                          const color = statusColor[order.status] || '#555';
-                          return (
-                            <div
-                              key={order.id_order}
-                              className="today-timeline-card"
-                              style={{ borderLeft: `4px solid ${color}` }}
-                              onClick={() => setEditingOrder(order)}
-                              title="クリックして編集"
-                            >
-                              <div className="today-timeline-card-header">
-                                <span className="today-timeline-card-id">#{String(order.id_order).padStart(4, '0')}</span>
-                                <span className="today-timeline-card-hour">{hour}</span>
-                              </div>
-                              <div className="today-timeline-card-name">
-                                {order.first_name} {order.last_name}
-                              </div>
-                              {order.cakes?.map((cake, ci) => (
-                                <div key={ci} className="today-timeline-card-cake">
-                                  {cake.name} {cake.size && `(${cake.size})`}
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="tab-content">
-              {loading ? (
-                <p style={{ padding: '20px 0' }}>読み込み中...</p>
-              ) : orders.length === 0 ? (
-                <p style={{ padding: '20px 0' }}>注文が見つかりません。</p>
-              ) : (
-                <>
-                  {activeTab === "all" && renderAllOrdersTable()}
-                  {activeTab === "today" && renderTodayOrdersTable()}
-                  {activeTab === "active" && renderActiveOrdersTable()}
-                  {activeTab === "past" && renderPastDateOrdersTable()}
-                  {activeTab === "completed" && renderCompletedOrdersTable()}
-                  {activeTab === "cancelled" && renderCancelledOrdersTable()}
-                </>
-              )}
+                )}
+              </button>
             </div>
 
+            {viewType === "gift" ? (
+              <ListGiftOrder />
+            ) : viewType === "sameday" ? (
+              <ListSameDayOrder onPendingCountChange={setSameDayPendingCount} />
+            ) : (
+              <>
+                {showScanner && (
+                  <div style={{ position: 'relative', marginBottom: 20 }}>
+                    <button
+                      onClick={() => setShowScanner(false)}
+                      style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        zIndex: 1000,
+                        background: 'red',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '30px',
+                        height: '30px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ×
+                    </button>
+                    <div id="reader" style={{ width: '100%', maxWidth: '300px' }}></div>
+                  </div>
+                )}
 
-            {/* Modal de edição */}
-            {editingOrder && (
-              <EditOrderModal
-                editingOrder={editingOrder}
-                setEditingOrder={setEditingOrder}
-                handleSaveEdit={handleSaveEdit}
-                isSaving={isSavingEdit}
-              />
+                {foundScannedOrder && (
+                  <div style={{ border: '1px solid #007bff', padding: 12, marginBottom: 20 }}>
+                    <strong>
+                      <Select
+                        options={statusOptions}
+                        value={statusOptions.find((opt) => String(opt.value) === String(foundScannedOrder.status))}
+                        onChange={(selected) =>
+                          handleStatusChange(
+                            foundScannedOrder.id_order,
+                            selected?.value as "a" | "b" | "c" | "d" | "e"
+                          )
+                        }
+                        isDisabled={isUpdating}
+                        isLoading={isUpdating}
+                        styles={customStyles}
+                        isSearchable={false}
+                      />
+                    </strong>
+                    <strong>受付番号: </strong> {String(foundScannedOrder.id_order).padStart(4, "0")}<br />
+                    <strong>お名前: </strong> {foundScannedOrder.first_name} {foundScannedOrder.last_name}<br />
+                    <strong>電話番号: </strong> {foundScannedOrder.tel}<br />
+                    <strong>受取日: </strong> {formatDateJP(foundScannedOrder.date)} - {foundScannedOrder.pickupHour}<br />
+                    <strong>ご注文のケーキ: </strong>
+                    <ul className='cake-list'>
+                      {foundScannedOrder.cakes.map((cake, index) => (
+                        <li key={`${cake.cake_id}-${index}`}>
+                          <span className='cake-name'>{cake.name}</span>
+                          <span className='cake-amount'>¥{cake.price.toLocaleString()}</span>
+                          <span className='cake-size'>サイズ: {cake.size}</span>
+                          <span className='cake-quantity'>個数: {cake.amount}</span>
+                          <span className='cake-fruitop'>フルーツ盛り: {cake.fruit_option}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+
+                {/* ========== 本日の予約タイムライン ========== */}
+                {todayOrdersByHour.length > 0 && (
+                  <div className="today-timeline-panel">
+                    <div className="today-timeline-header">
+                      <span className="today-timeline-title">🕐 本日の予約状況</span>
+                      <span className="today-timeline-date">
+                        {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
+                      </span>
+                    </div>
+                    <div className="today-timeline-scroll">
+                      {todayOrdersByHour.map(([hour, hourOrders]) => (
+                        <div key={hour} className="today-timeline-slot">
+                          <div className="today-timeline-slot-time">{hour}</div>
+                          <div className="today-timeline-slot-cards">
+                            {hourOrders.map(order => {
+                              const statusColor: Record<string, string> = {
+                                a: '#C40000', b: '#000DBD', c: '#287300',
+                                f: '#7332a8', e: '#000', d: '#6B6B6B'
+                              };
+                              const color = statusColor[order.status] || '#555';
+                              return (
+                                <div
+                                  key={order.id_order}
+                                  className="today-timeline-card"
+                                  style={{ borderLeft: `4px solid ${color}` }}
+                                  onClick={() => setEditingOrder(order)}
+                                  title="クリックして編集"
+                                >
+                                  <div className="today-timeline-card-header">
+                                    <span className="today-timeline-card-id">#{String(order.id_order).padStart(4, '0')}</span>
+                                    <span className="today-timeline-card-hour">{hour}</span>
+                                  </div>
+                                  <div className="today-timeline-card-name">
+                                    {order.first_name} {order.last_name}
+                                  </div>
+                                  {order.cakes?.map((cake, ci) => (
+                                    <div key={ci} className="today-timeline-card-cake">
+                                      {cake.name} {cake.size && `(${cake.size})`}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="tab-content">
+                  {loading ? (
+                    <p style={{ padding: '20px 0' }}>読み込み中...</p>
+                  ) : orders.length === 0 ? (
+                    <p style={{ padding: '20px 0' }}>注文が見つかりません。</p>
+                  ) : (
+                    <>
+                      {activeTab === "all" && renderAllOrdersTable()}
+                      {activeTab === "today" && renderTodayOrdersTable()}
+                      {activeTab === "active" && renderActiveOrdersTable()}
+                      {activeTab === "past" && renderPastDateOrdersTable()}
+                      {activeTab === "completed" && renderCompletedOrdersTable()}
+                      {activeTab === "cancelled" && renderCancelledOrdersTable()}
+                    </>
+                  )}
+                </div>
+
+
+                {/* Modal de edição */}
+                {editingOrder && (
+                  <EditOrderModal
+                    editingOrder={editingOrder}
+                    setEditingOrder={setEditingOrder}
+                    handleSaveEdit={handleSaveEdit}
+                    isSaving={isSavingEdit}
+                  />
+                )}
+              </>
             )}
-          </>
-        )}
-      </div>
-      </div>
-      
-      <div style={{ width: '320px', flexShrink: 0 }}>
-        <OnlineSalesSidebar />
-      </div>
+          </div>
+        </div>
+
+        <div className="list-order-side-col">
+          <OnlineSalesSidebar />
+        </div>
       </div>
     </AdminLayout>
   );

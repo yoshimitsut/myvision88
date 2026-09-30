@@ -536,7 +536,6 @@ ul {
 }
 
 .list-order-container {
-  /* max-width: 1000px; */
   margin: 0 auto;
   padding: 20px;
   min-width: 0;
@@ -564,7 +563,6 @@ ul {
 }
 
 .list-order-input {
-  /* margin-bottom: 20px; */
   padding: 8px;
   width: 100%;
   max-width: 400px;
@@ -605,21 +603,8 @@ ul {
   font-weight: bold;
 }
 
-/* .list-order-table td.message-cell,
 .list-order-table td.message-cell {
   max-width: 300px;
-  width: 300px;
-  white-space: nowrap;
-  overflow-x: auto;
-  overflow-y: auto;
-  text-overflow: ellipsis;
-  overflow: hidden;
-} */
-
-.list-order-table td.message-cell {
-  max-width: 300px;
-  /* max-height: 50px; */
-  /* overflow: auto; */
   white-space: normal;
   flex-wrap: wrap;
   scrollbar-width: thin;
@@ -651,7 +636,6 @@ ul {
   width: 100%;
   height: 1.2em;
   pointer-events: none;
-  /* background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1)); */
 }
 
 .ellipsis-text {
@@ -676,12 +660,10 @@ ul {
 
 .list-order-table tbody tr:nth-child(odd) {
   background-color: #ffffff;
-  /* branco */
 }
 
 .list-order-table tbody tr:nth-child(even) {
   background-color: #f9f9f9;
-  /* cinza claro */
 }
 
 .day-summary {
@@ -724,7 +706,6 @@ ul {
   display: flex;
 }
 
-/* Esconde cards no desktop */
 .mobile-orders {
   display: none;
 }
@@ -732,15 +713,11 @@ ul {
 .scroll-wrapper {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  /* scroll suave no iOS */
   white-space: nowrap;
-  /* evita quebra de linha */
 }
 
-/* Webkit (Chrome, Safari, iOS Safari) */
 .scroll-wrapper::-webkit-scrollbar {
   height: 8px;
-  /* altura da barra horizontal */
 }
 
 .scroll-wrapper::-webkit-scrollbar-thumb {
@@ -782,17 +759,12 @@ ul {
   overflow-x: auto;
   overflow-y: auto;
   white-space: nowrap;
-  /* Remova ou ajuste esses paddings problemáticos */
   padding-bottom: 0;
-  /* Já está ok, mas... */
   padding-right: 0;
-  /* Mude de 2rem para 0 */
   -webkit-overflow-scrolling: touch;
   height: fit-content;
   scrollbar-width: none;
-  /* Adicione margin-bottom negativo para compensar o ::after */
   margin-bottom: -24px;
-  /* Ajuste conforme necessário */
 }
 
 .table-wrapper table {
@@ -1199,6 +1171,77 @@ ul {
   text-overflow: ellipsis;
 }
 
+/* ==================== Hamburger Menu (Mobile) ==================== */
+
+.sidebar-hamburger-btn {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1001;
+  width: 44px;
+  height: 44px;
+  background: white;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.hamburger-line {
+  width: 22px;
+  height: 2px;
+  background-color: #333;
+  border-radius: 2px;
+}
+
+.sidebar-close-btn {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  color: #333;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+.list-order-page-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.list-order-main-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-order-side-col {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+  .list-order-page-row {
+    flex-direction: column;
+  }
+
+  .list-order-side-col {
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .today-timeline-scroll {
     padding: 12px;
@@ -1208,5 +1251,51 @@ ul {
     min-width: 130px;
     padding-right: 14px;
     margin-right: 14px;
+  }
+
+  .admin-dashboard-page {
+    flex-direction: column;
+  }
+
+  .sidebar-hamburger-btn {
+    display: flex;
+  }
+
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    max-width: 85vw;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .admin-sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-close-btn {
+    display: block;
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .admin-main-content {
+    padding-top: 70px;
+    /* espaço pro botão hambúrguer não cobrir o conteúdo */
   }
 }

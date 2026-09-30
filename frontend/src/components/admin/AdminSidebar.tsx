@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ExcelExportButton from './ExcelExportButton';
 import type { Order } from '../../types/types';
@@ -34,12 +35,15 @@ export default function AdminSidebar({
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
   const handleTabClick = (tab: string) => {
     if (setActiveTab) {
       setActiveTab(tab);
     } else {
       navigate('/list');
     }
+    setIsMobileOpen(false);
   };
 
   const handleSearchChange = (val: string) => {
@@ -51,139 +55,172 @@ export default function AdminSidebar({
     }
   };
 
+  const goTo = (path: string) => {
+    navigate(path);
+    setIsMobileOpen(false);
+  };
+
   return (
-    <aside className="admin-sidebar">
-      <div className="admin-sidebar-header">
-        <span className="sidebar-sub-title">予約管理</span>
-        <h1 className="sidebar-main-title">MYVISION88</h1>
-      </div>
+    <>
+      <button
+        className="sidebar-hamburger-btn"
+        onClick={() => setIsMobileOpen(prev => !prev)}
+        aria-label="メニューを開く"
+      >
+        <span className="hamburger-line"></span>
+        <span className="hamburger-line"></span>
+        <span className="hamburger-line"></span>
+      </button>
 
-      <div className="sidebar-menu-card">
+      {isMobileOpen && (
         <div
-          className={`sidebar-menu-item ${location.pathname === '/list' ? "active" : ""}`}
-          onClick={() => navigate('/list')}
-        >
-          <span>TOPメニュー</span>
-        </div>
-        <div
-          className={`sidebar-menu-item ${location.pathname === '/admin/cake' ? "active" : ""}`}
-          onClick={() => navigate("/admin/cake")}
-        >
-          <span>ケーキ</span>
-        </div>
-        <div
-          className={`sidebar-menu-item ${location.pathname === '/admin/candle' ? "active" : ""}`}
-          onClick={() => navigate("/admin/candle")}
-        >
-          <span>キャンドル</span>
-        </div>
-        <div
-          className={`sidebar-menu-item ${location.pathname === '/admin/samedaycake' ? "active" : ""}`}
-          onClick={() => navigate("/admin/same-day-cake")}
-        >
-          <span>当日ケーキ</span>
-        </div>
-        <div
-          className={`sidebar-menu-item ${location.pathname === '/admin/gift' ? "active" : ""}`}
-          onClick={() => navigate("/admin/gift")}
-        >
-          <span>ギフト</span>
-        </div>
-      </div>
+          className="sidebar-overlay"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
 
-      <div className="sidebar-search-box">
-        <div className="sidebar-search-input-wrapper">
-          <span className="search-icon">🔍</span>
-          <input
-            type="text"
-            placeholder="名前・電話番号・受付番号で検索"
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="sidebar-search-input"
-            disabled={!setSearch}
-          />
-        </div>
-        <button className="sidebar-add-btn" onClick={() => navigate("/orderstore")}>
-          + 新しい予約
+      <aside className={`admin-sidebar ${isMobileOpen ? 'sidebar-open' : ''}`}>
+        <button
+          className="sidebar-close-btn"
+          onClick={() => setIsMobileOpen(false)}
+          aria-label="メニューを閉じる"
+        >
+          ×
         </button>
-      </div>
 
-      <div className="sidebar-section">
-        <div className="sidebar-section-title">予約ステータス</div>
-        <div className="sidebar-filter-list">
-          <div
-            className={`sidebar-filter-item ${activeTab === 'all' || activeTab === 'today' ? 'active' : ''}`}
-            onClick={() => handleTabClick('all')}
-          >
-            <span>すべて</span>
-            <span className="sidebar-badge active">{orders.length}</span>
-          </div>
-          <div
-            className={`sidebar-filter-item ${activeTab === 'active' ? 'active' : ''}`}
-            onClick={() => handleTabClick('active')}
-          >
-            <span>オンライン予約</span>
-            <span className="sidebar-badge">{activeOrders.length}</span>
-          </div>
-          <div
-            className={`sidebar-filter-item`}
-            onClick={() => handleTabClick('today')}
-          >
-            <span>店頭予約</span>
-            <span className="sidebar-badge">{todayOrders.length}</span>
-          </div>
+        <div className="admin-sidebar-header">
+          <span className="sidebar-sub-title">予約管理</span>
+          <h1 className="sidebar-main-title">MYVISION88</h1>
         </div>
-      </div>
 
-      <div className="sidebar-section">
-        <div className="sidebar-section-title">履歴</div>
-        <div className="sidebar-filter-list">
+        <div className="sidebar-menu-card">
           <div
-            className={`sidebar-filter-item ${activeTab === 'past' ? 'active' : ''}`}
-            onClick={() => handleTabClick('past')}
+            className={`sidebar-menu-item ${location.pathname === '/list' ? "active" : ""}`}
+            onClick={() => goTo('/list')}
           >
-            <span>予約日経過</span>
-            <span className="sidebar-badge badge-green">{pastDateOrders.length}</span>
+            <span>TOPメニュー</span>
           </div>
           <div
-            className={`sidebar-filter-item ${activeTab === 'completed' ? 'active' : ''}`}
-            onClick={() => handleTabClick('completed')}
+            className={`sidebar-menu-item ${location.pathname === '/admin/cake' ? "active" : ""}`}
+            onClick={() => goTo("/admin/cake")}
           >
-            <span>受け取り済み</span>
-            <span className="sidebar-badge badge-green">{completedOrders.length}</span>
+            <span>ケーキ</span>
           </div>
           <div
-            className={`sidebar-filter-item ${activeTab === 'cancelled' ? 'active' : ''}`}
-            onClick={() => handleTabClick('cancelled')}
+            className={`sidebar-menu-item ${location.pathname === '/admin/candle' ? "active" : ""}`}
+            onClick={() => goTo("/admin/candle")}
           >
-            <span>キャンセル</span>
-            <span className="sidebar-badge badge-green">{cancelledOrders.length}</span>
+            <span>キャンドル</span>
+          </div>
+          <div
+            className={`sidebar-menu-item ${location.pathname === '/admin/samedaycake' ? "active" : ""}`}
+            onClick={() => goTo("/admin/same-day-cake")}
+          >
+            <span>当日ケーキ</span>
+          </div>
+          <div
+            className={`sidebar-menu-item ${location.pathname === '/admin/gift' ? "active" : ""}`}
+            onClick={() => goTo("/admin/gift")}
+          >
+            <span>ギフト</span>
           </div>
         </div>
-      </div>
 
-      <div className="sidebar-footer-actions">
-        <button className="sidebar-action-btn" onClick={() => navigate("/admin/date")} title="予定">
-          <span className="action-icon">📅</span>
-          <span className="action-label">予定</span>
-        </button>
-        <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
-        <button className="sidebar-action-btn" onClick={() => navigate("/ordertable")} title="集計">
-          <span className="action-icon">📊</span>
-          <span className="action-label">集計</span>
-        </button>
-        <button className="sidebar-action-btn" onClick={() => {
-          if (setShowScanner) setShowScanner(true);
-          else navigate('/list');
-        }} title="QR">
-          <span className="action-icon">📱</span>
-          <span className="action-label">QR</span>
-        </button>
-        <button className="sidebar-action-btn" onClick={() => navigate("/admin/storesettings")} title="設定">
-          <span className="action-icon">⚙️</span>
-          <span className="action-label">設定</span>
-        </button>
-      </div>
-    </aside>
+        <div className="sidebar-search-box">
+          <div className="sidebar-search-input-wrapper">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="名前・電話番号・受付番号で検索"
+              value={search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="sidebar-search-input"
+              disabled={!setSearch}
+            />
+          </div>
+          <button className="sidebar-add-btn" onClick={() => goTo("/orderstore")}>
+            + 新しい予約
+          </button>
+        </div>
+
+        <div className="sidebar-section">
+          <div className="sidebar-section-title">予約ステータス</div>
+          <div className="sidebar-filter-list">
+            <div
+              className={`sidebar-filter-item ${activeTab === 'all' || activeTab === 'today' ? 'active' : ''}`}
+              onClick={() => handleTabClick('all')}
+            >
+              <span>すべて</span>
+              <span className="sidebar-badge active">{orders.length}</span>
+            </div>
+            <div
+              className={`sidebar-filter-item ${activeTab === 'active' ? 'active' : ''}`}
+              onClick={() => handleTabClick('active')}
+            >
+              <span>オンライン予約</span>
+              <span className="sidebar-badge">{activeOrders.length}</span>
+            </div>
+            <div
+              className={`sidebar-filter-item`}
+              onClick={() => handleTabClick('today')}
+            >
+              <span>店頭予約</span>
+              <span className="sidebar-badge">{todayOrders.length}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="sidebar-section">
+          <div className="sidebar-section-title">履歴</div>
+          <div className="sidebar-filter-list">
+            <div
+              className={`sidebar-filter-item ${activeTab === 'past' ? 'active' : ''}`}
+              onClick={() => handleTabClick('past')}
+            >
+              <span>予約日経過</span>
+              <span className="sidebar-badge badge-green">{pastDateOrders.length}</span>
+            </div>
+            <div
+              className={`sidebar-filter-item ${activeTab === 'completed' ? 'active' : ''}`}
+              onClick={() => handleTabClick('completed')}
+            >
+              <span>受け取り済み</span>
+              <span className="sidebar-badge badge-green">{completedOrders.length}</span>
+            </div>
+            <div
+              className={`sidebar-filter-item ${activeTab === 'cancelled' ? 'active' : ''}`}
+              onClick={() => handleTabClick('cancelled')}
+            >
+              <span>キャンセル</span>
+              <span className="sidebar-badge badge-green">{cancelledOrders.length}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="sidebar-footer-actions">
+          <button className="sidebar-action-btn" onClick={() => goTo("/admin/date")} title="予定">
+            <span className="action-icon">📅</span>
+            <span className="action-label">予定</span>
+          </button>
+          <ExcelExportButton data={orders} filename='注文ケーキ.xlsx' sheetName='注文' />
+          <button className="sidebar-action-btn" onClick={() => goTo("/ordertable")} title="集計">
+            <span className="action-icon">📊</span>
+            <span className="action-label">集計</span>
+          </button>
+          <button className="sidebar-action-btn" onClick={() => {
+            if (setShowScanner) setShowScanner(true);
+            else navigate('/list');
+            setIsMobileOpen(false);
+          }} title="QR">
+            <span className="action-icon">📱</span>
+            <span className="action-label">QR</span>
+          </button>
+          <button className="sidebar-action-btn" onClick={() => goTo("/admin/storesettings")} title="設定">
+            <span className="action-icon">⚙️</span>
+            <span className="action-label">設定</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
