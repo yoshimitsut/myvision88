@@ -915,8 +915,8 @@ export default function OrderCake() {
                             type="text"
                             className="order-styled-input"
                             placeholder="お名前・メッセージをご記入ください (例: たろうくん お誕生日おめでとう)"
-                            value={item.message_cake || ""}
-                            onChange={(e) => updateCake(index, "message_cake", e.target.value)}
+                            value={item.message_plate || ""}
+                            onChange={(e) => updateCake(index, "message_plate", e.target.value)}
                             disabled={!stepProgress.messageSelected}
                             style={{
                               opacity: stepProgress.messageSelected ? 1 : 0.5,
@@ -934,12 +934,12 @@ export default function OrderCake() {
                           <span className="field-label-text">キャンドル</span>
                           <span className="field-required-badge">必須</span>
                         </div>
-                        
+
                         {/* Categories */}
                         <div className="option-pills-grid" style={{ marginBottom: '15px' }}>
                           {['ノーマル', '有料キャンドル', 'なし'].map(cat => {
-                            const isSelected = activeCandleCategory[index] === cat || 
-                                              (cat === 'なし' && (item as any).candle_option === 'なし');
+                            const isSelected = activeCandleCategory[index] === cat ||
+                              (cat === 'なし' && (item as any).candle_option === 'なし');
                             return (
                               <div
                                 key={cat}
@@ -1009,7 +1009,7 @@ export default function OrderCake() {
 
                                     {/* Number Input for Quantity */}
                                     <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
-                                      <button 
+                                      <button
                                         type="button"
                                         onClick={(e) => {
                                           e.preventDefault();
@@ -1022,7 +1022,7 @@ export default function OrderCake() {
                                             } else {
                                               newSelections[cOpt.description] = newQty;
                                             }
-                                            
+
                                             const newString = Object.entries(newSelections)
                                               .map(([name, q]) => `${name} x${q}`)
                                               .join(",");
@@ -1032,7 +1032,7 @@ export default function OrderCake() {
                                         style={{ padding: '2px 8px', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}
                                       >-</button>
                                       <span style={{ minWidth: '20px', textAlign: 'center' }}>{currentQty}</span>
-                                      <button 
+                                      <button
                                         type="button"
                                         onClick={(e) => {
                                           e.preventDefault();
@@ -1056,13 +1056,11 @@ export default function OrderCake() {
                       </div>
                     )}
 
-                    {cakes.length > 1 && (
-                      <div className='btn-div'>
-                        <button type='button' onClick={addCake} className='btn btn-add-cake'>
-                          ➕ 別のケーキを追加
-                        </button>
-                      </div>
-                    )}
+                    <div className='btn-div'>
+                      <button type='button' onClick={addCake} className='btn btn-add-cake'>
+                        ➕ 別のケーキを追加
+                      </button>
+                    </div>
                   </div>
                 );
               })}
