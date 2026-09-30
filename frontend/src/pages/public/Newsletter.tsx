@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import type { Newsletter } from "../../types/types";
-import "./Newsletter.css";
 
 import { formatDateJP } from "../../utils/formatDateJP";
 
@@ -36,7 +35,7 @@ export default function NewsletterPage() {
   }, []);
 
   const normalizeLink = (link: string) => {
-    if (link.startsWith("http://") || link.startsWith("https://")){
+    if (link.startsWith("http://") || link.startsWith("https://")) {
       return link;
     }
     return `https://${link}`
@@ -48,12 +47,12 @@ export default function NewsletterPage() {
       <div className="newsletter-list">
         {list.map((item) => (
           <div className="newsletter-item" key={item.id}>
-            
+
             <div className="newsletter-edit">
               <div className="newsletter-date">
                 <span>{formatDateJP(item.updated_at)}</span>
               </div>
-            
+
               <div className="newsletter-content">
                 <span className="newsletter-source">
                   {item.source === "instagram" ? (
@@ -74,7 +73,7 @@ export default function NewsletterPage() {
                     className="newsletter-tetle"
                   >
                     {item.title}
-                  </a> 
+                  </a>
                 ) : (
                   item.title
                 )}
@@ -82,7 +81,7 @@ export default function NewsletterPage() {
             </div>
 
 
-            </div>
+          </div>
         ))}
       </div>
     </div>

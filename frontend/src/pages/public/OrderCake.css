@@ -142,6 +142,12 @@
   }
 }
 
+.obs-candle {
+  color: #888;
+  font-size: 0.7rem;
+  margin: 0 0 15px 0;
+}
+
 .option-pill-card {
   position: relative;
   background-color: #f7f6f2;
@@ -857,17 +863,23 @@ body {
     /* border-radius: 6px; */
   }
 
+  .react-datepicker__week {
+    display: flex;
+    justify-content: center;
+  }
+
   .react-datepicker__day {
     width: 11vw;
-    aspect-ratio: 0 / 1.3;
     max-width: 65px;
-    border: #000 1px solid;
-    text-align: left;
+    border: 1px solid #999;
+    text-align: center;
     margin: 0px !important;
+    border-radius: 0 !important;
+    vertical-align: top;
   }
 
   .react-datepicker__day--outside-month {
-    border: 1px solid #c8c8c8;
+    pointer-events: none;
 
     .day-cell {
       color: transparent;
@@ -880,11 +892,6 @@ body {
         display: none;
       }
     }
-
-    .day-content {
-      color: transparent;
-      display: none;
-    }
   }
 
   .react-datepicker__day--selected {
@@ -896,10 +903,10 @@ body {
     width: 11vw;
     max-width: 65px;
     height: 5vh;
-    aspect-ratio: 1 / .65;
     font-size: larger;
     margin: 0px !important;
     margin-top: 3px !important;
+    display: inline-block;
   }
 
   .calendar-notice {
@@ -940,7 +947,8 @@ body {
 
   .notice-op {
     display: flex;
-    align-items: anchor-center;
+    align-items: center;
+    gap: 5px;
   }
 
   .rowgroup {
@@ -980,8 +988,6 @@ body {
     /* Mesma largura do círculo */
     height: clamp(20px, 3vw, 25px);
     /* Mesma altura do círculo */
-    margin-top: 3px;
-    align-items: flex-end;
   }
 
   .react-datepicker__day--disabled .selectable {
@@ -1154,7 +1160,6 @@ body {
 .react-datepicker__day.hoje-azul {
   background-color: #007bff;
   color: white;
-  border-radius: 0.3rem;
 }
 
 /* Domingo no cabeçalho */

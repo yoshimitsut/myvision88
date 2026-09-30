@@ -934,6 +934,7 @@ export default function OrderCake() {
                           <span className="field-label-text">キャンドル</span>
                           <span className="field-required-badge">必須</span>
                         </div>
+                        <p className='obs-candle'>記入例：長◯本、短◯本ろうそく（長）・ろうそく（短）合計18本まで無料でお渡ししております。</p>
 
                         {/* Categories */}
                         <div className="option-pills-grid" style={{ marginBottom: '15px' }}>
@@ -1084,7 +1085,7 @@ export default function OrderCake() {
                       updateStepProgress("dateSelected", true);
                     }}
                     disabled={!stepProgress.candlesSelected}
-                    minDate={today}
+                    minDate={addDays(today, 2)}
                     maxDate={maxDate}
                     excludeDates={excludedDates}
                     filterDate={isDateAllowed}

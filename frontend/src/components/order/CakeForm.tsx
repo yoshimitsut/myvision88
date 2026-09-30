@@ -231,8 +231,10 @@ const CakeForm: React.FC<CakeFormProps> = ({
                         className={`stock-mode-card ${size.has_manage_stock === 1 ? 'selected' : ''}`}
                         onClick={() => updateSize(index, 'has_manage_stock', 1)}
                       >
-                        <span className="stock-mode-icon">📦</span>
-                        <span className="stock-mode-title">管理する</span>
+                        <div>
+                          <span className="stock-mode-icon">📦</span>
+                          <span className="stock-mode-title"> 管理する</span>
+                        </div>
                         <span className="stock-mode-desc">
                           在庫数を設定し、在庫切れの際に販売を停止します。
                         </span>
@@ -243,8 +245,10 @@ const CakeForm: React.FC<CakeFormProps> = ({
                         className={`stock-mode-card ${size.has_manage_stock !== 1 ? 'selected' : ''}`}
                         onClick={() => updateSize(index, 'has_manage_stock', 0)}
                       >
-                        <span className="stock-mode-icon">♾️</span>
-                        <span className="stock-mode-title">管理しない（無制限）</span>
+                        <div>
+                          <span className="stock-mode-icon">♾️</span>
+                          <span className="stock-mode-title"> 管理しない（無制限）</span>
+                        </div>
                         <span className="stock-mode-desc">
                           在庫数の上限を設けず、常に販売可能にします。
                         </span>
