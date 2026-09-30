@@ -18,7 +18,9 @@ export function useCandleManagement() {
     name: '',
     description: '',
     price: 0,
-    is_active: true
+    is_active: true,
+    candle_type: 'ノーマル',
+    max_limit: 1
   });
 
   const fetchCandles = useCallback(async () => {
@@ -57,7 +59,7 @@ export function useCandleManagement() {
 
   const clearForm = () => {
     setEditingCandle(null);
-    setNewCandle({ name: '', description: '', price: 0, is_active: true });
+    setNewCandle({ name: '', description: '', price: 0, is_active: true, candle_type: 'ノーマル', max_limit: 1 });
     setSelectedImage(null);
     setImagePreview(null);
   };
@@ -74,6 +76,8 @@ export function useCandleManagement() {
     formData.append('description', newCandle.description || '');
     formData.append('price', String(newCandle.price || 0));
     formData.append('is_active', String(newCandle.is_active));
+    formData.append('candle_type', newCandle.candle_type || 'ノーマル');
+    formData.append('max_limit', String(newCandle.max_limit || 1));
 
     if (selectedImage) {
       formData.append('image', selectedImage);
@@ -113,6 +117,8 @@ export function useCandleManagement() {
     formData.append('description', editingCandle.description || '');
     formData.append('price', String(editingCandle.price || 0));
     formData.append('is_active', String(editingCandle.is_active));
+    formData.append('candle_type', editingCandle.candle_type || 'ノーマル');
+    formData.append('max_limit', String(editingCandle.max_limit || 1));
 
     if (selectedImage) {
       formData.append('image', selectedImage);

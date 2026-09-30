@@ -92,16 +92,19 @@ router.post('/', (req, res, next) => {
   });
 }, async (req, res) => {
   try {
-    const { name, description, price, is_active } = req.body;
+    const { name, description, price, is_active, candle_type, max_limit } = req.body;
     if (!name) return res.status(400).json({ success: false, error: 'O nome é obrigatório' });
 
     const isActiveVal = (is_active === 'true' || is_active === true || is_active === '1' || is_active === 1) ? 1 : 0;
     const priceVal = price ? parseInt(price) : 0;
     const imageFilename = req.file ? req.file.filename : '';
 
+    const limitVal = max_limit ? parseInt(max_limit, 10) : 1;
+    const typeVal = candle_type || 'ノーマル';
+
     const [result] = await pool.query(
-      'INSERT INTO candles (name, description, price, image, is_active) VALUES (?, ?, ?, ?, ?)',
-      [name, description || '', priceVal, imageFilename, isActiveVal]
+      'INSERT INTO candles (name, description, price, image, is_active, candle_type, max_limit) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [name, description || '', priceVal, imageFilename, isActiveVal, typeVal, limitVal]
     );
 
     res.status(201).json({ success: true, candleId: result.insertId, image: imageFilename, message: 'Vela criada com sucesso!' });
@@ -118,7 +121,7 @@ router.put('/:id', (req, res, next) => {
   });
 }, async (req, res) => {
   try {
-    const { name, description, price, is_active } = req.body;
+    const { name, description, price, is_active, candle_type, max_limit } = req.body;
     if (!name) return res.status(400).json({ success: false, error: 'O nome é obrigatório' });
 
     const isActiveVal = (is_active === 'true' || is_active === true || is_active === '1' || is_active === 1) ? 1 : 0;
@@ -140,9 +143,12 @@ router.put('/:id', (req, res, next) => {
       imageFilename = req.file.filename;
     }
 
+    const limitVal = max_limit ? parseInt(max_limit, 10) : 1;
+    const typeVal = candle_type || 'ノーマル';
+
     await pool.query(
-      'UPDATE candles SET name = ?, description = ?, price = ?, image = ?, is_active = ? WHERE id = ?',
-      [name, description || '', priceVal, imageFilename, isActiveVal, candleId]
+      'UPDATE candles SET name = ?, description = ?, price = ?, image = ?, is_active = ?, candle_type = ?, max_limit = ? WHERE id = ?',
+      [name, description || '', priceVal, imageFilename, isActiveVal, typeVal, limitVal, candleId]
     );
 
     res.json({ success: true, message: 'Vela atualizada com sucesso!' });

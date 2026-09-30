@@ -29,7 +29,7 @@ import type { StripePaymentResponse, StripeError, OrderData, OrderStatus, Paymen
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
 
-// ==================== TIPOS ====================
+// ============================== TIPOS ===========================
 interface CustomOptionType extends OptionType {
   isDisabled?: boolean;
 }
@@ -129,6 +129,7 @@ export default function OrderCake() {
     telSelected: false,
   });
   const [, setProcessingStorePayment] = useState(false);
+  const [activeCandleCategory, setActiveCandleCategory] = useState<Record<number, string>>({});
 
   // Hooks personalizados
   const cakesData = useCakesData();
@@ -169,7 +170,9 @@ export default function OrderCake() {
     id: candle.id,
     description: candle.name,
     price: candle.price,
-    image: candle.image
+    image: candle.image,
+    candle_type: candle.candle_type,
+    max_limit: candle.max_limit
   }));
 
   const plateOptions: Option[] = [
@@ -931,29 +934,24 @@ export default function OrderCake() {
                           <span className="field-label-text">キャンドル</span>
                           <span className="field-required-badge">必須</span>
                         </div>
-                        <div className="option-pills-grid-candle">
-                          {candleOptions.map(cOpt => {
-                            const currentCandles = ((item as any).candle_option || "").split(",").filter(Boolean);
-                            const isSelected = currentCandles.includes(cOpt.description);
-
+                        
+                        {/* Categories */}
+                        <div className="option-pills-grid" style={{ marginBottom: '15px' }}>
+                          {['ノーマル', '有料キャンドル', 'なし'].map(cat => {
+                            const isSelected = activeCandleCategory[index] === cat || 
+                                              (cat === 'なし' && (item as any).candle_option === 'なし');
                             return (
                               <div
-                                key={cOpt.id}
-                                className={`option-pill-card-candle ${isSelected ? 'selected' : ''}`}
+                                key={cat}
+                                className={`option-pill-card ${isSelected ? 'selected' : ''}`}
                                 onClick={() => {
                                   if (stepProgress.messageSelected) {
-                                    let newCandles = [...currentCandles];
-                                    if (isSelected) {
-                                      newCandles = newCandles.filter(c => c !== cOpt.description);
-                                    } else {
-                                      if (cOpt.description === 'なし' || cOpt.description === 'なし（0円）') {
-                                        newCandles = [cOpt.description];
-                                      } else {
-                                        newCandles = newCandles.filter(c => c !== 'なし' && c !== 'なし（0円）');
-                                        newCandles.push(cOpt.description);
-                                      }
+                                    setActiveCandleCategory(prev => ({ ...prev, [index]: cat }));
+                                    if (cat === 'なし') {
+                                      updateCake(index, "candle_option" as any, "なし");
+                                    } else if ((item as any).candle_option === 'なし') {
+                                      updateCake(index, "candle_option" as any, "");
                                     }
-                                    updateCake(index, "candle_option" as any, newCandles.join(","));
                                     updateStepProgress("candlesSelected", true);
                                   }
                                 }}
@@ -962,23 +960,99 @@ export default function OrderCake() {
                                   opacity: stepProgress.messageSelected ? 1 : 0.5
                                 }}
                               >
-                                {isSelected && <span className="option-pill-checkmark-">✓</span>}
-
-                                {cOpt.image && (
-                                  <img src={`${API_URL}/image/${FOLDER_URL}/${cOpt.image}`.replace(/([^:]\/)\/+/g, "$1")}
-                                    alt={cOpt.description}
-                                    style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }}
-                                  />
-                                )}
-
-                                <span className="option-pill-title">{cOpt.description}</span>
-                                {cOpt.price > 0 ? (<span className="option-pill-price">+¥{cOpt.price.toLocaleString()}</span>
-                                ) : (
-                                  <span className="option-pill-price">¥0</span>)}
+                                {isSelected && <span className="option-pill-checkmark">✓</span>}
+                                <span className="option-pill-title">{cat}</span>
                               </div>
-                            )
+                            );
                           })}
                         </div>
+
+                        {/* Candle list based on category */}
+                        {(activeCandleCategory[index] === 'ノーマル' || activeCandleCategory[index] === '有料キャンドル') && (
+                          <div className="option-pills-grid-candle">
+                            {candleOptions
+                              .filter(c => c.candle_type === activeCandleCategory[index])
+                              .map(cOpt => {
+                                const currentSelections: Record<string, number> = {};
+                                ((item as any).candle_option || "").split(",").filter(Boolean).forEach((cStr: string) => {
+                                  if (cStr === 'なし') return;
+                                  const match = cStr.match(/(.*?)\s*x(\d+)$/);
+                                  if (match) {
+                                    currentSelections[match[1].trim()] = parseInt(match[2], 10);
+                                  } else {
+                                    currentSelections[cStr.trim()] = 1;
+                                  }
+                                });
+
+                                const currentQty = currentSelections[cOpt.description] || 0;
+                                const maxLimit = cOpt.max_limit || 1;
+
+                                return (
+                                  <div
+                                    key={cOpt.id}
+                                    className={`option-pill-card-candle ${currentQty > 0 ? 'selected' : ''}`}
+                                    style={{ position: 'relative' }}
+                                  >
+                                    {cOpt.image && (
+                                      <img src={`${API_URL}/image/${FOLDER_URL}/${cOpt.image}`.replace(/([^:]\/)\/+/g, "$1")}
+                                        alt={cOpt.description}
+                                        style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }}
+                                      />
+                                    )}
+
+                                    <span className="option-pill-title" style={{ fontSize: '12px' }}>{cOpt.description}</span>
+                                    {cOpt.price > 0 ? (
+                                      <span className="option-pill-price">+¥{cOpt.price.toLocaleString()}</span>
+                                    ) : (
+                                      <span className="option-pill-price">¥0</span>
+                                    )}
+
+                                    {/* Number Input for Quantity */}
+                                    <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                                      <button 
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          if (currentQty > 0) {
+                                            const newQty = currentQty - 1;
+                                            const newSelections = { ...currentSelections };
+                                            if (newQty === 0) {
+                                              delete newSelections[cOpt.description];
+                                            } else {
+                                              newSelections[cOpt.description] = newQty;
+                                            }
+                                            
+                                            const newString = Object.entries(newSelections)
+                                              .map(([name, q]) => `${name} x${q}`)
+                                              .join(",");
+                                            updateCake(index, "candle_option" as any, newString);
+                                          }
+                                        }}
+                                        style={{ padding: '2px 8px', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}
+                                      >-</button>
+                                      <span style={{ minWidth: '20px', textAlign: 'center' }}>{currentQty}</span>
+                                      <button 
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          if (currentQty < maxLimit) {
+                                            const newSelections = { ...currentSelections, [cOpt.description]: currentQty + 1 };
+                                            const newString = Object.entries(newSelections)
+                                              .map(([name, q]) => `${name} x${q}`)
+                                              .join(",");
+                                            updateCake(index, "candle_option" as any, newString);
+                                          }
+                                        }}
+                                        style={{ padding: '2px 8px', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: currentQty < maxLimit ? 'pointer' : 'not-allowed', opacity: currentQty < maxLimit ? 1 : 0.5 }}
+                                      >+</button>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -1181,8 +1255,16 @@ export default function OrderCake() {
 
                 const currentCandles = (cake.candle_option || "").split(",").filter(Boolean);
                 const candlePrice = currentCandles.reduce((sum, candleDesc) => {
-                  const cOpt = candleOptions.find(c => c.description === candleDesc.trim());
-                  return sum + (cOpt?.price ?? 0);
+                  if (candleDesc === 'なし') return sum;
+                  const match = candleDesc.match(/(.*?)\s*x(\d+)$/);
+                  let desc = candleDesc.trim();
+                  let qty = 1;
+                  if (match) {
+                    desc = match[1].trim();
+                    qty = parseInt(match[2], 10);
+                  }
+                  const cOpt = candleOptions.find(c => c.description === desc);
+                  return sum + (cOpt?.price ?? 0) * qty;
                 }, 0);
 
                 const plateOpt = findOptionByDescription(plateOptions, cake.plate_type);

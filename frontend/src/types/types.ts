@@ -57,6 +57,8 @@ export type Candle = {
   price: number;
   image: string;
   is_active: boolean;
+  candle_type: string;
+  max_limit: number;
 };
 
 export type Order = {
@@ -257,4 +259,6 @@ export type Option = {
   description: string;
   price: number;
   image?: string;
+  candle_type?: string;
+  max_limit?: number;
 };

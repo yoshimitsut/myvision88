@@ -26,8 +26,15 @@ export const calculateTotalPrice = (
     const fruitPrice = fruitOptions.find(f => f.value === cake.fruit_option)?.price ?? 0;
     const currentCandles = (cake.candle_option || "").split(",").filter(Boolean);
     const candlePrice = currentCandles.reduce((sum, candleDesc) => {
-      const candle = candleOptions.find(c => c.description === candleDesc.trim());
-      return sum + (candle?.price ?? 0);
+      const match = candleDesc.match(/(.*?)\s*x(\d+)$/);
+      let desc = candleDesc.trim();
+      let qty = 1;
+      if (match) {
+        desc = match[1].trim();
+        qty = parseInt(match[2], 10);
+      }
+      const candle = candleOptions.find(c => c.description === desc);
+      return sum + (candle?.price ?? 0) * qty;
     }, 0);
     const platePrice = plateOptions.find(p => p.description === cake.plate_type)?.price ?? 0;
     return total + (cake.price + fruitPrice) * cake.amount + candlePrice + platePrice;

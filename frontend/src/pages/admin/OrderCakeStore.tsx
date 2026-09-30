@@ -50,7 +50,7 @@ const FRUIT_OPTIONS: readonly FruitOption[] = [
 
 const candleOptions: Option[] = [
   { id: 1, description: "ノーマル", price: 150 },
-  { id: 2, description: "ナンバーキャンドル", price: 100 },
+  { id: 2, description: "有料キャンドル", price: 100 },
   { id: 3, description: "なし", price: 0 },
 ];
 

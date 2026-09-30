@@ -72,6 +72,33 @@ export default function CandleManagement() {
               </div>
 
               <div className="form-group">
+                <label>種類 (Tipo) <span className="required">*</span></label>
+                <select
+                  className="form-control"
+                  value={currentCandle.candle_type || 'ノーマル'}
+                  onChange={e => isEditing
+                    ? setEditingCandle({ ...editingCandle!, candle_type: e.target.value })
+                    : setNewCandle({ ...newCandle, candle_type: e.target.value })}
+                >
+                  <option value="ノーマル">ノーマル</option>
+                  <option value="有料キャンドル">有料キャンドル</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>最大選択可能数 <span className="required">*</span></label>
+                <input
+                  type="number"
+                  min="1"
+                  className="form-control"
+                  value={currentCandle.max_limit || 1}
+                  onChange={e => isEditing
+                    ? setEditingCandle({ ...editingCandle!, max_limit: parseInt(e.target.value) || 1 })
+                    : setNewCandle({ ...newCandle, max_limit: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+
+              <div className="form-group">
                 <label>説明</label>
                 <textarea
                   className="form-control"
@@ -142,6 +169,8 @@ export default function CandleManagement() {
               <tr>
                 <th>画像</th>
                 <th>名前</th>
+                <th>種類</th>
+                <th>上限</th>
                 <th>価格</th>
                 <th>ステータス</th>
                 <th>アクション</th>
@@ -158,6 +187,8 @@ export default function CandleManagement() {
                     )}
                   </td>
                   <td>{candle.name}</td>
+                  <td>{candle.candle_type}</td>
+                  <td>{candle.max_limit}</td>
                   <td>¥{candle.price.toLocaleString()}</td>
                   <td>
                     <span className={`status-badge ${candle.is_active ? 'active' : 'inactive'}`}>
