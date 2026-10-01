@@ -306,7 +306,7 @@ export default function OrderCake() {
     if (!cakesData.length) return;
 
     cakes.forEach((item, index) => {
-      if (item.size) return;
+      if (!item.size) return;
 
       const selectedCakeData = cakesData.find(c => c.id === item.cake_id);
       const selectedSizeData = selectedCakeData?.sizes?.find(s => s.size === item.size);
@@ -323,7 +323,7 @@ export default function OrderCake() {
         if (item.candle_option !== "無し") {
           updateCake(index, "candle_option", "無し");
         }
-        updateStepProgress("candleSelected", true);
+        updateStepProgress("candlesSelected", true);
       }
 
       if (selectedSizeData.has_message_plate === 0) {
@@ -1244,6 +1244,29 @@ export default function OrderCake() {
                   }}
                   required
                 />
+              </div>
+
+              <div className='order-field-group'>
+                <div className="plate-message-input-box" style={{ marginTop: '10px' }}>
+                  <div className='order-field-group'>
+                    <div className="field-label-row">
+                      <span className="field-label-text">その他のご要望</span>
+                    </div>
+
+                    <textarea
+                      className="order-styled-input"
+                      placeholder="ご要望やお店に伝えたいことがございましたらご入力ください（250文字以内）"
+                      value={formData.message || ""}
+                      onChange={(e) => setFormData((prev: any) => ({ ...prev, message: e.target.value }))}
+                      maxLength={250}
+                      aria-rowspan={3}
+                      disabled={!stepProgress.messageSelected}
+                      style={{
+                        opacity: stepProgress.messageSelected ? 1 : 0.5,
+                        pointerEvents: stepProgress.messageSelected ? 'auto' : 'none'
+                      }}
+                    /></div>
+                </div>
               </div>
             </div>
 

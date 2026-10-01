@@ -66,6 +66,7 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
             <p>受付番号: <strong>${String(orderId).padStart(4, "0")}</strong></p>
             <p>電話番号: ${newOrder.tel}</p>
             <p>受け取り日時: ${newOrder.date} / ${newOrder.pickupHour}</p>
+            <p>メッセージ: ${newOrder.message || '無し'}</p>
 
             <h3 style="border-bottom: 2px solid #333; padding-bottom: 5px;">ご注文商品</h3>
 
@@ -88,7 +89,7 @@ async function sendNewOrderConfirmation(newOrder, orderId) {
                                 ${cake.size ? `<p style="margin: 5px 0;"><strong>サイズ:</strong> ${cake.size}</p>` : ''}
                                 <p style="margin: 5px 0;"><strong>個数:</strong> ${cake.amount}個</p>
                                 <p style="margin: 5px 0;"><strong>価格:</strong> ¥${Math.trunc(cake.price).toLocaleString("ja-JP")}</p>
-                                <p style="margin: 5px 0;"><strong>メッセージプレート:</strong> ${cake.message_plate}</p>
+                                <p style="margin: 5px 0;"><strong>メッセージプレート:</strong> ${cake.message_plate === '' ? '無し' : cake.message_plate}</p>
                                 <p style="margin: 5px 0;"><strong>キャンドル:</strong> ${cake.candle_option}</p>
                                 <p style="margin: 5px 0;"><strong>フルーツ盛り:</strong> ${cake.fruit_option === '有り' ? '有り ＋648円' : '無し'}
                                 <hr/>
@@ -180,7 +181,7 @@ async function sendOrderUpdateNotification(orderData) {
                             <p style="margin: 5px 0;"><strong>個数:</strong> ${cake.amount}個</p>
                             <p style="margin: 5px 0;"><strong>価格:</strong> ¥${Math.trunc(cake.price).toLocaleString()}</p>
                             <p style="margin: 5px 0;"><strong>フルーツ盛り:</strong> ${cake.fruit_option === '有り' ? '有り ＋648円' : '無し'}</p>
-                            <p style="margin: 5px 0;"><strong>メッセージプレート:</strong> ${cake.message_plate || '無し'}</p>
+                            <p style="margin: 5px 0;"><strong>メッセージプレート:</strong> ${cake.message_plate === '' ? '無し' : cake.message_plate}</p>
                             <p style="margin: 5px 0;"><strong>キャンドル:</strong> ${cake.candle_option || '無し'}</p>
                             <hr/>
                             <strong>小計: ¥${Math.trunc(cakeTotalPrice).toLocaleString("ja-JP")}</strong>
@@ -205,6 +206,7 @@ async function sendOrderUpdateNotification(orderData) {
                     <p><strong>お名前：</strong> ${orderData.first_name} ${orderData.last_name}様</p>
                     <p><strong>受付番号：</strong> ${String(orderData.id_order).padStart(4, "0")}</p>
                     <p><strong>受取日時：</strong> ${orderData.date} / ${orderData.pickupHour}</p>
+                    <p><strong>その他のご要望：</strong> ${orderData.message || '無し'}</p>
                     
                     <h3 style="border-bottom: 2px solid #333; padding-bottom: 5px;">ご注文商品</h3>
                     ${cakeListHtml}
@@ -690,7 +692,7 @@ async function sendSameDayOrderRequestToStore(orderData, orderId) {
                 <p style="margin: 5px 0;"><strong>電話番号：</strong> <a href="tel:${orderData.tel}">${orderData.tel}</a></p>
                 <p style="margin: 5px 0;"><strong>メールアドレス：</strong> ${orderData.email}</p>
                 <p style="margin: 5px 0;"><strong>受取希望日時：</strong> ${orderData.pickup_date} / ${orderData.pickup_hour}</p>
-                <p style="margin: 5px 0;"><strong>メッセージプレート:</strong> ${orderData.message_plate || '無し'}</p>
+                <p style="margin: 5px 0;"><strong>メッセージプレート:</strong> ${orderData.message_plate === '' ? '無し' : orderData.message_plate}</p>
                 <p style="margin: 5px 0;"><strong>キャンドル:</strong> ${orderData.candle_option || '無し'}</p>
             </div>
 

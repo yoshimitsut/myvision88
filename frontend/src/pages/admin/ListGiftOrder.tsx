@@ -211,27 +211,19 @@ export default function ListGiftOrder() {
     dropdownIndicator: (provided) => ({ ...provided, padding: "1px" }),
   };
 
+  // 🔹 Tabela no mesmo estilo "moderno" (cards por linha) usado na aba すべて de ケーキ
   const renderTable = (orderList: GiftOrder[]) => {
-    if (orderList.length === 0) return <p>注文はありません。</p>;
+    const filtered = orderList.filter(order => statusFilter === "すべて" || order.status === statusFilter);
+
+    if (filtered.length === 0) return <p>該当する注文はありません。</p>;
 
     return (
-      <div className="table-wrapper scroll-cell table-order-container">
-        <table className="list-order-table table-order">
+      <div className="table-card-wrapper">
+        <table className="modern-admin-table">
           <thead>
             <tr>
-              <th className='id-cell'>受付番号</th>
-              <th className='situation-cell'>
-                <div className='filter-column'>
-                  お会計
-                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                    {filterOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </th>
-              <th>注文日</th>
-              <th>お名前</th>
+              <th>受取日時</th>
+              <th>お名前 / 受付番号</th>
               <th>受取方法</th>
               <th>ご注文内容</th>
               <th>金額</th>
@@ -240,12 +232,11 @@ export default function ListGiftOrder() {
             </tr>
           </thead>
           <tbody>
-            {orderList
-              .filter(order => statusFilter === "すべて" || order.status === statusFilter)
-              .map(order => (
-                <tr key={order.id_order}>
-                  <td>{String(order.id_order).padStart(4, "0")}</td>
-                  <td className='situation-cell'>
+            {filtered.map(order => (
+              <tr key={order.id_order} className="order-row-card gift-card-row">
+                <td>
+                  <div className="order-date-col">
+                    <span>{formatDateJP(order.date_order)}</span>
                     <Select<StatusOption, false>
                       options={statusOptions}
                       value={statusOptions.find((opt) => opt.value === order.status)}
@@ -256,35 +247,44 @@ export default function ListGiftOrder() {
                       isSearchable={false}
                       isDisabled={isUpdating}
                       isLoading={isUpdating && updatingOrderId === order.id_order}
+                      className="gift-status-select"
                     />
-                  </td>
-                  <td>{formatDateJP(order.date_order)}</td>
-                  <td>{order.first_name} {order.last_name}</td>
-                  <td>
-                    {order.delivery_method === 'pickup' ? (
-                      <span style={{ color: '#287300', fontWeight: 'bold' }}>店頭受取</span>
-                    ) : (
-                      <div>
-                        <span style={{ color: '#000DBD', fontWeight: 'bold' }}>配送</span><br />
-                        <small>〒{order.postal_code}<br />{order.prefecture} {order.city} {order.address1} {order.address2}</small>
-                      </div>
-                    )}
-                  </td>
-                  <td>
-                    <ul style={{ textAlign: 'left', margin: 0, paddingLeft: '1rem' }}>
-                      {order.items.map((item, i) => (
-                        <li key={i}>{item.name} ({item.size}) - {item.amount}個</li>
-                      ))}
-                    </ul>
-                  </td>
-                  <td>¥{order.total_amount?.toLocaleString() || 0}</td>
-                  <td>{order.message}</td>
-                  <td>
-                    {order.tel}<br />
-                    <small>{order.email}</small>
-                  </td>
-                </tr>
-              ))}
+                  </div>
+                </td>
+                <td>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <strong style={{ fontSize: '13px', color: '#222' }}>{order.first_name} {order.last_name}</strong>
+                    <span className="order-id-badge">#{String(order.id_order).padStart(4, "0")}</span>
+                  </div>
+                </td>
+                <td>
+                  {order.delivery_method === 'pickup' ? (
+                    <span style={{ color: '#287300', fontWeight: 'bold' }}>店頭受取</span>
+                  ) : (
+                    <div>
+                      <span style={{ color: '#000DBD', fontWeight: 'bold' }}>配送</span><br />
+                      <small style={{ color: '#666' }}>
+                        〒{order.postal_code}<br />
+                        {order.prefecture} {order.city} {order.address1} {order.address2}
+                      </small>
+                    </div>
+                  )}
+                </td>
+                <td>
+                  {order.items.map((item, i) => (
+                    <div key={i}>
+                      {item.name} ({item.size}) - {item.amount}個
+                    </div>
+                  ))}
+                </td>
+                <td>¥{order.total_amount?.toLocaleString() || 0}</td>
+                <td>{order.message || "なし"}</td>
+                <td>
+                  {order.tel}<br />
+                  <small style={{ color: '#666' }}>{order.email}</small>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -297,19 +297,19 @@ export default function ListGiftOrder() {
         <div className="tabs-header-row">
           <div className="tabs-header">
             <button
-              className={`tab-button ${activeTab === "active" ? "active" : ""}`}
+              className={`tab-button-list ${activeTab === "active" ? "active" : ""}`}
               onClick={() => setActiveTab("active")}
             >
               現在の注文 ({activeOrders.length})
             </button>
             <button
-              className={`tab-button tab-completed ${activeTab === "completed" ? "active" : ""}`}
+              className={`tab-button-list tab-completed ${activeTab === "completed" ? "active" : ""}`}
               onClick={() => setActiveTab("completed")}
             >
               お渡し済み/発送済 ({completedOrders.length})
             </button>
             <button
-              className={`tab-button tab-cancelled ${activeTab === "cancelled" ? "active" : ""}`}
+              className={`tab-button-list tab-cancelled ${activeTab === "cancelled" ? "active" : ""}`}
               onClick={() => setActiveTab("cancelled")}
             >
               <span style={{ marginRight: '4px' }}>✕</span> キャンセル ({cancelledOrders.length})
@@ -326,6 +326,15 @@ export default function ListGiftOrder() {
               className='list-order-input'
               style={{ paddingLeft: '32px', borderRadius: '4px', border: '1px solid #ddd', minWidth: '300px' }}
             />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={{ marginLeft: '10px', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+            >
+              {filterOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
           </div>
         </div>
 

@@ -1,4 +1,27 @@
-/* Scanner QR Code */
+/* ============================================================
+   LISTORDER.CSS — Admin Dashboard (予約管理)
+   Índice:
+   1. Scanner QR Code
+   2. Layout Geral (Dashboard / Sidebar / Main Content)
+   3. Sidebar — Menu, Busca, Filtros, Ações
+   4. Hamburger Menu (Mobile)
+   5. Breadcrumbs / Card Container / Título
+   6. Category Pills
+   7. Tabela Moderna (Todos os Pedidos)
+   8. Tabelas Padrão de Pedidos
+   9. Cards Mobile de Pedidos
+   10. Tabs (abas genéricas)
+   11. Timeline do Dia (本日の予約状況)
+   12. Layout de Colunas (Conteúdo + Painel Lateral)
+   13. Utilitários Diversos
+   14. RESPONSIVO — Mobile (max-width: 768px)
+   ============================================================ */
+
+
+/* ============================================================
+   1. SCANNER QR CODE
+   ============================================================ */
+
 #reader {
   border: 2px solid #007bff !important;
   border-radius: 8px;
@@ -14,18 +37,36 @@
   color: #333;
 }
 
-/* ==================== MODERN JAPANESE ADMIN DASHBOARD STYLES ==================== */
+.scanner-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  z-index: 1000;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* ============================================================
+   2. LAYOUT GERAL (Dashboard / Sidebar / Main Content)
+   ============================================================ */
 
 .admin-dashboard-page {
   display: flex;
   min-height: 100vh;
   background-color: #e5eae6;
-  /* Light green-gray background as in image */
   font-family: 'Inter', 'Noto Sans JP', sans-serif;
   color: #333;
 }
 
-/* ── LEFT SIDEBAR ────────────────────────────────────────── */
 .admin-sidebar {
   width: 260px;
   flex-shrink: 0;
@@ -57,7 +98,21 @@
   letter-spacing: 0.05em;
 }
 
-/* Sidebar Top Menu White Card */
+.admin-main-content {
+  flex: 1;
+  padding: 20px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-x: hidden;
+}
+
+
+/* ============================================================
+   3. SIDEBAR — Menu, Busca, Filtros, Ações
+   ============================================================ */
+
+/* Menu superior (cartão branco) */
 .sidebar-menu-card {
   background: #ffffff;
   border-radius: 12px;
@@ -87,7 +142,7 @@
   color: #1a1a1a;
 }
 
-/* Sidebar Search & Add Button */
+/* Busca + Botão adicionar */
 .sidebar-search-box {
   display: flex;
   flex-direction: column;
@@ -136,7 +191,7 @@
   background-color: #f0f7f3;
 }
 
-/* Sidebar Section Titles & Filter Lists */
+/* Seções de filtro (予約ステータス / 履歴) */
 .sidebar-section {
   display: flex;
   flex-direction: column;
@@ -192,7 +247,7 @@
   color: #ffffff;
 }
 
-/* Footer Quick Action Grid */
+/* Grade de ações rápidas no rodapé */
 .sidebar-footer-actions {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -227,15 +282,59 @@
   font-weight: 600;
 }
 
-/* ── RIGHT MAIN PANEL ────────────────────────────────────── */
-.admin-main-content {
-  flex: 1;
-  padding: 20px 28px;
-  display: flex;
+
+/* ============================================================
+   4. HAMBURGER MENU (Mobile)
+   Desligado por padrão; ativado dentro do bloco responsivo (seção 14)
+   ============================================================ */
+
+.sidebar-hamburger-btn {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1001;
+  width: 44px;
+  height: 44px;
+  background: white;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   flex-direction: column;
-  gap: 16px;
-  overflow-x: hidden;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
 }
+
+.hamburger-line {
+  width: 22px;
+  height: 2px;
+  background-color: #333;
+  border-radius: 2px;
+}
+
+.sidebar-close-btn {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  color: #333;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+
+/* ============================================================
+   5. BREADCRUMBS / CARD CONTAINER / TÍTULO
+   ============================================================ */
 
 .admin-breadcrumbs {
   font-size: 13px;
@@ -248,7 +347,6 @@
   font-weight: 600;
 }
 
-/* Main Container Card */
 .admin-card-container {
   background-color: #ffffff;
   border-radius: 20px;
@@ -267,7 +365,11 @@
   margin: 0;
 }
 
-/* Category Pills Row */
+
+/* ============================================================
+   6. CATEGORY PILLS (すべて / ケーキ / ギフト / 当日ケーキ)
+   ============================================================ */
+
 .category-pills-row {
   display: flex;
   gap: 10px;
@@ -325,7 +427,6 @@
   color: #ffffff;
 }
 
-
 .pill-count {
   font-size: 11px;
   font-weight: 700;
@@ -341,7 +442,11 @@
   color: #333;
 }
 
-/* Custom Table Card Rows */
+
+/* ============================================================
+   7. TABELA MODERNA (Todos os Pedidos)
+   ============================================================ */
+
 .table-card-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -351,7 +456,7 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0 10px;
-  /* Space between row cards! */
+  /* Espaço entre os "cards" de linha */
 }
 
 .modern-admin-table thead tr th {
@@ -374,7 +479,6 @@
   border-bottom-right-radius: 8px;
 }
 
-/* Individual Row Card Item */
 .order-row-card {
   background-color: #ffffff;
   border: 2px solid var(--primary-color, #237050);
@@ -459,81 +563,16 @@
   color: #ffffff;
 }
 
-.sales-view-tabs-list {
-  display: flex;
+/* Select de status dentro do card da tabela moderna (usado no gift) */
+.order-date-col .gift-status-select {
+  margin-top: 4px;
+  min-width: 140px;
 }
 
-.sales-view-tab-list--active {
-  background: #000;
-  color: #fff;
-  border-color: #000;
-  box-shadow: 0 2px 8px rgba(24, 84, 149, 0.25);
-}
 
-.sales-view-tab-list {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 24px;
-  font-size: 1rem;
-  font-weight: 600;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  background: #f8f9fa;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-/* Botão de fechar */
-.scanner-close-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #dc3545;
-  color: white;
-  border: none;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  z-index: 1000;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-ul {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-}
-
-.list-order-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.5rem;
-}
-
-.btn-actions-list {
-  gap: 8px;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.cake-btn {
-  img {
-    padding: 2px;
-  }
-}
-
-.cake-list li {
-  list-style: none;
-}
+/* ============================================================
+   8. TABELAS PADRÃO DE PEDIDOS (list-order-table)
+   ============================================================ */
 
 .list-order-container {
   margin: 0 auto;
@@ -570,6 +609,22 @@ ul {
   box-sizing: border-box;
 }
 
+.list-order-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.btn-actions-list {
+  gap: 8px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .list-order-table {
   width: 100%;
   border-collapse: collapse;
@@ -589,14 +644,6 @@ ul {
   margin: 0;
 }
 
-.list-order-table th,
-.list-order-table td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  vertical-align: top;
-  text-align: left;
-}
-
 .list-order-table td.status-cell,
 .list-order-table td.payment-cell {
   text-align: center;
@@ -608,17 +655,15 @@ ul {
   white-space: normal;
   flex-wrap: wrap;
   scrollbar-width: thin;
-  /* Firefox */
   scrollbar-color: #888 #f0f0f0;
   word-break: break-word;
-
-  li {
-    width: 280px;
-    list-style: none;
-  }
 }
 
-/* Webkit (Chrome, Safari) */
+.list-order-table td.message-cell li {
+  width: 280px;
+  list-style: none;
+}
+
 .list-order-table td.message-cell::-webkit-scrollbar {
   width: 8px;
 }
@@ -638,6 +683,28 @@ ul {
   pointer-events: none;
 }
 
+.list-order-table thead {
+  background-color: var(--primary-color, #000000);
+  color: white;
+}
+
+.list-order-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.list-order-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.list-order-table th.situation-cell,
+.list-order-table td.situation-cell {
+  min-width: 161px;
+}
+
+.id-cell {
+  width: 30px !important;
+}
+
 .ellipsis-text {
   max-width: 300px;
   white-space: nowrap;
@@ -652,62 +719,118 @@ ul {
   width: 300px;
 }
 
-
-.list-order-table thead {
-  background-color: var(--primary-color, #000000);
-  color: white;
-}
-
-.list-order-table tbody tr:nth-child(odd) {
-  background-color: #ffffff;
-}
-
-.list-order-table tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
+.filter-column {
+  display: flex;
+  flex-direction: column;
 }
 
 .day-summary {
   padding-bottom: 30px;
 }
 
-.list-btn {
-  padding: 8px;
-  cursor: pointer;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  transition: background-color 0.2s;
-
-  img {
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
-    display: block;
-  }
-
-  img.icon-black {
-    filter: brightness(0);
-  }
-}
-
-.list-order-table th.situation-cell,
-.list-order-table td.situation-cell {
-  min-width: 161px;
-}
-
-.id-cell {
-  width: 30px !important;
-}
-
 .table-head {
   display: flex;
 }
 
-.mobile-orders {
+.cake-btn img {
+  padding: 2px;
+}
+
+.cake-list li {
+  list-style: none;
+}
+
+/* Wrapper com scroll horizontal + indicador de "arraste" */
+.table-wrapper {
+  display: block;
+  width: 100%;
+  max-height: 79vh;
+  overflow-x: auto;
+  overflow-y: auto;
+  white-space: nowrap;
+  padding-bottom: 0;
+  padding-right: 0;
+  -webkit-overflow-scrolling: touch;
+  height: fit-content;
+  scrollbar-width: auto;
+  scrollbar-color: #888 #f0f0f0;
+  margin-bottom: -24px;
+  position: relative;
+}
+
+.table-wrapper table {
+  width: 100%;
+}
+
+.table-wrapper.space-drag {
+  cursor: grab;
+}
+
+.table-wrapper.space-drag.dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.table-wrapper::-webkit-scrollbar {
   display: none;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 6px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.table-wrapper::after {
+  content: "⎵ を押しながらドラッグ";
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.table-wrapper.space-drag::after,
+.table-wrapper.has-scroll.space-drag::after {
+  content: "クリックしてドラッグ";
+  opacity: 1;
+  background: rgba(0, 100, 255, 0.7);
+}
+
+.table-wrapper.has-scroll:hover::after {
+  opacity: 1;
+}
+
+.table-order-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-order-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-order-container::-webkit-scrollbar-thumb {
+  background: #999;
+  border-radius: 4px;
+}
+
+.table-order-container::-webkit-scrollbar-track {
+  background: #eee;
 }
 
 .scroll-wrapper {
@@ -729,128 +852,45 @@ ul {
   background: #f1f1f1;
 }
 
-.table-order-container {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+.table-cake th {
+  color: #000;
+  background: rgb(128, 213, 216);
+  padding: 2px;
 }
 
-.table-order-container::-webkit-scrollbar {
-  height: 8px;
-}
-
-.table-order-container::-webkit-scrollbar-thumb {
-  background: #999;
-  border-radius: 4px;
-}
-
-.table-order-container::-webkit-scrollbar-track {
-  background: #eee;
-}
-
-.filter-column {
-  display: flex;
-  flex-direction: column;
-}
-
-.table-wrapper {
-  display: block;
-  width: 100%;
-  max-height: 79vh;
-  overflow-x: auto;
-  overflow-y: auto;
-  white-space: nowrap;
-  padding-bottom: 0;
-  padding-right: 0;
-  -webkit-overflow-scrolling: touch;
-  height: fit-content;
-  scrollbar-width: none;
-  margin-bottom: -24px;
-}
-
-.table-wrapper table {
-  width: 100%;
-}
-
-/* Cursor quando espaço está pressionado */
-.table-wrapper.space-drag {
-  cursor: grab;
-}
-
-.table-wrapper.space-drag.dragging {
-  cursor: grabbing;
-  user-select: none;
-}
-
-.table-wrapper::-webkit-scrollbar {
-  /* width: 12px;      
-  height: 12px;      */
-  display: none;
-}
-
-.table-wrapper::-webkit-scrollbar-track {
-  background: #f0f0f0;
-}
-
-.table-wrapper::-webkit-scrollbar-thumb {
-  background: #888;
+.list-btn {
+  padding: 8px;
+  cursor: pointer;
   border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  transition: background-color 0.2s;
 }
 
-.table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #555;
+.list-btn img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
 }
 
-.table-wrapper {
-  scrollbar-width: auto;
-  /* "thin" para mais fina */
-  scrollbar-color: #888 #f0f0f0;
+.list-btn img.icon-black {
+  filter: brightness(0);
 }
 
-.table-wrapper {
-  position: relative;
+
+/* ============================================================
+   9. CARDS MOBILE DE PEDIDOS
+   ============================================================ */
+
+.mobile-orders {
+  display: none;
+  /* Ativado no bloco responsivo (seção 14) */
 }
 
-.table-wrapper::after {
-  content: "⎵ を押しながらドラッグ";
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-.table-wrapper.space-drag::after {
-  content: "クリックしてドラッグ";
-  opacity: 1;
-  background: rgba(0, 100, 255, 0.7);
-}
-
-.table-wrapper.has-scroll:hover::after {
-  opacity: 1;
-}
-
-.table-wrapper.has-scroll.space-drag::after {
-  content: "クリックしてドラッグ";
-  opacity: 1;
-  background: rgba(0, 100, 255, 0.7);
-}
-
-.table-cake {
-  th {
-    color: #000;
-    background: rgb(128, 213, 216);
-    padding: 2px;
-  }
-}
-
-/* Card estilo mobile */
 .order-card {
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -878,13 +918,42 @@ ul {
   transition: opacity 0.3s;
 }
 
+
+/* ============================================================
+   10. TABS (abas genéricas)
+   ============================================================ */
+
+.sales-view-tabs-list {
+  display: flex;
+}
+
+.sales-view-tab-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f8f9fa;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sales-view-tab-list--active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+  box-shadow: 0 2px 8px rgba(24, 84, 149, 0.25);
+}
+
 .sales-view-tab--active {
   color: #fff !important;
   background-color: var(--primary-color, #000000) !important;
-
 }
 
-/* Estilos para as abas */
 .tabs-container {
   margin-top: .5rem;
 }
@@ -936,27 +1005,15 @@ ul {
   color: #fff !important;
 }
 
-/* Custom Tab Colors */
-.tab-past {
-  color: #000 !important;
-}
-
-.tab-past.active {
-  border-bottom-color: #000 !important;
-}
-
-.tab-completed {
-  color: #000 !important;
-}
-
-.tab-completed.active {
-  border-bottom-color: #000 !important;
-}
-
+/* Cores customizadas por aba */
+.tab-past,
+.tab-completed,
 .tab-cancelled {
   color: #000 !important;
 }
 
+.tab-past.active,
+.tab-completed.active,
 .tab-cancelled.active {
   border-bottom-color: #000 !important;
 }
@@ -965,65 +1022,10 @@ ul {
   min-height: 200px;
 }
 
-/* Responsividade para abas */
-@media (max-width: 768px) {
-  .tabs-header {
-    flex-direction: column;
-  }
 
-  .tab-button-list {
-    width: 100%;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
-    border-radius: 0;
-  }
-
-  .tab-button-list.active {
-    border-bottom: 3px solid #000;
-  }
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .list-order-input {
-    max-width: 98vw !important;
-  }
-
-  .list-order-actions {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-
-  .btn-actions-list {
-    flex-direction: row;
-    justify-content: flex-end;
-  }
-
-  .table-wrapper {
-    display: none;
-  }
-
-  .mobile-orders {
-    display: block;
-  }
-
-  .excel-btn {
-    display: none;
-  }
-
-  .list-btn {
-    min-width: 48px !important;
-    min-height: 48px !important;
-
-    img {
-      width: 1.8rem !important;
-      height: 1.8rem !important;
-    }
-  }
-}
-
-/* ==================== 本日の予約タイムライン ==================== */
+/* ============================================================
+   11. TIMELINE DO DIA (本日の予約状況)
+   ============================================================ */
 
 .today-timeline-panel {
   background: #ffffff;
@@ -1056,7 +1058,6 @@ ul {
   font-weight: 500;
 }
 
-/* Scrollable horizontal row of time slots */
 .today-timeline-scroll {
   display: flex;
   flex-direction: row;
@@ -1080,7 +1081,6 @@ ul {
   border-radius: 4px;
 }
 
-/* Each time-slot column */
 .today-timeline-slot {
   display: flex;
   flex-direction: column;
@@ -1114,7 +1114,6 @@ ul {
   gap: 6px;
 }
 
-/* Individual order card inside slot */
 .today-timeline-card {
   background: #f8fbf8;
   border: 1px solid #dde8dd;
@@ -1171,50 +1170,10 @@ ul {
   text-overflow: ellipsis;
 }
 
-/* ==================== Hamburger Menu (Mobile) ==================== */
 
-.sidebar-hamburger-btn {
-  display: none;
-  position: fixed;
-  top: 16px;
-  left: 16px;
-  z-index: 1001;
-  width: 44px;
-  height: 44px;
-  background: white;
-  border: none;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  cursor: pointer;
-}
-
-.hamburger-line {
-  width: 22px;
-  height: 2px;
-  background-color: #333;
-  border-radius: 2px;
-}
-
-.sidebar-close-btn {
-  display: none;
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: none;
-  border: none;
-  font-size: 28px;
-  line-height: 1;
-  cursor: pointer;
-  color: #333;
-}
-
-.sidebar-overlay {
-  display: none;
-}
+/* ============================================================
+   12. LAYOUT DE COLUNAS (Conteúdo principal + Painel lateral)
+   ============================================================ */
 
 .list-order-page-row {
   display: flex;
@@ -1232,6 +1191,22 @@ ul {
   flex-shrink: 0;
 }
 
+
+/* ============================================================
+   13. UTILITÁRIOS DIVERSOS
+   ============================================================ */
+
+ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+
+/* ============================================================
+   14. RESPONSIVO — TABLET (max-width: 1024px)
+   ============================================================ */
+
 @media (max-width: 1024px) {
   .list-order-page-row {
     flex-direction: column;
@@ -1242,20 +1217,32 @@ ul {
   }
 }
 
-@media (max-width: 768px) {
-  .today-timeline-scroll {
-    padding: 12px;
-  }
 
-  .today-timeline-slot {
-    min-width: 130px;
-    padding-right: 14px;
-    margin-right: 14px;
-  }
+/* ============================================================
+   15. RESPONSIVO — MOBILE (max-width: 768px)
+   Bloco único: todas as regras mobile antes espalhadas em
+   4 media queries separadas foram consolidadas aqui.
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+  /* ---- Layout geral ---- */
 
   .admin-dashboard-page {
     flex-direction: column;
   }
+
+  .admin-main-content {
+    padding: 70px 12px 20px 12px;
+    /* topo libera espaço para o botão hambúrguer */
+    gap: 12px;
+  }
+
+  .admin-breadcrumbs {
+    font-size: 11px;
+  }
+
+  /* ---- Hamburger menu / sidebar como drawer ---- */
 
   .sidebar-hamburger-btn {
     display: flex;
@@ -1294,8 +1281,147 @@ ul {
     z-index: 999;
   }
 
-  .admin-main-content {
-    padding-top: 70px;
-    /* espaço pro botão hambúrguer não cobrir o conteúdo */
+  /* ---- Card principal ---- */
+
+  .admin-card-container {
+    padding: 16px;
+    border-radius: 14px;
+    min-height: auto;
+    /* remove o calc(100vh - 100px), que sobra no mobile */
+    gap: 14px;
+  }
+
+  .admin-page-title {
+    font-size: 17px;
+  }
+
+  /* ---- Category pills: carrossel horizontal ---- */
+
+  .category-pills-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    gap: 8px;
+    scrollbar-width: none;
+  }
+
+  .category-pills-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-pill {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* ---- Inputs e ações da lista ---- */
+
+  .list-order-input {
+    max-width: 98vw !important;
+  }
+
+  .list-order-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .btn-actions-list {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .excel-btn {
+    display: none;
+  }
+
+  .list-btn {
+    min-width: 48px !important;
+    min-height: 48px !important;
+  }
+
+  .list-btn img {
+    width: 1.8rem !important;
+    height: 1.8rem !important;
+  }
+
+  /* ---- Tabelas: escondidas em favor dos cards mobile ---- */
+
+  .table-wrapper {
+    display: none;
+  }
+
+  .mobile-orders {
+    display: block;
+  }
+
+  /* ---- Tabs genéricas ---- */
+
+  .tabs-header {
+    flex-direction: column;
+  }
+
+  .tab-button-list {
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    border-radius: 0;
+  }
+
+  .tab-button-list.active {
+    border-bottom: 3px solid #000;
+  }
+
+  /* ---- Timeline do dia ---- */
+
+  .today-timeline-header {
+    padding: 10px 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .today-timeline-title {
+    font-size: 13px;
+  }
+
+  .today-timeline-date {
+    font-size: 11px;
+  }
+
+  .today-timeline-scroll {
+    padding: 12px;
+  }
+
+  .today-timeline-slot {
+    min-width: 130px;
+    padding-right: 14px;
+    margin-right: 14px;
+  }
+
+  /* ---- Painel lateral (OnlineSalesSidebar) ---- */
+
+  .list-order-side-col {
+    margin-top: 16px;
+  }
+
+  /* ---- Scanner QR ---- */
+
+  #reader {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* ---- Lista de itens do pedido escaneado ---- */
+
+  .cake-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
   }
 }
