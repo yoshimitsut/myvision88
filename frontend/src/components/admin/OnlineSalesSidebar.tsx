@@ -25,6 +25,7 @@ interface SameDayCake {
 export default function OnlineSalesSidebar() {
   const [cakes, setCakes] = useState<SameDayCake[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -83,51 +84,80 @@ export default function OnlineSalesSidebar() {
   if (loading) return <div className="online-sales-sidebar loading">読み込み中...</div>;
 
   return (
-    <div className="online-sales-sidebar">
-      <h3 className="online-sales-title">オンライン販売</h3>
+    <>
+      <button 
+        className="online-sales-mobile-btn" 
+        onClick={() => setIsOpen(true)}
+        aria-label="オンライン販売メニューを開く"
+      >
+        <span className="online-sales-hamburger-icon">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </button>
 
-      <div className="online-sales-list">
-        {cakes.filter(c => c.is_active).map(cake => (
-          cake.sizes.map(size => (
-            <div key={`${cake.id}-${size.id}`} className="online-sales-item">
-              <div className="online-sales-img-wrapper">
-                {cake.image && (
-                  <img
-                    src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`}
-                    alt={cake.name}
-                    className="online-sales-img"
-                  />
-                )}
-              </div>
-              <div className="online-sales-info">
-                <div className="online-sales-name">{cake.name}</div>
-                <div className="online-sales-size">{size.size}</div>
-                <div className="online-sales-toggle-wrapper">
-                  <label className="online-sales-switch">
-                    <input
-                      type="checkbox"
-                      checked={!!size.is_active}
-                      onChange={() => toggleSizeStatus(size.id, size.is_active)}
+      {isOpen && (
+        <div 
+          className="online-sales-overlay" 
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      <div className={`online-sales-sidebar ${isOpen ? 'open' : ''}`}>
+        <button 
+          className="online-sales-close-btn" 
+          onClick={() => setIsOpen(false)}
+          aria-label="閉じる"
+        >
+          &times;
+        </button>
+
+        <h3 className="online-sales-title">オンライン販売</h3>
+
+        <div className="online-sales-list">
+          {cakes.filter(c => c.is_active).map(cake => (
+            cake.sizes.map(size => (
+              <div key={`${cake.id}-${size.id}`} className="online-sales-item">
+                <div className="online-sales-img-wrapper">
+                  {cake.image && (
+                    <img
+                      src={`${API_URL}/image/${FOLDER_URL}/${cake.image}`}
+                      alt={cake.name}
+                      className="online-sales-img"
                     />
-                    <span className="online-sales-slider round"></span>
-                  </label>
-                  <span className={`online-sales-status-text ${size.is_active ? 'active' : 'inactive'}`}>
-                    {size.is_active ? '販売中' : '停止中'}
-                  </span>
+                  )}
+                </div>
+                <div className="online-sales-info">
+                  <div className="online-sales-name">{cake.name}</div>
+                  <div className="online-sales-size">{size.size}</div>
+                  <div className="online-sales-toggle-wrapper">
+                    <label className="online-sales-switch">
+                      <input
+                        type="checkbox"
+                        checked={!!size.is_active}
+                        onChange={() => toggleSizeStatus(size.id, size.is_active)}
+                      />
+                      <span className="online-sales-slider round"></span>
+                    </label>
+                    <span className={`online-sales-status-text ${size.is_active ? 'active' : 'inactive'}`}>
+                      {size.is_active ? '販売中' : '停止中'}
+                    </span>
+                  </div>
+                </div>
+                <div className="online-sales-stock-box">
+                  <span className="online-sales-stock-label">残り</span>
+                  <span className="online-sales-stock-number">{size.stock}</span>
                 </div>
               </div>
-              <div className="online-sales-stock-box">
-                <span className="online-sales-stock-label">残り</span>
-                <span className="online-sales-stock-number">{size.stock}</span>
-              </div>
-            </div>
-          ))
-        ))}
-      </div>
+            ))
+          ))}
+        </div>
 
-      <button className="online-sales-edit-btn" onClick={() => navigate('/store-settings')}>
-        当日オンライン販売を編集
-      </button>
-    </div>
+        <button className="online-sales-edit-btn" onClick={() => navigate('/store-settings')}>
+          当日オンライン販売を編集
+        </button>
+      </div>
+    </>
   );
 }

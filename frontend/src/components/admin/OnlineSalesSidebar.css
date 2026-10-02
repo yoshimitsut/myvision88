@@ -176,3 +176,91 @@ input:checked + .online-sales-slider:before {
 .online-sales-edit-btn:hover {
   background-color: #236548;
 }
+
+/* --- Mobile Drawer Styles --- */
+.online-sales-mobile-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #2b7d59;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  z-index: 998;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.online-sales-hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.online-sales-hamburger-icon span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: white;
+}
+
+.online-sales-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.online-sales-close-btn {
+  display: none;
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #333;
+}
+
+@media (max-width: 1024px) {
+  .online-sales-mobile-btn {
+    display: flex;
+  }
+
+  .online-sales-sidebar {
+    position: fixed;
+    top: 0;
+    right: -320px;
+    width: 300px;
+    height: 100vh;
+    max-width: 85vw;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: -2px 0 12px rgba(0, 0, 0, 0.2);
+    transition: right 0.3s ease;
+    border-radius: 0;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+  }
+
+  .online-sales-sidebar.open {
+    right: 0;
+  }
+
+  .online-sales-overlay {
+    display: block;
+  }
+
+  .online-sales-close-btn {
+    display: block;
+  }
+}
