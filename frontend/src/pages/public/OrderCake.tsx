@@ -128,6 +128,7 @@ export default function OrderCake() {
     emailSelected: false,
     telSelected: false,
   });
+
   const [, setProcessingStorePayment] = useState(false);
   const [activeCandleCategory, setActiveCandleCategory] = useState<Record<number, string>>({});
 
@@ -337,6 +338,32 @@ export default function OrderCake() {
       }
     })
   }, [cakes, cakesData])
+
+  useEffect(() => {
+    if (!cakesData.length) return;
+
+    cakes.forEach((item, index) => {
+      if (!item.size) return;
+
+      const selectedCakeData = cakesData.find(c => c.id === item.cake_id);
+      const selectedSizeData = selectedCakeData?.sizes?.find(s => s.size === item.size);
+      if (!selectedSizeData) return;
+
+      if (selectedSizeData.has_fruit_option === 0 && item.fruit_option !== "無し") {
+        updateCake(index, "fruit_option", "無し");
+      }
+
+      if (selectedSizeData.has_candle_option === 0 && item.candle_option !== "無し") {
+        updateCake(index, "candle_option", "無し");
+      }
+
+      if (selectedSizeData.has_message_plate === 0) {
+        if (item.message_cake !== "") updateCake(index, "message_cake", "");
+        if ((item as any).plate_type !== "") updateCake(index, "plate_type" as any, "");
+        if (item.message_plate !== "") updateCake(index, "message_plate", "");
+      }
+    });
+  }, [cakes, cakesData]);
 
   // ==================== FUNÇÕES DE VALIDAÇÃO ====================
   const { isDateAllowed } = useDateValidation(today, excludedDates, availableDates);
@@ -658,6 +685,23 @@ export default function OrderCake() {
     message: formData.message
   };
 
+  // 🔹 Verifica se TODOS os bolos do carrinho já completaram as etapas obrigatórias
+  // (considerando campos ocultos como automaticamente "completos")
+  const allCakesReadyForDate = cakes.every(item => {
+    const cd = cakesData?.find(c => c.id === item.cake_id);
+    const sd = cd?.sizes?.find(s => s.size === item.size);
+
+    const needsFruit = sd?.has_fruit_option !== 0;
+    const needsMessage = sd?.has_message_plate !== 0;
+    const needsCandle = sd?.has_candle_option !== 0;
+
+    const fruitOk = !needsFruit || stepProgress.fruitSelected;
+    const messageOk = !needsMessage || stepProgress.messageSelected;
+    const candleOk = !needsCandle || stepProgress.candlesSelected;
+
+    return fruitOk && messageOk && candleOk;
+  });
+
   // ==================== RENDER ====================
   return (
     <div className='reservation-main'>
@@ -681,6 +725,9 @@ export default function OrderCake() {
                 const showMessagePlate = selectedSizeData?.has_message_plate !== 0;
                 const showCandleOption = selectedSizeData?.has_candle_option !== 0;
 
+                const effectiveFruitSelected = !showFruitOption || stepProgress.fruitSelected;
+                const effectiveMessageSelected = !showMessagePlate || stepProgress.messageSelected;
+                const effectiveCandleSelected = !showCandleOption || stepProgress.candlesSelected;
                 return (
                   <div className="box-cake" key={`${item.cake_id}-${index}`}>
                     {index > 0 && (
@@ -887,7 +934,7 @@ export default function OrderCake() {
                                 key={pOpt.value}
                                 className={`option-pill-card ${isSelected ? 'selected' : ''}`}
                                 onClick={() => {
-                                  if (stepProgress.fruitSelected) {
+                                  if (effectiveFruitSelected) {
                                     updateCake(index, "plate_type" as any, pOpt.value);
                                     if (pOpt.value !== "その他") {
                                       updateCake(index, "message_plate", pOpt.label);
@@ -898,8 +945,8 @@ export default function OrderCake() {
                                   }
                                 }}
                                 style={{
-                                  pointerEvents: stepProgress.fruitSelected ? 'auto' : 'none',
-                                  opacity: stepProgress.fruitSelected ? 1 : 0.5
+                                  pointerEvents: effectiveFruitSelected ? 'auto' : 'none',
+                                  opacity: effectiveFruitSelected ? 1 : 0.5
                                 }}
                               >
                                 {isSelected && <span className="option-pill-checkmark">✓</span>}
@@ -946,7 +993,7 @@ export default function OrderCake() {
                                 key={cat}
                                 className={`option-pill-card ${isSelected ? 'selected' : ''}`}
                                 onClick={() => {
-                                  if (stepProgress.messageSelected) {
+                                  if (effectiveMessageSelected) {
                                     setActiveCandleCategory(prev => ({ ...prev, [index]: cat }));
                                     if (cat === 'なし') {
                                       updateCake(index, "candle_option" as any, "なし");
@@ -957,8 +1004,8 @@ export default function OrderCake() {
                                   }
                                 }}
                                 style={{
-                                  pointerEvents: stepProgress.messageSelected ? 'auto' : 'none',
-                                  opacity: stepProgress.messageSelected ? 1 : 0.5
+                                  pointerEvents: effectiveMessageSelected ? 'auto' : 'none',
+                                  opacity: effectiveMessageSelected ? 1 : 0.5
                                 }}
                               >
                                 {isSelected && <span className="option-pill-checkmark">✓</span>}
@@ -1084,7 +1131,7 @@ export default function OrderCake() {
                       setSelectedDate(date);
                       updateStepProgress("dateSelected", true);
                     }}
-                    disabled={!stepProgress.candlesSelected}
+                    disabled={!allCakesReadyForDate}
                     minDate={addDays(today, 2)}
                     maxDate={maxDate}
                     excludeDates={excludedDates}
