@@ -52,11 +52,11 @@ export default function StoreSettings() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     if (storeInfo) {
       setStoreInfo({
         ...storeInfo,
-        [name]: type === 'checkbox' 
+        [name]: type === 'checkbox'
           ? (e.target as HTMLInputElement).checked ? 's' : 'n'
           : value
       });
@@ -82,7 +82,7 @@ export default function StoreSettings() {
       const token = sessionStorage.getItem('store_token');
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/storeinfo`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -182,68 +182,10 @@ export default function StoreSettings() {
             </div>
           </div>
 
-          <div style={{ marginTop: '15px' }}>
-            <label style={{ fontSize: '14px', fontWeight: 500, color: '#495057' }}>クイックプリセット (Preset Cores):</label>
-            <div className="color-preset-group">
-              <button
-                type="button"
-                className="color-preset-btn"
-                onClick={() => handleColorChange('#000000', '#fdd111')}
-              >
-                <span className="color-badge" style={{ backgroundColor: '#000000' }}></span>
-                🖤 ブラック (Black)
-              </button>
-
-              <button
-                type="button"
-                className="color-preset-btn"
-                onClick={() => handleColorChange('#fdd111', '#000000')}
-              >
-                <span className="color-badge" style={{ backgroundColor: '#fdd111' }}></span>
-                🟡 イエロー (Yellow)
-              </button>
-
-              <button
-                type="button"
-                className="color-preset-btn"
-                onClick={() => handleColorChange('#007bff', '#fdd111')}
-              >
-                <span className="color-badge" style={{ backgroundColor: '#007bff' }}></span>
-                🔵 ブルー (Blue)
-              </button>
-
-              <button
-                type="button"
-                className="color-preset-btn"
-                onClick={() => handleColorChange('#ff758c', '#fff0f3')}
-              >
-                <span className="color-badge" style={{ backgroundColor: '#ff758c' }}></span>
-                🌸 サクラピンク (Sakura Pink)
-              </button>
-
-              <button
-                type="button"
-                className="color-preset-btn"
-                onClick={() => handleColorChange('#2d6a4f', '#d8f3dc')}
-              >
-                <span className="color-badge" style={{ backgroundColor: '#2d6a4f' }}></span>
-                🍵 抹茶グリーン (Matcha Green)
-              </button>
-
-              <button
-                type="button"
-                className="color-preset-btn"
-                onClick={() => handleColorChange('#6f42c1', '#f3e8ff')}
-              >
-                <span className="color-badge" style={{ backgroundColor: '#6f42c1' }}></span>
-                💜 パープル (Purple)
-              </button>
-            </div>
-          </div>
         </div>
         <div className="store-settings-section">
           <h2>基本情報</h2>
-          
+
           <div className="store-settings-field">
             <label>店舗名：</label>
             <input
@@ -302,7 +244,7 @@ export default function StoreSettings() {
 
         <div className="store-settings-section">
           <h2>メール設定</h2>
-          
+
           <div className="store-settings-field">
             <label>店舗メールアドレス：</label>
             <input
@@ -350,7 +292,7 @@ export default function StoreSettings() {
 
         <div className="store-settings-section">
           <h2>管理機能</h2>
-          
+
           <div className="store-settings-checkbox-group">
             <label className="store-settings-checkbox">
               <input
@@ -395,8 +337,8 @@ export default function StoreSettings() {
         </div>
 
         <div className="store-settings-actions">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="store-settings-save-btn"
             disabled={saving}
           >

@@ -13,12 +13,13 @@ import { STATUS_OPTIONS } from '../../types/types';
 import { formatDateJP } from "../../utils/formatDateJP";
 import ListGiftOrder from "./ListGiftOrder";
 import ListSameDayOrder from "./ListSameDayOrder";
+import ListAllUnified from "./ListAllUnified";
 import OnlineSalesSidebar from "../../components/admin/OnlineSalesSidebar";
 
 import './ListOrder.css';
 
 export default function ListOrder() {
-  const [viewType, setViewType] = useState<"cake" | "gift" | "sameday">("cake");
+  const [viewType, setViewType] = useState<"all" | "cake" | "gift" | "sameday">("all");
   const [sameDayPendingCount, setSameDayPendingCount] = useState(0);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1536,11 +1537,8 @@ export default function ListOrder() {
             {/* Category Pills Row */}
             <div className="category-pills-row">
               <button
-                className={`category-pill ${activeTab === 'all' && viewType === 'cake' ? 'active-solid' : ''}`}
-                onClick={() => {
-                  setActiveTab('all');
-                  setViewType('cake');
-                }}
+                className={`category-pill ${viewType === 'all' ? 'active-solid' : ''}`}
+                onClick={() => setViewType('all')}
               >
                 すべて
               </button>
@@ -1583,6 +1581,8 @@ export default function ListOrder() {
               <ListGiftOrder />
             ) : viewType === "sameday" ? (
               <ListSameDayOrder onPendingCountChange={setSameDayPendingCount} />
+            ) : viewType === "all" ? (
+              <ListAllUnified />
             ) : (
               <>
                 {showScanner && (
