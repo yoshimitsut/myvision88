@@ -35,16 +35,30 @@ export default function CakeManagement() {
 
   const navigate = useNavigate();
 
-  const toggleSizeActive = async (sizeId: number) => {
+  const toggleSizeActive = async (sizeId: number, currentStatus: number) => {
     try {
-      await fetch(`${API_URL}/api/sizes/${sizeId}/toggle`, {
+      const newStatus = currentStatus === 1 ? 0 : 1;
+      const token = sessionStorage.getItem('store_token');
+
+      const response = await fetch(`${API_URL}/api/cake/sizes/${sizeId}/toggle`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ is_active: newStatus })
       });
-      // A quick reload to reflect changes, or it can be handled by the hook state reload
-      window.location.reload();
+      
+      const data = await response.json();
+      if (data.success) {
+        // A quick reload to reflect changes, or it can be handled by the hook state reload
+        window.location.reload();
+      } else {
+        alert('ステータスの更新に失敗しました。');
+      }
     } catch (error) {
       console.error('Erro ao toggle size:', error);
+      alert('通信エラーが発生しました。');
     }
   };
 
@@ -132,7 +146,7 @@ export default function CakeManagement() {
                                   <input
                                     type="checkbox"
                                     checked={size.is_active === 1}
-                                    onChange={() => size.id !== undefined && toggleSizeActive(size.id)}
+                                    onChange={() => size.id !== undefined && toggleSizeActive(size.id, size.is_active ?? 0)}
                                   />
                                   <span className="toggle-slider"></span>
                                 </label>

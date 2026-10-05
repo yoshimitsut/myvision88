@@ -472,4 +472,30 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// 🔹 Rota para alternar status de um tamanho
+router.patch('/sizes/:id/toggle', async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const sizeId = req.params.id;
+    const { is_active } = req.body;
+    
+    let query, params;
+    if (is_active !== undefined) {
+      query = 'UPDATE cake_sizes SET is_active = ? WHERE id = ?';
+      params = [is_active, sizeId];
+    } else {
+      query = 'UPDATE cake_sizes SET is_active = NOT is_active WHERE id = ?';
+      params = [sizeId];
+    }
+    
+    await connection.query(query, params);
+    res.json({ success: true, message: 'Status atualizado com sucesso' });
+  } catch (err) {
+    console.error('Erro ao alternar status do tamanho:', err);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    connection.release();
+  }
+});
+
 module.exports = router;

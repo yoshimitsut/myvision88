@@ -1215,6 +1215,10 @@ ul {
   .list-order-side-col {
     width: 100%;
   }
+
+  .list-order-main-col {
+    width: 100%;
+  }
 }
 
 
