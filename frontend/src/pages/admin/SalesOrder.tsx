@@ -375,8 +375,8 @@ export default function SalesOrder() {
     </div>
   );
 
-  const currentMonthData = viewType === "cake" ? activeMonthData : activeGiftMonthData;
-  const currentMonthDates = currentMonthData?.dates || [];
+  // const currentMonthData = viewType === "cake" ? activeMonthData : activeGiftMonthData;
+  // const currentMonthDates = currentMonthData?.dates || [];
 
   // Compute sidebar-compatible counts from orders for the sidebar
   const activeOrdersForSidebar = orders.filter(o => o.status === "b" || o.status === "f");
@@ -411,25 +411,25 @@ export default function SalesOrder() {
         <div className="so-month-tabs-row">
           {viewType === "cake"
             ? monthlyData.map(({ month, label }) => (
-                <button
-                  key={month}
-                  className={`so-month-tab ${activeMonth === month ? "so-month-tab--active" : ""} ${isCurrentMonth(month) ? "so-month-tab--current" : ""}`}
-                  onClick={() => setActiveMonth(month)}
-                >
-                  {label}
-                  {isCurrentMonth(month) && <span className="so-current-badge">当月</span>}
-                </button>
-              ))
+              <button
+                key={month}
+                className={`so-month-tab ${activeMonth === month ? "so-month-tab--active" : ""} ${isCurrentMonth(month) ? "so-month-tab--current" : ""}`}
+                onClick={() => setActiveMonth(month)}
+              >
+                {label}
+                {isCurrentMonth(month) && <span className="so-current-badge">当月</span>}
+              </button>
+            ))
             : giftMonthlyData.map(({ month, label }) => (
-                <button
-                  key={month}
-                  className={`so-month-tab ${giftActiveMonth === month ? "so-month-tab--active" : ""} ${isCurrentMonth(month) ? "so-month-tab--current" : ""}`}
-                  onClick={() => setGiftActiveMonth(month)}
-                >
-                  {label}
-                  {isCurrentMonth(month) && <span className="so-current-badge">当月</span>}
-                </button>
-              ))
+              <button
+                key={month}
+                className={`so-month-tab ${giftActiveMonth === month ? "so-month-tab--active" : ""} ${isCurrentMonth(month) ? "so-month-tab--current" : ""}`}
+                onClick={() => setGiftActiveMonth(month)}
+              >
+                {label}
+                {isCurrentMonth(month) && <span className="so-current-badge">当月</span>}
+              </button>
+            ))
           }
         </div>
 

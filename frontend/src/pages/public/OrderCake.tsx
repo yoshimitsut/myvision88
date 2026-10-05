@@ -727,7 +727,7 @@ export default function OrderCake() {
 
                 const effectiveFruitSelected = !showFruitOption || stepProgress.fruitSelected;
                 const effectiveMessageSelected = !showMessagePlate || stepProgress.messageSelected;
-                const effectiveCandleSelected = !showCandleOption || stepProgress.candlesSelected;
+                // const effectiveCandleSelected = !showCandleOption || stepProgress.candlesSelected;
                 return (
                   <div className="box-cake" key={`${item.cake_id}-${index}`}>
                     {index > 0 && (
