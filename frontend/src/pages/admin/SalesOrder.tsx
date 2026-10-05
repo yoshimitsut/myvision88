@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import "./SalesOrder.css";
 import type { Order, GiftOrder } from "../../types/types";
 import { STATUS_OPTIONS } from "../../types/types";
-import { useNavigate } from "react-router-dom";
+import AdminSidebar from "../../components/admin/AdminSidebar";
 
 // ── Interfaces Cake ──────────────────────────────────────────
 interface CakeSizeData { stock: number; days: Record<string, number>; }
@@ -44,7 +44,6 @@ const isCurrentMonth = (m: string) => {
 };
 
 export default function SalesOrder() {
-  const navigate = useNavigate();
   const statusOptions = STATUS_OPTIONS;
 
   // ── View tab ─────────────────────────────────────────────────
@@ -69,7 +68,6 @@ export default function SalesOrder() {
     const token = () => sessionStorage.getItem("store_token");
     const headers = () => ({ Authorization: `Bearer ${token()}` });
 
-    // ── CAKE fetch ───────────────────────────────────────────
     const fetchCakes = async (): Promise<Cake[]> => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cake`, { headers: headers() });
       const data = await res.json();
@@ -118,7 +116,6 @@ export default function SalesOrder() {
         }
       });
 
-      // Garantir todos bolos em todos os meses
       map.forEach((md) => {
         cakes.forEach((cake) => {
           const n = cake.name.trim();
@@ -142,7 +139,6 @@ export default function SalesOrder() {
       setActiveMonth(found ? currentMonth : processed[processed.length - 1]?.month || "");
     };
 
-    // ── GIFT fetch ───────────────────────────────────────────
     const fetchGiftProducts = async (): Promise<GiftProduct[]> => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/gift`, { headers: headers() });
@@ -167,7 +163,6 @@ export default function SalesOrder() {
         const map = new Map<string, GiftMonthlyData>();
         raw.forEach((order) => {
           const status = order.status?.toLowerCase() || "";
-          // Use date_order (creation date), take just YYYY-MM-DD
           const fullDate = order.date_order ? order.date_order.substring(0, 10) : "";
           if (!fullDate) return;
           const monthKey = fullDate.substring(0, 7);
@@ -184,7 +179,6 @@ export default function SalesOrder() {
           if (!md.statusDayCounts[fullDate]) md.statusDayCounts[fullDate] = {};
           md.statusDayCounts[fullDate][status] = (md.statusDayCounts[fullDate][status] || 0) + 1;
 
-          // Acumular valor por status/dia
           if (!md.orderValues[fullDate]) md.orderValues[fullDate] = {};
           md.orderValues[fullDate][status] = (md.orderValues[fullDate][status] || 0) + (order.total_amount || 0);
 
@@ -200,7 +194,6 @@ export default function SalesOrder() {
           }
         });
 
-        // Garantir todos gifts em todos os meses
         map.forEach((md) => {
           gifts.forEach((gift) => {
             const n = gift.name.trim();
@@ -227,7 +220,6 @@ export default function SalesOrder() {
       }
     };
 
-    // ── Run all ──────────────────────────────────────────────
     const run = async () => {
       try {
         const [cakes, gifts] = await Promise.all([fetchCakes(), fetchGiftProducts()]);
@@ -293,80 +285,6 @@ export default function SalesOrder() {
     [allGifts]
   );
 
-  if (error) return (
-    <div className="error-container">
-      <p>{error}</p>
-      <button onClick={() => window.location.reload()}>エラー</button>
-    </div>
-  );
-
-  // ── Render helper: status table ──────────────────────────────
-  const renderStatusTable = (
-    monthData: MonthlyData | GiftMonthlyData,
-    sv: { [status: string]: { [date: string]: number } }
-  ) => (
-    <div className="data-percentage">
-      <table className="summary-table total-summary">
-        <thead>
-          <tr>
-            <th>支払い状況</th>
-            {monthData.dates.map((date) => (
-              <th key={date} className={isToday(date) ? "current-day" : ""}>{formatDayOnly(date)}</th>
-            ))}
-            <th>合計(件数)</th>
-            <th>合計(金額)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {statusOptions.filter(({ label }) => label !== "キャンセル").map(({ value, label }) => {
-            let totalStatus = 0, totalValue = 0;
-            return (
-              <tr key={value}>
-                <td className={`title-${label}`}>{label}</td>
-                {monthData.dates.map((date) => {
-                  const count = monthData.statusDayCounts[date]?.[value] || 0;
-                  const val = sv[value]?.[date] || 0;
-                  totalStatus += count; totalValue += val;
-                  return <td key={`${value}-${date}`} className={isToday(date) ? "data-current-day" : ""}>{count}</td>;
-                })}
-                <td><strong>{totalStatus}</strong></td>
-                <td><strong>¥{totalValue.toLocaleString("ja-JP")}</strong></td>
-              </tr>
-            );
-          })}
-          <tr className="sales-total-row">
-            <td><strong>合計</strong></td>
-            {monthData.dates.map((date) => {
-              const total = statusOptions.filter(({ label }) => label !== "キャンセル")
-                .reduce((s, { value }) => s + (monthData.statusDayCounts[date]?.[value] || 0), 0);
-              return <td key={`total-${date}`} className={isToday(date) ? "data-current-day" : ""}><strong>{total}</strong></td>;
-            })}
-            <td><strong>{monthData.dates.reduce((s, d) => s + statusOptions.filter(({ label }) => label !== "キャンセル").reduce((ss, { value }) => ss + (monthData.statusDayCounts[d]?.[value] || 0), 0), 0)}</strong></td>
-            <td><strong>¥{monthData.dates.reduce((s, d) => s + statusOptions.filter(({ label }) => label !== "キャンセル").reduce((ss, { value }) => ss + (sv[value]?.[d] || 0), 0), 0).toLocaleString("ja-JP")}</strong></td>
-          </tr>
-          <br /><br />
-          {statusOptions.filter(({ label }) => label === "キャンセル").map(({ value, label }) => {
-            let totalStatus = 0, totalValue = 0;
-            return (
-              <tr key={value} className="cancel-row">
-                <td className={`title-${label}`}>{label}</td>
-                {monthData.dates.map((date) => {
-                  const count = monthData.statusDayCounts[date]?.[value] || 0;
-                  const val = sv[value]?.[date] || 0;
-                  totalStatus += count; totalValue += val;
-                  return <td key={`${value}-${date}`} className={isToday(date) ? "data-current-day" : ""}>{count}</td>;
-                })}
-                <td><strong>{totalStatus}</strong></td>
-                <td><strong>¥{totalValue.toLocaleString("ja-JP")}</strong></td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-
-  // ── Gift status values (baseado em orderValues) ──────────────
   const giftStatusValues = useMemo(() => {
     if (!activeGiftMonthData) return {};
     const values: { [status: string]: { [date: string]: number } } = {};
@@ -384,233 +302,320 @@ export default function SalesOrder() {
     return values;
   }, [activeGiftMonthData, giftOrders, statusOptions]);
 
+  // ── Render helper: status table ──────────────────────────────
+  const renderStatusTable = (
+    monthData: MonthlyData | GiftMonthlyData,
+    sv: { [status: string]: { [date: string]: number } }
+  ) => (
+    <div className="so-data-percentage">
+      <table className="so-summary-table so-total-summary">
+        <thead>
+          <tr>
+            <th>支払い状況</th>
+            {monthData.dates.map((date) => (
+              <th key={date} className={isToday(date) ? "so-current-day" : ""}>{formatDayOnly(date)}</th>
+            ))}
+            <th>合計(件数)</th>
+            <th>合計(金額)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {statusOptions.filter(({ label }) => label !== "キャンセル").map(({ value, label }) => {
+            let totalStatus = 0, totalValue = 0;
+            return (
+              <tr key={value}>
+                <td className={`so-title-${label}`}>{label}</td>
+                {monthData.dates.map((date) => {
+                  const count = monthData.statusDayCounts[date]?.[value] || 0;
+                  const val = sv[value]?.[date] || 0;
+                  totalStatus += count; totalValue += val;
+                  return <td key={`${value}-${date}`} className={isToday(date) ? "so-data-current-day" : ""}>{count}</td>;
+                })}
+                <td><strong>{totalStatus}</strong></td>
+                <td><strong>¥{totalValue.toLocaleString("ja-JP")}</strong></td>
+              </tr>
+            );
+          })}
+          <tr className="so-sales-total-row">
+            <td><strong>合計</strong></td>
+            {monthData.dates.map((date) => {
+              const total = statusOptions.filter(({ label }) => label !== "キャンセル")
+                .reduce((s, { value }) => s + (monthData.statusDayCounts[date]?.[value] || 0), 0);
+              return <td key={`total-${date}`} className={isToday(date) ? "so-data-current-day" : ""}><strong>{total}</strong></td>;
+            })}
+            <td><strong>{monthData.dates.reduce((s, d) => s + statusOptions.filter(({ label }) => label !== "キャンセル").reduce((ss, { value }) => ss + (monthData.statusDayCounts[d]?.[value] || 0), 0), 0)}</strong></td>
+            <td><strong>¥{monthData.dates.reduce((s, d) => s + statusOptions.filter(({ label }) => label !== "キャンセル").reduce((ss, { value }) => ss + (sv[value]?.[d] || 0), 0), 0).toLocaleString("ja-JP")}</strong></td>
+          </tr>
+          <tr><td colSpan={monthData.dates.length + 3} style={{ padding: '4px', background: 'transparent', border: 'none' }}></td></tr>
+          {statusOptions.filter(({ label }) => label === "キャンセル").map(({ value, label }) => {
+            let totalStatus = 0, totalValue = 0;
+            return (
+              <tr key={value} className="so-cancel-row">
+                <td className={`so-title-${label}`}>{label}</td>
+                {monthData.dates.map((date) => {
+                  const count = monthData.statusDayCounts[date]?.[value] || 0;
+                  const val = sv[value]?.[date] || 0;
+                  totalStatus += count; totalValue += val;
+                  return <td key={`${value}-${date}`} className={isToday(date) ? "so-data-current-day" : ""}>{count}</td>;
+                })}
+                <td><strong>{totalStatus}</strong></td>
+                <td><strong>¥{totalValue.toLocaleString("ja-JP")}</strong></td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  if (error) return (
+    <div className="so-error-container">
+      <p>{error}</p>
+      <button onClick={() => window.location.reload()}>再読み込み</button>
+    </div>
+  );
+
+  const currentMonthData = viewType === "cake" ? activeMonthData : activeGiftMonthData;
+  const currentMonthDates = currentMonthData?.dates || [];
+
+  // Compute sidebar-compatible counts from orders for the sidebar
+  const activeOrdersForSidebar = orders.filter(o => o.status === "b" || o.status === "f");
+  const todayOrdersForSidebar = orders.filter(o => o.status === "c");
+  const pastDateOrdersForSidebar = orders.filter(o => {
+    const d = new Date(o.date);
+    return d < new Date() && o.status !== "d" && o.status !== "e";
+  });
+  const completedOrdersForSidebar = orders.filter(o => o.status === "d");
+  const cancelledOrdersForSidebar = orders.filter(o => o.status === "e");
+
   return (
-    <div className="summary-table-container">
-      {/* Botão Voltar */}
-      <div className="table-order-actions" onClick={() => navigate("/list")}>
-        <div className="btn-actions">
-          <div className="btn-back">
-            <img src="/icons/btn-back.png" alt="list icon" />
+    <div className="so-page-layout">
+      {/* Sidebar */}
+      <AdminSidebar
+        orders={orders}
+        activeOrders={activeOrdersForSidebar}
+        todayOrders={todayOrdersForSidebar}
+        pastDateOrders={pastDateOrdersForSidebar}
+        completedOrders={completedOrdersForSidebar}
+        cancelledOrders={cancelledOrdersForSidebar}
+      />
+
+      {/* Main Content */}
+      <div className="so-main-content">
+        {/* Header */}
+        <div className="so-header">
+          <h2 className="so-page-title">予約グラフ</h2>
+        </div>
+
+        {/* Month Tabs */}
+        <div className="so-month-tabs-row">
+          {viewType === "cake"
+            ? monthlyData.map(({ month, label }) => (
+                <button
+                  key={month}
+                  className={`so-month-tab ${activeMonth === month ? "so-month-tab--active" : ""} ${isCurrentMonth(month) ? "so-month-tab--current" : ""}`}
+                  onClick={() => setActiveMonth(month)}
+                >
+                  {label}
+                  {isCurrentMonth(month) && <span className="so-current-badge">当月</span>}
+                </button>
+              ))
+            : giftMonthlyData.map(({ month, label }) => (
+                <button
+                  key={month}
+                  className={`so-month-tab ${giftActiveMonth === month ? "so-month-tab--active" : ""} ${isCurrentMonth(month) ? "so-month-tab--current" : ""}`}
+                  onClick={() => setGiftActiveMonth(month)}
+                >
+                  {label}
+                  {isCurrentMonth(month) && <span className="so-current-badge">当月</span>}
+                </button>
+              ))
+          }
+        </div>
+
+        {/* View Type Tabs */}
+        <div className="so-view-tabs">
+          <button
+            className={`so-view-tab ${viewType === "cake" ? "so-view-tab--active" : ""}`}
+            onClick={() => setViewType("cake")}
+          >
+            🎂 ケーキ
+          </button>
+          <button
+            className={`so-view-tab ${viewType === "gift" ? "so-view-tab--active" : ""}`}
+            onClick={() => setViewType("gift")}
+          >
+            🎁 ギフト
+          </button>
+        </div>
+
+        {/* ─── CAKE SECTION ─── */}
+        {viewType === "cake" && activeMonthData && (
+          <div className="so-tab-content">
+            {/* Grand Total Row */}
+            <div className="so-table-block">
+              <table className="so-summary-table so-total-summary">
+                <thead>
+                  <tr>
+                    <th>日付毎の合計</th>
+                    {activeMonthData.dates.map((date) => (
+                      <th key={date} className={isToday(date) ? "so-current-day" : ""}>{formatDayOnly(date)}</th>
+                    ))}
+                    <th>月合計</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="so-grand-total-row">
+                    <td></td>
+                    {activeMonthData.dates.map((date) => (
+                      <td key={date} className={isToday(date) ? "so-data-current-day" : ""}>
+                        <strong>{totalGeralPorDia[date] || 0}</strong>
+                      </td>
+                    ))}
+                    <td><strong>{totalGlobal}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Per-Cake Tables */}
+            {getCakesInOrder.map((cake) => {
+              const cakeName = cake.name.trim();
+              const sizes = activeMonthData.summary[cakeName] || {};
+              const totalPorDia = activeMonthData.dates.reduce((acc: Record<string, number>, date) => {
+                acc[date] = Object.values(sizes).reduce((t, sd) => t + (sd.days[date] || 0), 0);
+                return acc;
+              }, {});
+              const totalGeral = Object.values(totalPorDia).reduce((a, b) => a + b, 0);
+              return (
+                <div key={cake.id} className="so-table-block">
+                  <table className="so-summary-table">
+                    <thead>
+                      <tr>
+                        <th className="so-cake-name-header">{cakeName}</th>
+                        {activeMonthData.dates.map((date) => (
+                          <th key={date} className={isToday(date) ? "so-current-day" : ""}>{formatDayOnly(date)}</th>
+                        ))}
+                        <th>月合計</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(sizes).map(([size, sizeData]) => {
+                        const total = activeMonthData.dates.reduce((s, d) => s + (sizeData.days[d] || 0), 0);
+                        return (
+                          <tr key={`${cakeName}-${size}`}>
+                            <td className="so-size-cell">{size}</td>
+                            {activeMonthData.dates.map((date) => (
+                              <td key={date} className={isToday(date) ? "so-data-current-day" : ""}>{sizeData.days[date] || 0}</td>
+                            ))}
+                            <td className="so-total-cell">{total}</td>
+                          </tr>
+                        );
+                      })}
+                      <tr className="so-subtotal-row">
+                        <td><strong>合計 →</strong></td>
+                        {activeMonthData.dates.map((date) => (
+                          <td key={date} className={isToday(date) ? "so-data-current-day" : ""}>
+                            <strong>{totalPorDia[date] || 0}</strong>
+                          </td>
+                        ))}
+                        <td><strong>{totalGeral}</strong></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })}
+
+            {/* Status table */}
+            {renderStatusTable(activeMonthData, statusValues)}
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* ── Seletor de seção ── */}
-      <div className="sales-view-tabs">
-        <button
-          className={`sales-view-tab ${viewType === "cake" ? "sales-view-tab--active" : ""}`}
-          onClick={() => setViewType("cake")}
-        >
-          🎂 ケーキ
-        </button>
-        <button
-          className={`sales-view-tab ${viewType === "gift" ? "sales-view-tab--active" : ""}`}
-          onClick={() => setViewType("gift")}
-        >
-          🎁 ギフト
-        </button>
-      </div>
+        {/* ─── GIFT SECTION ─── */}
+        {viewType === "gift" && activeGiftMonthData && (
+          <div className="so-tab-content">
+            <div className="so-table-block">
+              <table className="so-summary-table so-total-summary">
+                <thead>
+                  <tr>
+                    <th>日付毎の合計</th>
+                    {activeGiftMonthData.dates.map((date) => (
+                      <th key={date} className={isToday(date) ? "so-current-day" : ""}>{formatDayOnly(date)}</th>
+                    ))}
+                    <th>月合計</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="so-grand-total-row">
+                    <td></td>
+                    {activeGiftMonthData.dates.map((date) => (
+                      <td key={date} className={isToday(date) ? "so-data-current-day" : ""}>
+                        <strong>{giftTotalPorDia[date] || 0}</strong>
+                      </td>
+                    ))}
+                    <td><strong>{giftTotalGlobal}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-      {/* ══════════════════════════════════════════
-          🎂 SEÇÃO CAKE
-          ══════════════════════════════════════════ */}
-      {viewType === "cake" && <>
+            {getGiftsInOrder.map((gift) => {
+              const giftName = gift.name.trim();
+              const sizes = activeGiftMonthData.summary[giftName] || {};
+              const totalPorDia = activeGiftMonthData.dates.reduce((acc: Record<string, number>, date) => {
+                acc[date] = Object.values(sizes).reduce((t, sd) => t + (sd.days[date] || 0), 0);
+                return acc;
+              }, {});
+              const totalGeral = Object.values(totalPorDia).reduce((a, b) => a + b, 0);
+              return (
+                <div key={gift.id} className="so-table-block">
+                  <table className="so-summary-table">
+                    <thead>
+                      <tr>
+                        <th className="so-cake-name-header">{giftName}</th>
+                        {activeGiftMonthData.dates.map((date) => (
+                          <th key={date} className={isToday(date) ? "so-current-day" : ""}>{formatDayOnly(date)}</th>
+                        ))}
+                        <th>月合計</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(sizes).map(([size, sizeData]) => {
+                        const total = activeGiftMonthData.dates.reduce((s, d) => s + (sizeData.days[d] || 0), 0);
+                        return (
+                          <tr key={`${giftName}-${size}`}>
+                            <td className="so-size-cell">{size}</td>
+                            {activeGiftMonthData.dates.map((date) => (
+                              <td key={date} className={isToday(date) ? "so-data-current-day" : ""}>{sizeData.days[date] || 0}</td>
+                            ))}
+                            <td className="so-total-cell">{total}</td>
+                          </tr>
+                        );
+                      })}
+                      <tr className="so-subtotal-row">
+                        <td><strong>合計 →</strong></td>
+                        {activeGiftMonthData.dates.map((date) => (
+                          <td key={date} className={isToday(date) ? "so-data-current-day" : ""}>
+                            <strong>{totalPorDia[date] || 0}</strong>
+                          </td>
+                        ))}
+                        <td><strong>{totalGeral}</strong></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })}
 
-      {/* Abas de Meses - Cake */}
-      <div className="month-tabs-container">
-        <div className="month-tabs">
-          {monthlyData.map(({ month, label }) => (
-            <button
-              key={month}
-              className={`tab-button ${activeMonth === month ? "active" : ""} ${isCurrentMonth(month) ? "current-month-tab" : ""}`}
-              onClick={() => setActiveMonth(month)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {activeMonthData && (
-        <div className="tab-content">
-          {/* Total Geral */}
-          <div className="cake-table-wrapper">
-            <table className="summary-table total-summary">
-              <thead>
-                <tr>
-                  <th>日付毎の合計</th>
-                  {activeMonthData.dates.map((date) => (
-                    <th key={date} className={isToday(date) ? "current-day" : ""}>{formatDayOnly(date)}</th>
-                  ))}
-                  <th>月合計</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="sales-total-row">
-                  <td></td>
-                  {activeMonthData.dates.map((date) => (
-                    <td key={date} className={isToday(date) ? "data-current-day" : ""}><strong>{totalGeralPorDia[date] || 0}</strong></td>
-                  ))}
-                  <td><strong>{totalGlobal}</strong></td>
-                </tr>
-              </tbody>
-            </table>
+            {renderStatusTable(activeGiftMonthData, giftStatusValues)}
           </div>
+        )}
 
-          {/* Tabelas por Bolo */}
-          {getCakesInOrder.map((cake) => {
-            const cakeName = cake.name.trim();
-            const sizes = activeMonthData.summary[cakeName] || {};
-            const totalPorDia = activeMonthData.dates.reduce((acc: Record<string, number>, date) => {
-              acc[date] = Object.values(sizes).reduce((t, sd) => t + (sd.days[date] || 0), 0);
-              return acc;
-            }, {});
-            const totalGeral = Object.values(totalPorDia).reduce((a, b) => a + b, 0);
-            return (
-              <div key={cake.id} className="cake-table-wrapper">
-                <table className="summary-table">
-                  <thead>
-                    <tr>
-                      <th>{cakeName}</th>
-                      {activeMonthData.dates.map((date) => (
-                        <th key={date} className={isToday(date) ? "current-day" : ""}>{formatDayOnly(date)}</th>
-                      ))}
-                      <th>月合計</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(sizes).map(([size, sizeData]) => {
-                      const total = activeMonthData.dates.reduce((s, d) => s + (sizeData.days[d] || 0), 0);
-                      return (
-                        <tr key={`${cakeName}-${size}`}>
-                          <td>{size}</td>
-                          {activeMonthData.dates.map((date) => (
-                            <td key={date} className={isToday(date) ? "data-current-day" : ""}>{sizeData.days[date] || 0}</td>
-                          ))}
-                          <td className="total-cell">{total}</td>
-                        </tr>
-                      );
-                    })}
-                    <tr className="sales-total-row">
-                      <td><strong>合計 →</strong></td>
-                      {activeMonthData.dates.map((date) => (
-                        <td key={date} className={isToday(date) ? "data-current-day" : ""}><strong>{totalPorDia[date] || 0}</strong></td>
-                      ))}
-                      <td><strong>{totalGeral}</strong></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            );
-          })}
-
-          {/* Status Cake */}
-          {renderStatusTable(activeMonthData, statusValues)}
-        </div>
-      )}
-      </> }
-
-      {/* ══════════════════════════════════════════
-          🎁 SEÇÃO GIFT
-          ══════════════════════════════════════════ */}
-      {viewType === "gift" && <>
-
-      {/* Abas de Meses - Gift */}
-      <div className="month-tabs-container">
-        <div className="month-tabs">
-          {giftMonthlyData.map(({ month, label }) => (
-            <button
-              key={month}
-              className={`tab-button ${giftActiveMonth === month ? "active" : ""} ${isCurrentMonth(month) ? "current-month-tab" : ""}`}
-              onClick={() => setGiftActiveMonth(month)}
-            >
-              {label}
-            </button>
-          ))}
-          {giftMonthlyData.length === 0 && (
-            <span style={{ color: "#999", padding: "8px 12px", fontSize: "0.9rem" }}>注文なし</span>
-          )}
-        </div>
+        {viewType === "gift" && giftMonthlyData.length === 0 && (
+          <p className="so-empty">ギフト注文がありません。</p>
+        )}
       </div>
-
-      {activeGiftMonthData && (
-        <div className="tab-content">
-          {/* Total Geral Gift */}
-          <div className="cake-table-wrapper">
-            <table className="summary-table total-summary">
-              <thead>
-                <tr>
-                  <th>日付毎の合計</th>
-                  {activeGiftMonthData.dates.map((date) => (
-                    <th key={date} className={isToday(date) ? "current-day" : ""}>{formatDayOnly(date)}</th>
-                  ))}
-                  <th>月合計</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="sales-total-row">
-                  <td></td>
-                  {activeGiftMonthData.dates.map((date) => (
-                    <td key={date} className={isToday(date) ? "data-current-day" : ""}><strong>{giftTotalPorDia[date] || 0}</strong></td>
-                  ))}
-                  <td><strong>{giftTotalGlobal}</strong></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* Tabelas por Gift */}
-          {getGiftsInOrder.map((gift) => {
-            const giftName = gift.name.trim();
-            const sizes = activeGiftMonthData.summary[giftName] || {};
-            const totalPorDia = activeGiftMonthData.dates.reduce((acc: Record<string, number>, date) => {
-              acc[date] = Object.values(sizes).reduce((t, sd) => t + (sd.days[date] || 0), 0);
-              return acc;
-            }, {});
-            const totalGeral = Object.values(totalPorDia).reduce((a, b) => a + b, 0);
-            return (
-              <div key={gift.id} className="cake-table-wrapper">
-                <table className="summary-table">
-                  <thead>
-                    <tr>
-                      <th>{giftName}</th>
-                      {activeGiftMonthData.dates.map((date) => (
-                        <th key={date} className={isToday(date) ? "current-day" : ""}>{formatDayOnly(date)}</th>
-                      ))}
-                      <th>月合計</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(sizes).map(([size, sizeData]) => {
-                      const total = activeGiftMonthData.dates.reduce((s, d) => s + (sizeData.days[d] || 0), 0);
-                      return (
-                        <tr key={`${giftName}-${size}`}>
-                          <td>{size}</td>
-                          {activeGiftMonthData.dates.map((date) => (
-                            <td key={date} className={isToday(date) ? "data-current-day" : ""}>{sizeData.days[date] || 0}</td>
-                          ))}
-                          <td className="total-cell">{total}</td>
-                        </tr>
-                      );
-                    })}
-                    <tr className="sales-total-row">
-                      <td><strong>合計 →</strong></td>
-                      {activeGiftMonthData.dates.map((date) => (
-                        <td key={date} className={isToday(date) ? "data-current-day" : ""}><strong>{totalPorDia[date] || 0}</strong></td>
-                      ))}
-                      <td><strong>{totalGeral}</strong></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            );
-          })}
-
-          {/* Status Gift */}
-          {renderStatusTable(activeGiftMonthData, giftStatusValues)}
-        </div>
-      )}
-      </> }
     </div>
   );
 }

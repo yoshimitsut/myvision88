@@ -1,166 +1,240 @@
-.cake-table-wrapper {
-  padding-bottom: 20px;
-}
-
-
-.table-wrapper-info {
-  padding: 1em;
-  display: inline-block;
-  /* overflow-x: auto; */
-}
-
-.summary-table-container {
-  padding: 20px;
-  font-family: "Noto Sans JP", sans-serif;
+/* ─── Layout principal ──────────────────────────────────────── */
+.so-page-layout {
   display: flex;
-  width: 100%;
-  box-sizing: border-box;
-  flex-direction: column;
+  min-height: 100vh;
+  background: #f0f4f0;
+  font-family: "Noto Sans JP", sans-serif;
 }
 
-.table-title {
-  font-size: 1.4rem;
+.so-main-content {
+  flex: 1;
+  padding: 24px 28px;
+  overflow-x: auto;
+  min-width: 0;
+}
+
+/* ─── Header ────────────────────────────────────────────────── */
+.so-header {
+  margin-bottom: 16px;
+}
+
+.so-page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+/* ─── Month Pills ────────────────────────────────────────────── */
+.so-month-tabs-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #d0d8d0;
+}
+
+.so-month-tab {
+  position: relative;
+  padding: 7px 18px;
+  border: 1px solid #c8d8c8;
+  border-radius: 6px;
+  background: #fff;
+  color: #444;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.so-month-tab:hover {
+  border-color: #2d7a5a;
+  color: #2d7a5a;
+  background: #f0faf4;
+}
+
+.so-month-tab--active {
+  background: #2d7a5a !important;
+  color: #fff !important;
+  border-color: #2d7a5a !important;
+  font-weight: 600;
+}
+
+.so-month-tab--current {
+  background: #2d7a5a;
+  color: #fff;
+  border-color: #2d7a5a;
+}
+
+.so-current-badge {
+  margin-left: 6px;
+  background: #28a745;
+  color: #fff;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 4px;
   font-weight: bold;
-  margin-bottom: 12px;
+  vertical-align: middle;
 }
 
-.summary-table {
+/* ─── View Type Tabs (Cake / Gift) ──────────────────────────── */
+.so-view-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.so-view-tab {
+  padding: 8px 22px;
+  border: 2px solid #c8d8c8;
+  border-radius: 8px;
+  background: #fff;
+  color: #666;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.so-view-tab:hover {
+  border-color: #2d7a5a;
+  color: #2d7a5a;
+}
+
+.so-view-tab--active {
+  background: #2d7a5a;
+  color: #fff;
+  border-color: #2d7a5a;
+}
+
+/* ─── Tab Content ────────────────────────────────────────────── */
+.so-tab-content {
+  animation: soFadeIn 0.25s ease;
+}
+
+@keyframes soFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Table Blocks ───────────────────────────────────────────── */
+.so-table-block {
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+/* ─── Tables ─────────────────────────────────────────────────── */
+.so-summary-table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 600px;
+  min-width: 500px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.so-summary-table th,
+.so-summary-table td {
+  border: 1px solid #d8e8d8;
+  padding: 8px 10px;
   text-align: center;
-  table-layout: fixed;
-  overflow: auto;
+  white-space: nowrap;
 }
 
-.summary-table th,
-.summary-table td {
-  border: 1px solid #ccc;
-  padding: 6px 10px;
-
-  width: 90px;
-  height: 40px;
+/* First column: left-aligned, wider */
+.so-summary-table th:first-child,
+.so-summary-table td:first-child {
+  text-align: left;
+  min-width: 200px;
+  padding-left: 16px;
 }
 
-.summary-table th {
-  background-color: #185495f5;
+/* Last column:月合計 */
+.so-summary-table th:last-child,
+.so-summary-table td:last-child {
+  min-width: 70px;
+  font-weight: 600;
+}
+
+/* Day columns */
+.so-summary-table th:not(:first-child):not(:last-child),
+.so-summary-table td:not(:first-child):not(:last-child) {
+  min-width: 44px;
+  max-width: 55px;
+}
+
+/* Header row */
+.so-summary-table thead th {
+  background: #2d7a5a;
   color: #fff;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 13px;
 }
 
-.summary-table tr:nth-child(even) {
-  background-color: #fafafa;
+/* Cake name header (same green header but slightly different) */
+.so-cake-name-header {
+  background: #2d7a5a !important;
+  color: #fff !important;
+  text-align: left !important;
 }
 
-.summary-table th:first-child,
-.summary-table td:first-child {
-  width: 180px;
+/* Size cells */
+.so-size-cell {
+  color: #333;
+  font-size: 13px;
 }
 
-.sales-total-row {
-  background-color: #e6e5e5 !important;
-  font-weight: bold;
+/* Even rows */
+.so-summary-table tbody tr:nth-child(even) {
+  background: #f8fdf9;
 }
 
-.total-cell {
-  background-color: #c1bdbd95;
-  font-weight: bold;
-}
-
-/* 🔹 Efeito hover: destaca a linha com borda mais grossa e leve sombra */
-.summary-table tbody tr:hover {
-  border: 2px solid #999;
-  /* background-color: #f5f5f5;  */
-  transition: all 0.15s ease-in-out;
+/* Hover */
+.so-summary-table tbody tr:hover {
+  background: #edf7f1;
   cursor: pointer;
+  transition: background 0.15s ease;
 }
 
-/* 🔹 Corrige a sobreposição da borda nas células internas */
-.summary-table tbody tr:hover td {
-  border-top: 2px solid #999;
-  border-bottom: 2px solid #999;
+/* Total row (月合計 cell) */
+.so-total-cell {
+  background: #e8f5ee !important;
+  font-weight: 600;
+  color: #2d7a5a;
 }
 
-/* 🔹 Mantém os totais em destaque fixo */
-.sales-total-row:hover {
-  background-color: #e6e5e5 !important;
-  border: none;
-  cursor: default;
+/* Grand total row (日付毎の合計) */
+.so-grand-total-row td {
+  background: #e8f5ee;
+  font-weight: 600;
+  color: #1a5c3a;
+  font-size: 14px;
 }
 
-.table-order-actions {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 0;
-  margin-bottom: 20px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  transition: background 0.3s ease;
-  cursor: pointer;
+/* Subtotal rows (合計 →) */
+.so-subtotal-row td {
+  background: #f0faf4;
+  color: #2d7a5a;
+  font-weight: 600;
+  border-top: 2px solid #2d7a5a44;
 }
 
-.table-order-actions:hover {
-  background-color: #e9ecef;
+/* Sales total row (status sum) */
+.so-sales-total-row td {
+  background: #e8f5ee;
+  font-weight: 600;
+  border-top: 2px solid #2d7a5a66;
 }
 
-.btn-actions {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.btn-back {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  background-color: transparent !important;
-}
-
-.btn-back img {
-  width: 24px;
-  height: 24px;
-}
-
-.title-未 {
-  background-color: #C40000;
-  color: aliceblue;
-}
-
-.title-オンライン予約 {
-  background-color: #000DBD !important;
-  color: aliceblue;
-}
-
-.title-店頭支払い済 {
-  background-color: #287300;
-  color: aliceblue;
-}
-
-
-.title-お渡し済 {
-  background-color: #6B6B6B !important;
-  color: aliceblue;
-}
-
-
-.title-キャンセル {
-  background-color: #000;
-  color: aliceblue;
-}
-
-
-/* Destacar o dia atual */
-.current-day {
-  background-color: #0076e3 !important;
-  color: white !important;
+/* ─── Current day highlight ──────────────────────────────────── */
+.so-current-day {
+  background: #2d7a5a !important;
+  color: #fff !important;
   font-weight: bold;
   position: relative;
 }
 
-.current-day::after {
+.so-current-day::after {
   content: "今日";
   position: absolute;
   top: 2px;
@@ -171,337 +245,71 @@
   padding: 1px 3px;
   border-radius: 2px;
   line-height: 1;
-}
-
-/* Versão alternativa sem o "今日" */
-.current-day-simple {
-  background-color: #e3f2fd !important;
-  color: #007bff !important;
-  font-weight: bold;
-  border: 2px solid #007bff !important;
-}
-
-/* Para células de dados no dia atual */
-.data-current-day {
-  background-color: #f0f8ff !important;
-  font-weight: 600;
-}
-
-
-
-
-
-/* Container das abas */
-.month-tabs-container {
-  margin-bottom: 10px;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-.month-tabs {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-/* Botões das abas */
-.tab-button {
-  padding: 12px 20px;
-  border: none;
-  background: #f8f9fa;
-  color: #495057;
-  cursor: pointer;
-  border-radius: 8px 8px 0 0;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
-  border-bottom: none;
-  margin-bottom: -2px;
-  position: relative;
-}
-
-.tab-button:hover {
-  background: #e9ecef;
-  color: #007bff;
-}
-
-.tab-button.active {
-  background: white;
-  color: #007bff;
-  border-color: #e0e0e0;
-  border-bottom-color: white;
-  font-weight: 600;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* 🔹 Aba do mês atual */
-.current-month-tab {
-  position: relative;
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
-  color: white !important;
-}
-
-.current-month-tab::after {
-  content: "当月";
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  font-size: 9px;
-  background: #28a745;
-  color: white;
-  padding: 2px 5px;
-  border-radius: 4px;
-  line-height: 1;
   font-weight: bold;
 }
 
-/* Conteúdo das abas */
-.tab-content {
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Estilos das tabelas */
-/* .cake-table-wrapper {
-  margin-bottom: 24px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  overflow: hidden;
-} */
-
-/* .summary-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-} */
-
-/* .summary-table th,
-.summary-table td {
-  padding: 8px 12px;
-  text-align: left;
-  border: 1px solid #e0e0e0;
-} */
-
-/* .summary-table th {
-  background: #f8f9fa;
+.so-data-current-day {
+  background: #e0f5eb !important;
   font-weight: 600;
-  color: #495057;
-} */
-
-/* 🔹 Cabeçalhos compactos apenas com dias */
-.summary-table th:not(:first-child):not(:last-child) {
-  min-width: 40px;
-  max-width: 45px;
-  padding: 8px 4px;
-  /* font-size: 12px; */
-  text-align: center;
-  position: relative;
+  border: 2px solid #2d7a5a88 !important;
 }
 
-/* Manter largura normal para a primeira e última coluna */
-.summary-table th:first-child,
-.summary-table th:last-child {
-  min-width: 100px;
-  padding: 10px 12px;
-  font-size: 13px;
+/* ─── Status title cells ─────────────────────────────────────── */
+.so-title-未 { background: #C40000; color: #fff; }
+.so-title-オンライン予約 { background: #000DBD; color: #fff; }
+.so-title-店頭支払い済 { background: #287300; color: #fff; }
+.so-title-お渡し済 { background: #6B6B6B; color: #fff; }
+.so-title-オンライン支払い済み { background: #7332a8; color: #fff; }
+.so-title-キャンセル { background: #000; color: #fff; }
+
+.so-cancel-row { background: #fff3f3 !important; }
+
+/* ─── Status percentage table ────────────────────────────────── */
+.so-data-percentage {
+  overflow-x: auto;
+  margin-top: 24px;
 }
 
-/* Células de dados também compactas */
-.summary-table td:not(:first-child):not(:last-child) {
-  min-width: 50px;
-  max-width: 60px;
-  padding: 8px 4px;
-  text-align: center;
-  font-size: 13px;
-}
-
-/* .summary-table td:first-child,
-.summary-table td:last-child {
-  min-width: 100px;
-  padding: 8px 12px;
-}  */
-
-/* 🔹 DESTAQUE PARA O DIA ATUAL - COM "今日" */
-.current-day {
-  background-color: #1a72cf !important;
-  color: white !important;
-  font-weight: bold;
-  position: relative;
-}
-
-.current-day::after {
-  content: "今日";
-  position: absolute;
-  top: 1px;
-  right: 2px;
-  font-size: 8px;
-  background: #dc3545;
-  color: white;
-  padding: 1px 3px;
-  border-radius: 2px;
-  line-height: 1;
-  font-weight: bold;
-}
-
-/* Células de dados no dia atual */
-.data-current-day {
-  background-color: #e3f2fd !important;
-  font-weight: 600;
-  border: 2px solid #1163bbb1 !important;
-}
-
-/* Linhas de total */
-.sales-total-row {
-  background: #e3f2fd !important;
-  font-weight: 600;
-}
-
-.sales-total-row td {
-  border-top: 2px solid #007bff;
-}
-
-.total-cell {
-  font-weight: 600;
-  background: #f8f9fa;
-}
-
-/* Cores para status */
-.title-入金済み {
-  background: #d4edda !important;
-  color: #155724 !important;
-}
-
-.title-未入金 {
-  background: #fff3cd !important;
-  color: #856404 !important;
-}
-
-.title-キャンセル {
-  background: #f8d7da !important;
-  color: #721c24 !important;
-}
-
-.cancel-row {
-  background: #ffebee !important;
-}
-
-/* Botão de voltar ajustado no início do arquivo */
-
-/* Mensagens de erro e loading */
-.error-container,
-.loading-container {
+/* ─── Error / Empty ──────────────────────────────────────────── */
+.so-error-container {
   text-align: center;
   padding: 40px;
   font-size: 16px;
 }
 
-.error-container button {
+.so-error-container button {
   margin-top: 15px;
   padding: 10px 20px;
-  background: #007bff;
+  background: #2d7a5a;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
 }
 
-.error-container button:hover {
-  background: #0056b3;
+.so-error-container button:hover {
+  background: #225e45;
 }
 
-/* Responsividade */
+.so-empty {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+  font-size: 15px;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .month-tabs {
-    flex-direction: column;
+  .so-main-content {
+    padding: 16px;
   }
 
-  .tab-button {
-    border-radius: 6px;
-    margin-bottom: 4px;
-    border: 1px solid #e0e0e0;
-    text-align: center;
-  }
-
-  .tab-button.active {
-    border-bottom-color: #e0e0e0;
-  }
-
-  .summary-table {
-    font-size: 12px;
-  }
-
-  .summary-table th:not(:first-child):not(:last-child) {
-    min-width: 40px;
-    max-width: 45px;
-    font-size: 10px;
-    padding: 6px 2px;
-  }
-
-  .summary-table td:not(:first-child):not(:last-child) {
-    min-width: 40px;
-    max-width: 45px;
-    padding: 6px 2px;
+  .so-summary-table {
     font-size: 11px;
   }
 
-  .current-day::after {
-    font-size: 7px;
-    top: -4px;
-    right: 1px;
+  .so-summary-table th:first-child,
+  .so-summary-table td:first-child {
+    min-width: 140px;
   }
-}
-
-/* Scroll horizontal para tabelas muito largas */
-.cake-table-wrapper {
-  overflow-x: auto;
-}
-
-.data-percentage {
-  overflow-x: auto;
-}
-
-/* ── Botões de seleção Cake / Gift ───────────── */
-.sales-view-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.sales-view-tab {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 24px;
-  font-size: 1rem;
-  font-weight: 600;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  background: #f8f9fa;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.sales-view-tab:hover {
-  border-color: #bbb;
-  background: #eee;
-  color: #333;
-}
-
-.sales-view-tab--active {
-  background: #185495f5;
-  color: #fff;
-  border-color: #185495f5;
-  box-shadow: 0 2px 8px rgba(24, 84, 149, 0.25);
 }
