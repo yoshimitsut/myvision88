@@ -1,6 +1,5 @@
-
-button, 
-input[type="button"], 
+button,
+input[type="button"],
 input[type="submit"] {
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
@@ -106,10 +105,10 @@ input[type="submit"] {
   cursor: not-allowed;
 }
 
-.calenda  justify-content r-day--none-selected {
+.calenda justify-content r-day--none-selected {
   background-color: #fff !important;
   color: #383838 !important;
-  font-weight:normal   justify-content !important;
+  font-weight: normal justify-content !important;
 }
 
 .timeslot-batch-creator__submit-button:hover:not(:disabled) {
@@ -194,6 +193,7 @@ input[type="submit"] {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -327,7 +327,7 @@ input[type="submit"] {
   gap: 2rem;
 }
 
-.timeslot-batch-creator__help-text{
+.timeslot-batch-creator__help-text {
   font-size: 0.8rem;
 }
 
@@ -335,12 +335,12 @@ input[type="submit"] {
   font-size: 0.8;
 }
 
-.timeslot-batch-selec-all{
+.timeslot-batch-selec-all {
   display: flex;
   justify-content: space-between;
   width: 100%;
   gap: 10px;
-  
+
   button {
     width: 95%;
   }
@@ -379,7 +379,7 @@ input[type="submit"] {
 
 .timeslot-batch-creator__bulk-button:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .timeslot-batch-creator__bulk-button--select {
@@ -431,8 +431,12 @@ input[type="submit"] {
   justify-content: space-between;
 }
 
-.btn-back {
-  border: 2px solid #000;
+.btn-back-date {
+  border: none;
+
+  img {
+    width: 3rem;
+  }
 }
 
 /* Adicione ao seu TimeSlotsManagement.css */
@@ -451,8 +455,8 @@ input[type="submit"] {
   width: 100% !important;
 }
 
-.timeslot-page .react-datepicker__day-name, 
-.timeslot-page .react-datepicker__day, 
+.timeslot-page .react-datepicker__day-name,
+.timeslot-page .react-datepicker__day,
 .timeslot-page .react-datepicker__time-name {
   font-size: 0.9rem;
   width: 2.3rem;
@@ -636,7 +640,7 @@ input[type="submit"] {
     .timeslot-batch-creator {
       padding: 1rem;
     }
-    
+
     .timeslot-batch-creator__tab-content {
       padding: 0.5rem !important;
     }
@@ -645,8 +649,8 @@ input[type="submit"] {
       height: 1px !important;
     }
 
-    .react-datepicker__day-name, 
-    .react-datepicker__day, 
+    .react-datepicker__day-name,
+    .react-datepicker__day,
     .react-datepicker__time-name {
       font-size: 0.9rem;
       width: 9vw;
@@ -658,16 +662,20 @@ input[type="submit"] {
   .timeslot-content {
     flex-direction: column;
   }
+
   .timeslot-add-content {
     padding-top: 0;
   }
+
   .timeslot-batch-creator__day-management {
     text-align: center;
     align-items: center;
   }
+
   .timeslot-content {
     align-items: center;
   }
+
   .timeslot-batch-creator__form-row {
     width: 100% !important;
   }
@@ -682,21 +690,21 @@ input[type="submit"] {
   .timeslot-batch-creator__tab {
     text-align: center;
   }
-  
+
   .timeslot-batch-creator__add-time-form {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .timeslot-batch-creator__add-time-form .timeslot-batch-creator__form-group {
     margin-bottom: 15px;
     display: contents;
   }
-  
+
   .timeslot-batch-creator__time-items {
     grid-template-columns: repeat(auto-fill, minmax(142px, 1fr));
   }
-  
+
   .timeslot-batch-creator__tab-content {
     padding: 20px;
   }
