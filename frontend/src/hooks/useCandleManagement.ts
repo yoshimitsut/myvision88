@@ -27,7 +27,7 @@ export function useCandleManagement() {
     setLoading(true);
     try {
       const response = await fetch(`${API_URL}/api/candles`);
-      if (!response.ok) throw new Error('Erro ao carregar velas');
+      if (!response.ok) throw new Error('キャンドルの読み込みエラー');
       const data = await response.json();
       setCandles(data);
     } catch (err: any) {

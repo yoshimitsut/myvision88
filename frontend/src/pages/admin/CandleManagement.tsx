@@ -39,7 +39,7 @@ export default function CandleManagement() {
           <span className="breadcrumb-current">管理</span>
         </div>
 
-        <h1>キャンドル管理 (Velas)</h1>
+        <h1>キャンドル管理</h1>
 
         <div className="candle-form-card">
           <h2>{isEditing ? 'キャンドルを編集' : '新しいキャンドルを追加'}</h2>
