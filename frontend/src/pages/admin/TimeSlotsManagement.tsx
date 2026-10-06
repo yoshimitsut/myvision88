@@ -594,7 +594,7 @@ const TimeslotBatchCreator: React.FC<TimeslotBatchCreatorProps> = ({ onTimeslots
   // Horários selecionados para a data atual
   const currentSelectedTimes = getSelectedTimesForDate(formatDateJST(selectedDate));
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   return (
     <>
