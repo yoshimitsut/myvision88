@@ -27,7 +27,7 @@ export default function ListOrder() {
   const [scannedOrderId, setScannedOrderId] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [viewMode] = useState<"date" | "order">("order");
-  const [activeTab, setActiveTab] = useState<"all" | "today" | "active" | "completed" | "cancelled" | "past">("today");
+  const [activeTab, setActiveTab] = useState<"all" | "today" | "active" | "completed" | "cancelled" | "past" | "online" | "store">("today");
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
@@ -256,6 +256,16 @@ export default function ListOrder() {
   // Pedidos Cancelados: status e (キャンセル)
   const cancelledOrders = useMemo(() => {
     return orders.filter(o => o.status === "e");
+  }, [orders]);
+
+  // 🔹 Pedidos オンライン予約: status b (オンライン予約) e f (オンライン支払い済み)
+  const onlineOrders = useMemo(() => {
+    return orders.filter(o => o.status === "b" || o.status === "f");
+  }, [orders]);
+
+  // 🔹 Pedidos 店頭予約: status a (未) e c (店頭支払い済)
+  const storeOrders = useMemo(() => {
+    return orders.filter(o => o.status === "a" || o.status === "c");
   }, [orders]);
 
   const sortedTodayOrders = useMemo(() => {
@@ -976,15 +986,12 @@ export default function ListOrder() {
                           return matchesStatus && matchesCake && matchesDate && matchesHour;
                         })
                         .sort((a, b) => {
-                          if (dateFilter !== "すべて") {
-                            const hourA = a.pickupHour || "";
-                            const hourB = b.pickupHour || "";
-                            return hourA.localeCompare(hourB, "ja");
-                          } else {
-                            const idA = Number(a.id_order) || 0;
-                            const idB = Number(b.id_order) || 0;
-                            return idA - idB;
-                          }
+                          const dateA = (a.date || '').slice(0, 10);
+                          const dateB = (b.date || '').slice(0, 10);
+                          if (dateA !== dateB) return dateA.localeCompare(dateB);
+                          const hourA = a.pickupHour || "";
+                          const hourB = b.pickupHour || "";
+                          return hourA.localeCompare(hourB, "ja");
                         })
                         .map((order) => (
                           <tr key={order.id_order}>
@@ -1507,6 +1514,176 @@ export default function ListOrder() {
     );
   };
 
+  // 🔹 COMPONENTE PARA PEDIDOS オンライン予約 (status b / f)
+  const renderOnlineOrdersTable = () => {
+    const sorted = [...onlineOrders].sort((a, b) => b.id_order - a.id_order);
+    return (
+      <>
+        {sorted.length === 0 ? (
+          <p>オンライン予約の注文はありません。</p>
+        ) : (
+          <div className="table-card-wrapper">
+            <table className="modern-admin-table">
+              <thead>
+                <tr>
+                  <th>受取日時</th>
+                  <th>お名前 / 受付番号</th>
+                  <th>お会計</th>
+                  <th>商品名</th>
+                  <th>個数</th>
+                  <th>メッセージプレート</th>
+                  <th>編集</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((order) => (
+                  <tr key={order.id_order} className="order-row-card">
+                    <td>
+                      <div className="order-date-col">
+                        <span>{formatDateJP(order.date)}</span>
+                        <span style={{ fontSize: '11px', color: '#666' }}>{order.pickupHour}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <strong style={{ fontSize: '13px', color: '#222' }}>{order.first_name} {order.last_name}</strong>
+                        <span className="order-id-badge">#{String(order.id_order).padStart(4, "0")}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <Select<StatusOption, false>
+                        options={statusOptions}
+                        value={statusOptions.find((opt) => opt.value === order.status)}
+                        onChange={(selected: SingleValue<StatusOption>) => {
+                          if (selected) handleStatusChange(order.id_order, selected.value);
+                        }}
+                        styles={customStyles}
+                        isSearchable={false}
+                        isDisabled={isUpdating}
+                        isLoading={isUpdating && updatingOrderId === order.id_order}
+                      />
+                    </td>
+                    <td>
+                      {order.cakes && order.cakes.map((cake, index) => (
+                        <div key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                          {cake.name} {cake.size}
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      {order.cakes && order.cakes.map((cake, index) => (
+                        <div key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                          {cake.amount}
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      {order.cakes && order.cakes.map((cake, index) => (
+                        <div key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                          {cake.message_cake || "なし"}
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      <button className="edit-circle-btn" onClick={() => setEditingOrder(order)} title="編集">
+                        ✏️
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </>
+    );
+  };
+
+  // 🔹 COMPONENTE PARA PEDIDOS 店頭予約 (status a / c)
+  const renderStoreOrdersTable = () => {
+    const sorted = [...storeOrders].sort((a, b) => b.id_order - a.id_order);
+    return (
+      <>
+        {sorted.length === 0 ? (
+          <p>店頭予約の注文はありません。</p>
+        ) : (
+          <div className="table-card-wrapper">
+            <table className="modern-admin-table">
+              <thead>
+                <tr>
+                  <th>受取日時</th>
+                  <th>お名前 / 受付番号</th>
+                  <th>お会計</th>
+                  <th>商品名</th>
+                  <th>個数</th>
+                  <th>メッセージプレート</th>
+                  <th>編集</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((order) => (
+                  <tr key={order.id_order} className="order-row-card">
+                    <td>
+                      <div className="order-date-col">
+                        <span>{formatDateJP(order.date)}</span>
+                        <span style={{ fontSize: '11px', color: '#666' }}>{order.pickupHour}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <strong style={{ fontSize: '13px', color: '#222' }}>{order.first_name} {order.last_name}</strong>
+                        <span className="order-id-badge">#{String(order.id_order).padStart(4, "0")}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <Select<StatusOption, false>
+                        options={statusOptions}
+                        value={statusOptions.find((opt) => opt.value === order.status)}
+                        onChange={(selected: SingleValue<StatusOption>) => {
+                          if (selected) handleStatusChange(order.id_order, selected.value);
+                        }}
+                        styles={customStyles}
+                        isSearchable={false}
+                        isDisabled={isUpdating}
+                        isLoading={isUpdating && updatingOrderId === order.id_order}
+                      />
+                    </td>
+                    <td>
+                      {order.cakes && order.cakes.map((cake, index) => (
+                        <div key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                          {cake.name} {cake.size}
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      {order.cakes && order.cakes.map((cake, index) => (
+                        <div key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                          {cake.amount}
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      {order.cakes && order.cakes.map((cake, index) => (
+                        <div key={`${order.id_order}-${cake.cake_id}-${index}`}>
+                          {cake.message_cake || "なし"}
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      <button className="edit-circle-btn" onClick={() => setEditingOrder(order)} title="編集">
+                        ✏️
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <AdminLayout sidebarProps={{
       orders,
@@ -1515,6 +1692,8 @@ export default function ListOrder() {
       pastDateOrders,
       completedOrders,
       cancelledOrders,
+      onlineOrders,
+      storeOrders,
       viewType,
       setViewType,
       search,
@@ -1544,9 +1723,9 @@ export default function ListOrder() {
               </button>
               <button
                 className={`category-pill pill-cake ${viewType === 'cake' ? 'active-cake' : ''}`}
-                onClick={() => setViewType('cake')}
+                onClick={() => { setViewType('cake'); setActiveTab('active'); }}
               >
-                🎂 ケーキ <span className="pill-count">{activeOrders.length || orders.length}</span>
+                🎂 ケーキ <span className="pill-count">{activeOrders.length}</span>
               </button>
               <button
                 className={`category-pill pill-gift ${viewType === 'gift' ? 'active-gift' : ''}`}
@@ -1710,6 +1889,8 @@ export default function ListOrder() {
                       {activeTab === "past" && renderPastDateOrdersTable()}
                       {activeTab === "completed" && renderCompletedOrdersTable()}
                       {activeTab === "cancelled" && renderCancelledOrdersTable()}
+                      {activeTab === "online" && renderOnlineOrdersTable()}
+                      {activeTab === "store" && renderStoreOrdersTable()}
                     </>
                   )}
                 </div>

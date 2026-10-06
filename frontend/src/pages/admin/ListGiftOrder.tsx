@@ -232,7 +232,13 @@ export default function ListGiftOrder() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map(order => (
+            {filtered
+              .sort((a, b) => {
+                const dateA = (a.date_order || '').slice(0, 10);
+                const dateB = (b.date_order || '').slice(0, 10);
+                return dateA.localeCompare(dateB);
+              })
+              .map(order => (
               <tr key={order.id_order} className="order-row-card gift-card-row">
                 <td>
                   <div className="order-date-col">
@@ -316,7 +322,7 @@ export default function ListGiftOrder() {
             </button>
           </div>
 
-          <div className="search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          {/* <div className="search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <span style={{ position: 'absolute', left: '10px', color: '#888' }}>🔍</span>
             <input
               type="text"
@@ -335,7 +341,7 @@ export default function ListGiftOrder() {
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
-          </div>
+          </div> */}
         </div>
 
         <div className="tab-content">

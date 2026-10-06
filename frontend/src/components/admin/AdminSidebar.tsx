@@ -10,6 +10,8 @@ interface AdminSidebarProps {
   pastDateOrders?: Order[];
   completedOrders?: Order[];
   cancelledOrders?: Order[];
+  onlineOrders?: Order[];
+  storeOrders?: Order[];
   viewType?: "cake" | "gift" | "sameday";
   setViewType?: (type: "cake" | "gift" | "sameday") => void;
   search?: string;
@@ -26,6 +28,8 @@ export default function AdminSidebar({
   pastDateOrders = [],
   completedOrders = [],
   cancelledOrders = [],
+  onlineOrders = [],
+  storeOrders = [],
   search = "",
   setSearch,
   activeTab = "all",
@@ -154,18 +158,18 @@ export default function AdminSidebar({
               <span className="sidebar-badge active">{orders.length}</span>
             </div>
             <div
-              className={`sidebar-filter-item ${activeTab === 'active' ? 'active' : ''}`}
-              onClick={() => handleTabClick('active')}
+              className={`sidebar-filter-item ${activeTab === 'online' ? 'active' : ''}`}
+              onClick={() => handleTabClick('online')}
             >
               <span>オンライン予約</span>
-              <span className="sidebar-badge">{activeOrders.length}</span>
+              <span className="sidebar-badge">{onlineOrders.length}</span>
             </div>
             <div
-              className={`sidebar-filter-item`}
-              onClick={() => handleTabClick('today')}
+              className={`sidebar-filter-item ${activeTab === 'store' ? 'active' : ''}`}
+              onClick={() => handleTabClick('store')}
             >
               <span>店頭予約</span>
-              <span className="sidebar-badge">{todayOrders.length}</span>
+              <span className="sidebar-badge">{storeOrders.length}</span>
             </div>
           </div>
         </div>
