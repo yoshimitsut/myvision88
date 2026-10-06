@@ -23,8 +23,6 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({
   orders = [],
-  activeOrders = [],
-  todayOrders = [],
   pastDateOrders = [],
   completedOrders = [],
   cancelledOrders = [],

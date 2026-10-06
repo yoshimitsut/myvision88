@@ -239,58 +239,58 @@ export default function ListGiftOrder() {
                 return dateA.localeCompare(dateB);
               })
               .map(order => (
-              <tr key={order.id_order} className="order-row-card gift-card-row">
-                <td>
-                  <div className="order-date-col">
-                    <span>{formatDateJP(order.date_order)}</span>
-                    <Select<StatusOption, false>
-                      options={statusOptions}
-                      value={statusOptions.find((opt) => opt.value === order.status)}
-                      onChange={(selected: SingleValue<StatusOption>) => {
-                        if (selected) handleStatusChange(order.id_order, selected.value);
-                      }}
-                      styles={customStyles}
-                      isSearchable={false}
-                      isDisabled={isUpdating}
-                      isLoading={isUpdating && updatingOrderId === order.id_order}
-                      className="gift-status-select"
-                    />
-                  </div>
-                </td>
-                <td>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <strong style={{ fontSize: '13px', color: '#222' }}>{order.first_name} {order.last_name}</strong>
-                    <span className="order-id-badge">#{String(order.id_order).padStart(4, "0")}</span>
-                  </div>
-                </td>
-                <td>
-                  {order.delivery_method === 'pickup' ? (
-                    <span style={{ color: '#287300', fontWeight: 'bold' }}>店頭受取</span>
-                  ) : (
-                    <div>
-                      <span style={{ color: '#000DBD', fontWeight: 'bold' }}>配送</span><br />
-                      <small style={{ color: '#666' }}>
-                        〒{order.postal_code}<br />
-                        {order.prefecture} {order.city} {order.address1} {order.address2}
-                      </small>
+                <tr key={order.id_order} className="order-row-card gift-card-row">
+                  <td>
+                    <div className="order-date-col">
+                      <span>{formatDateJP(order.date_order)}</span>
+                      <Select<StatusOption, false>
+                        options={statusOptions}
+                        value={statusOptions.find((opt) => opt.value === order.status)}
+                        onChange={(selected: SingleValue<StatusOption>) => {
+                          if (selected) handleStatusChange(order.id_order, selected.value);
+                        }}
+                        styles={customStyles}
+                        isSearchable={false}
+                        isDisabled={isUpdating}
+                        isLoading={isUpdating && updatingOrderId === order.id_order}
+                        className="gift-status-select"
+                      />
                     </div>
-                  )}
-                </td>
-                <td>
-                  {order.items.map((item, i) => (
-                    <div key={i}>
-                      {item.name} ({item.size}) - {item.amount}個
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <strong style={{ fontSize: '13px', color: '#222' }}>{order.first_name} {order.last_name}</strong>
+                      <span className="order-id-badge">#{String(order.id_order).padStart(4, "0")}</span>
                     </div>
-                  ))}
-                </td>
-                <td>¥{order.total_amount?.toLocaleString() || 0}</td>
-                <td>{order.message || "なし"}</td>
-                <td>
-                  {order.tel}<br />
-                  <small style={{ color: '#666' }}>{order.email}</small>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td>
+                    {order.delivery_method === 'pickup' ? (
+                      <span style={{ color: '#287300', fontWeight: 'bold' }}>店頭受取</span>
+                    ) : (
+                      <div>
+                        <span style={{ color: '#000DBD', fontWeight: 'bold' }}>配送</span><br />
+                        <small style={{ color: '#666' }}>
+                          〒{order.postal_code}<br />
+                          {order.prefecture} {order.city} {order.address1} {order.address2}
+                        </small>
+                      </div>
+                    )}
+                  </td>
+                  <td>
+                    {order.items.map((item, i) => (
+                      <div key={i}>
+                        {item.name} ({item.size}) - {item.amount}個
+                      </div>
+                    ))}
+                  </td>
+                  <td>¥{order.total_amount?.toLocaleString() || 0}</td>
+                  <td>{order.message || "なし"}</td>
+                  <td>
+                    {order.tel}<br />
+                    <small style={{ color: '#666' }}>{order.email}</small>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
@@ -322,7 +322,7 @@ export default function ListGiftOrder() {
             </button>
           </div>
 
-          {/* <div className="search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <div className="search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <span style={{ position: 'absolute', left: '10px', color: '#888' }}>🔍</span>
             <input
               type="text"
@@ -341,7 +341,7 @@ export default function ListGiftOrder() {
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
-          </div> */}
+          </div>
         </div>
 
         <div className="tab-content">
