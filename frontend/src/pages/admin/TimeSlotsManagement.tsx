@@ -3,7 +3,7 @@ import './TimeSlotsManagement.css';
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import { ja } from 'date-fns/locale';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import {
   format,
   startOfMonth,
