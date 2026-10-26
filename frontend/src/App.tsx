@@ -39,8 +39,8 @@ function App() {
     fetch(`${import.meta.env.VITE_API_URL}/api/storeinfo`)
       .then(res => res.json())
       .then(data => {
-        if (data && (data.primary_color || data.secondary_color)) {
-          applyStoreTheme(data.primary_color, data.secondary_color);
+        if (data && (data.primary_color || data.secondary_color || data.header_color)) {
+          applyStoreTheme(data.primary_color, data.secondary_color, data.header_color);
         }
       })
       .catch(err => console.error('Erro ao carregar tema da loja:', err));

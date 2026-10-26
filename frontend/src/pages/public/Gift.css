@@ -23,7 +23,7 @@
 /* Header */
 .gift-header {
   height: 40px;
-  background: var(--primary-color, #454538);
+  background: var(--header-color, #454538);
   display: flex;
   align-items: center;
   justify-content: space-between;

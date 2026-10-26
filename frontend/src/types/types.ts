@@ -168,6 +168,7 @@ export interface StoreInfo {
   use_admin_download: 's' | 'n';
   primary_color?: string;
   secondary_color?: string;
+  header_color?: string;
 }
 // ------------------ 🎁 Gift (Okashi) ------------------
 

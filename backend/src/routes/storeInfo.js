@@ -15,7 +15,8 @@ router.get('/', async (req, res) => {
     res.json({
       ...info,
       primary_color: info.primary_color || '#000000',
-      secondary_color: info.secondary_color || '#fdd111'
+      secondary_color: info.secondary_color || '#fdd111',
+      header_color: info.header_color || info.primary_color || '#000000'
     });
   } catch (error) {
     console.error('Erro ao buscar storeinfo:', error);
@@ -30,7 +31,7 @@ router.put('/', async (req, res) => {
       store_name, mail_store, mail_pass, mail_resend, resend_pass,
       site_back, tel, open_hour, folder_img,
       use_admin_grafic, use_admin_cake, use_admin_date, use_admin_download,
-      primary_color, secondary_color
+      primary_color, secondary_color, header_color
     } = req.body;
 
     // Adicionar colunas caso ainda não existam no MySQL
@@ -42,6 +43,10 @@ router.put('/', async (req, res) => {
       await pool.query('ALTER TABLE store_info ADD COLUMN secondary_color VARCHAR(7) DEFAULT "#fdd111"');
     } catch (e) { /* Coluna já existe */ }
 
+    try {
+      await pool.query('ALTER TABLE store_info ADD COLUMN header_color VARCHAR(7) DEFAULT "#000000"');
+    } catch (e) { /* Coluna já existe */ }
+
     await pool.query(
       `UPDATE store_info SET 
         store_name = ?, mail_store = ?, mail_pass = ?, 
@@ -49,13 +54,14 @@ router.put('/', async (req, res) => {
         tel = ?, open_hour = ?, folder_img = ?,
         use_admin_grafic = ?, use_admin_cake = ?, 
         use_admin_date = ?, use_admin_download = ?,
-        primary_color = ?, secondary_color = ?
+        primary_color = ?, secondary_color = ?, header_color = ?
       WHERE id = 1`,
       [
         store_name, mail_store, mail_pass, mail_resend, resend_pass,
         site_back, tel, open_hour, folder_img,
         use_admin_grafic, use_admin_cake, use_admin_date, use_admin_download,
-        primary_color || '#000000', secondary_color || '#fdd111'
+        primary_color || '#000000', secondary_color || '#fdd111',
+        header_color || primary_color || '#000000'
       ]
     );
 

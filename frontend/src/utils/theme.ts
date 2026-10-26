@@ -1,13 +1,15 @@
 /**
  * Aplica as cores da loja dinamicamente no elemento raiz do DOM (:root)
  */
-export function applyStoreTheme(primaryColor?: string, secondaryColor?: string) {
+export function applyStoreTheme(primaryColor?: string, secondaryColor?: string, headerColor?: string) {
   const root = document.documentElement;
   const primary = primaryColor || '#000000';
   const secondary = secondaryColor || '#fdd111';
+  const header = headerColor || primary;
 
   root.style.setProperty('--primary-color', primary);
   root.style.setProperty('--secondary-color', secondary);
+  root.style.setProperty('--header-color', header);
 
   // Calcula automaticamente a cor de hover (mais clara ou mais escura conforme a cor base)
   const hoverColor = adjustBrightness(primary, -20);

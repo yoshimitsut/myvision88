@@ -27,8 +27,8 @@ export default function StoreSettings() {
       const data = await res.json();
       console.log('Dados recebidos da API:', data);
       setStoreInfo(data);
-      if (data.primary_color || data.secondary_color) {
-        applyStoreTheme(data.primary_color, data.secondary_color);
+      if (data.primary_color || data.secondary_color || data.header_color) {
+        applyStoreTheme(data.primary_color, data.secondary_color, data.header_color);
       }
     } catch (error) {
       console.error('設定の読み込みエラー:', error);
@@ -38,15 +38,16 @@ export default function StoreSettings() {
     }
   };
 
-  const handleColorChange = (primary: string, secondary?: string) => {
+  const handleColorChange = (primary: string, secondary?: string, headerC?: string) => {
     if (storeInfo) {
       const updated = {
         ...storeInfo,
         primary_color: primary,
-        secondary_color: secondary ?? storeInfo.secondary_color ?? '#fdd111'
+        secondary_color: secondary ?? storeInfo.secondary_color ?? '#fdd111',
+        header_color: headerC ?? storeInfo.header_color ?? primary
       };
       setStoreInfo(updated);
-      applyStoreTheme(updated.primary_color, updated.secondary_color);
+      applyStoreTheme(updated.primary_color, updated.secondary_color, updated.header_color);
     }
   };
 
@@ -96,7 +97,7 @@ export default function StoreSettings() {
       }
 
       if (storeInfo?.primary_color) {
-        applyStoreTheme(storeInfo.primary_color, storeInfo.secondary_color);
+        applyStoreTheme(storeInfo.primary_color, storeInfo.secondary_color, storeInfo.header_color);
       }
 
       setMessage({ type: 'success', text: '✅ 設定を保存しました！' });
@@ -147,14 +148,14 @@ export default function StoreSettings() {
                 type="color"
                 name="primary_color"
                 value={storeInfo.primary_color || '#000000'}
-                onChange={(e) => handleColorChange(e.target.value, storeInfo.secondary_color)}
+                onChange={(e) => handleColorChange(e.target.value, storeInfo.secondary_color, storeInfo.header_color)}
                 className="color-picker-input"
               />
               <input
                 type="text"
                 name="primary_color"
                 value={storeInfo.primary_color || '#000000'}
-                onChange={(e) => handleColorChange(e.target.value, storeInfo.secondary_color)}
+                onChange={(e) => handleColorChange(e.target.value, storeInfo.secondary_color, storeInfo.header_color)}
                 placeholder="#000000"
                 style={{ width: '120px' }}
               />
@@ -168,18 +169,40 @@ export default function StoreSettings() {
                 type="color"
                 name="secondary_color"
                 value={storeInfo.secondary_color || '#fdd111'}
-                onChange={(e) => handleColorChange(storeInfo.primary_color || '#000000', e.target.value)}
+                onChange={(e) => handleColorChange(storeInfo.primary_color || '#000000', e.target.value, storeInfo.header_color)}
                 className="color-picker-input"
               />
               <input
                 type="text"
                 name="secondary_color"
                 value={storeInfo.secondary_color || '#fdd111'}
-                onChange={(e) => handleColorChange(storeInfo.primary_color || '#000000', e.target.value)}
+                onChange={(e) => handleColorChange(storeInfo.primary_color || '#000000', e.target.value, storeInfo.header_color)}
                 placeholder="#fdd111"
                 style={{ width: '120px' }}
               />
             </div>
+          </div>
+
+          <div className="store-settings-field">
+            <label>ヘッダーカラー (Header Color)：</label>
+            <div className="color-picker-row">
+              <input
+                type="color"
+                name="header_color"
+                value={storeInfo.header_color || storeInfo.primary_color || '#000000'}
+                onChange={(e) => handleColorChange(storeInfo.primary_color || '#000000', storeInfo.secondary_color, e.target.value)}
+                className="color-picker-input"
+              />
+              <input
+                type="text"
+                name="header_color"
+                value={storeInfo.header_color || storeInfo.primary_color || '#000000'}
+                onChange={(e) => handleColorChange(storeInfo.primary_color || '#000000', storeInfo.secondary_color, e.target.value)}
+                placeholder="#000000"
+                style={{ width: '120px' }}
+              />
+            </div>
+            <small style={{ color: '#888', fontSize: '12px' }}>ヘッダーの背景色。未設定の場合はメインカラーを使用します。</small>
           </div>
 
         </div>

@@ -31,16 +31,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
-  background: transparent;
+  padding: 12px 40px;
+  background: var(--header-color, #000000);
   z-index: 100;
-  mix-blend-mode: difference;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 
 .header-center .logo-img {
-  height: 50px;
+  height: 40px;
   cursor: pointer;
-  filter: invert(1);
+  filter: brightness(0) invert(1);
 }
 
 .header-right {
@@ -52,7 +52,7 @@
 .instagram-link img {
   width: 24px;
   height: 24px;
-  filter: invert(1);
+  filter: brightness(0) invert(1);
 }
 
 .menu-toggle {
@@ -68,7 +68,7 @@
   display: block;
   width: 35px;
   height: 2px;
-  background-color: white;
+  background-color: #ffffff;
 }
 
 /* Hero Main Image */
