@@ -1231,6 +1231,17 @@
   transition: all 0.15s;
 }
 
+.baiten-page .select-camera-device {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: var(--secondary);
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  max-width: 140px;
+}
+
 .baiten-page .btn-camera-ctrl:hover {
   background: #e2e8f0;
 }
