@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { Produto } from '../types';
 import { getProdutos, salvarProduto, deletarProduto } from '../services/api';
+import { BarcodeCameraScanner } from './BarcodeCameraScanner';
 
 export const ProdutosTab: React.FC = () => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -13,6 +14,7 @@ export const ProdutosTab: React.FC = () => {
   const [modalAberto, setModalAberto] = useState(false);
   const [produtoEditando, setProdutoEditando] = useState<Partial<Produto> | null>(null);
   const [salvando, setSalvando] = useState(false);
+  const [scannerModalAberto, setScannerModalAberto] = useState(false);
 
   const barcodeInputModalRef = useRef<HTMLInputElement>(null);
 
@@ -116,7 +118,7 @@ export const ProdutosTab: React.FC = () => {
       <div className="produtos-header">
         <div>
           <h2>📦 Gestão de Produtos & Estoque</h2>
-          <p className="subtitle">Cadastre novos itens, leia códigos de barras e monitore os níveis de estoque.</p>
+          <p className="subtitle">Cadastre novos itens, leia códigos de barras com a câmera e monitore os níveis de estoque.</p>
         </div>
         <button className="btn-primary" onClick={abrirModalNovo}>
           ➕ Cadastrar Novo Produto
@@ -271,7 +273,18 @@ export const ProdutosTab: React.FC = () => {
 
             <form onSubmit={handleSalvar} className="modal-body">
               <div className="form-group">
-                <label className="field-label">Código de Barras (EAN-13 / Custom) *</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label className="field-label">Código de Barras (EAN-13 / Custom) *</label>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    style={{ padding: '0.25rem 0.6rem', fontSize: '0.8rem' }}
+                    onClick={() => setScannerModalAberto(true)}
+                  >
+                    📷 Ler com a Câmera
+                  </button>
+                </div>
+
                 <input
                   ref={barcodeInputModalRef}
                   type="text"
@@ -404,7 +417,39 @@ export const ProdutosTab: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Modal Leitor de Câmera para Cadastro de Produto */}
+      {scannerModalAberto && (
+        <div className="modal-overlay" style={{ zIndex: 1100 }}>
+          <div className="modal-box" style={{ maxWidth: 460 }}>
+            <div className="modal-header">
+              <h3>📷 Ler Código com a Câmera</h3>
+              <button className="btn-close-modal" onClick={() => setScannerModalAberto(false)}>
+                ✕
+              </button>
+            </div>
+            <div className="modal-body" style={{ padding: '1rem' }}>
+              <BarcodeCameraScanner
+                ativo={scannerModalAberto}
+                setAtivo={setScannerModalAberto}
+                onScan={(codigo) => {
+                  setProdutoEditando((prev) => (prev ? { ...prev, codigo_barras: codigo } : prev));
+                  setScannerModalAberto(false);
+                }}
+              />
+            </div>
+            <div className="modal-footer justify-center">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setScannerModalAberto(false)}
+              >
+                Fechar Câmera
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-

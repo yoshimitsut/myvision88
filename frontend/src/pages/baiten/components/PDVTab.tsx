@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { Produto, ItemCarrinho, FormaPagamento, VendaFinalizada } from '../types';
 import { getProdutos, getProdutoPorCodigo, finalizarVenda } from '../services/api';
 import { playBeep } from '../utils/audio';
+import { BarcodeCameraScanner } from './BarcodeCameraScanner';
 
 interface PDVTabProps {
   carrinho: ItemCarrinho[];
@@ -14,6 +15,11 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
   const [mensagemStatus, setMensagemStatus] = useState<{ texto: string; tipo: 'sucesso' | 'erro' } | null>(null);
   const [categoriaAtiva, setCategoriaAtiva] = useState<string>('Todas');
   const [loading, setLoading] = useState(false);
+
+  // Controle da Câmera do Smartphone
+  const [cameraAtiva, setCameraAtiva] = useState(false);
+  const [ultimoCodigoLido, setUltimoCodigoLido] = useState<string | null>(null);
+  const [mostrarEntradaManual, setMostrarEntradaManual] = useState(false);
 
   // Estados do Modal de Pagamento
   const [modalPagamentoAberto, setModalPagamentoAberto] = useState(false);
@@ -42,12 +48,12 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
     carregarProdutos();
   }, []);
 
-  // Foca no leitor de código de barras sempre que possível
+  // Foca no campo manual quando necessário
   useEffect(() => {
-    if (!modalPagamentoAberto && !vendaConcluida) {
+    if (!cameraAtiva && !modalPagamentoAberto && !vendaConcluida && mostrarEntradaManual) {
       barcodeInputRef.current?.focus();
     }
-  }, [modalPagamentoAberto, vendaConcluida, carrinho]);
+  }, [cameraAtiva, modalPagamentoAberto, vendaConcluida, mostrarEntradaManual]);
 
   // Foca no campo de valor pago ao abrir modal de pagamento
   useEffect(() => {
@@ -87,23 +93,23 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
 
         playBeep('success');
         setMensagemStatus({
-          texto: `+1 ${produto.nome} (Total: ${novaQtd})`,
+          texto: `+1 ${produto.nome} (Total no carrinho: ${novaQtd})`,
           tipo: 'sucesso',
         });
 
         return prev.map((item) =>
           item.produto.id === produto.id
             ? {
-                ...item,
-                quantidade: novaQtd,
-                subtotal: Number((novaQtd * Number(produto.preco_venda)).toFixed(2)),
-              }
+              ...item,
+              quantidade: novaQtd,
+              subtotal: Number((novaQtd * Number(produto.preco_venda)).toFixed(2)),
+            }
             : item
         );
       } else {
         playBeep('success');
         setMensagemStatus({
-          texto: `Adicionado: ${produto.nome}`,
+          texto: `Adicionado: ${produto.nome} (R$ ${Number(produto.preco_venda).toFixed(2)})`,
           tipo: 'sucesso',
         });
 
@@ -157,25 +163,26 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
     }
   };
 
-  // Disparado ao ler o código de barras com o leitor ou apertar Enter
-  const handleScanSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const codigo = codigoInput.trim();
+  // Processa o código de barras lido (seja via Câmera do Celular ou Leitor USB)
+  const processarCodigoBarras = async (codigoBruto: string) => {
+    const codigo = codigoBruto.trim();
     if (!codigo) return;
 
     setLoading(true);
     try {
-      // Tenta primeiro encontrar na lista já carregada localmente para velocidade instantânea
+      // 1. Tenta buscar em cache local para resposta ultra-rápida
       const produtoLocal = produtos.find(
         (p) => p.codigo_barras.toLowerCase() === codigo.toLowerCase()
       );
 
       if (produtoLocal) {
         adicionarAoCarrinho(produtoLocal);
+        setUltimoCodigoLido(`${produtoLocal.nome} (${codigo})`);
       } else {
-        // Se não achou na lista em memória, consulta a API
+        // 2. Se não estiver em cache, consulta o banco de dados
         const produtoApi = await getProdutoPorCodigo(codigo);
         adicionarAoCarrinho(produtoApi);
+        setUltimoCodigoLido(`${produtoApi.nome} (${codigo})`);
       }
       setCodigoInput('');
     } catch (err: any) {
@@ -184,11 +191,23 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
         texto: err.message || `Código "${codigo}" não encontrado!`,
         tipo: 'erro',
       });
+      setUltimoCodigoLido(`Não encontrado: ${codigo}`);
       setCodigoInput('');
     } finally {
       setLoading(false);
-      barcodeInputRef.current?.focus();
     }
+  };
+
+  // Disparado ao submeter formulário manual ou leitor USB
+  const handleScanSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await processarCodigoBarras(codigoInput);
+    barcodeInputRef.current?.focus();
+  };
+
+  // Disparado automaticamente pela câmera do celular ao detectar barra de código
+  const handleCameraScan = (codigoDetectado: string) => {
+    processarCodigoBarras(codigoDetectado);
   };
 
   const abrirModalPagamento = () => {
@@ -244,36 +263,63 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
 
   return (
     <div className="pdv-container">
-      {/* Coluna Esquerda: Leitor e Catálogo Rápido */}
+      {/* Coluna Esquerda: Câmera do Celular, Leitor e Catálogo Rápido */}
       <div className="pdv-left">
-        {/* Caixa de Entrada do Leitor de Código de Barras */}
-        <div className="scanner-card">
-          <label className="scanner-label">
-            <span className="scanner-icon">📟</span>
-            <strong>Leitor de Código de Barras</strong>
-            <span className="scanner-hint">(Aponte o leitor ou digite e tecle Enter)</span>
-          </label>
-          <form onSubmit={handleScanSubmit} className="scanner-form">
-            <input
-              ref={barcodeInputRef}
-              type="text"
-              value={codigoInput}
-              onChange={(e) => setCodigoInput(e.target.value)}
-              placeholder="Aguardando bipagem do código de barras..."
-              className="scanner-input"
-              disabled={loading}
-              autoComplete="off"
-            />
-            <button type="submit" className="scanner-btn" disabled={loading || !codigoInput}>
-              {loading ? 'Buscando...' : 'Adicionar'}
-            </button>
-          </form>
+        {/* Leitor de Código de Barras via Câmera do Smartphone */}
+        <BarcodeCameraScanner
+          ativo={cameraAtiva && !modalPagamentoAberto && !vendaConcluida}
+          setAtivo={setCameraAtiva}
+          onScan={handleCameraScan}
+          ultimoCodigoLido={ultimoCodigoLido}
+        />
 
-          {/* Feedback de status */}
-          {mensagemStatus && (
-            <div className={`status-banner ${mensagemStatus.tipo}`}>
-              {mensagemStatus.texto}
+        {/* Feedback de status visual */}
+        {mensagemStatus && (
+          <div className={`status-banner ${mensagemStatus.tipo}`}>
+            {mensagemStatus.texto}
+          </div>
+        )}
+
+        {/* Entrada Manual / Leitor USB (Opcional ou Alternativa) */}
+        <div className="scanner-card">
+          <div className="scanner-label" style={{ justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span className="scanner-icon">⌨️</span>
+              <strong>Digitar Código ou Leitor USB</strong>
             </div>
+            <button
+              type="button"
+              className="btn-link-toggle"
+              onClick={() => setMostrarEntradaManual(!mostrarEntradaManual)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--primary)',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+              }}
+            >
+              {mostrarEntradaManual ? '▲ Recolher' : '▼ Expandir'}
+            </button>
+          </div>
+
+          {mostrarEntradaManual && (
+            <form onSubmit={handleScanSubmit} className="scanner-form" style={{ marginTop: '0.5rem' }}>
+              <input
+                ref={barcodeInputRef}
+                type="text"
+                value={codigoInput}
+                onChange={(e) => setCodigoInput(e.target.value)}
+                placeholder="Ex: 7894900010015"
+                className="scanner-input"
+                disabled={loading}
+                autoComplete="off"
+              />
+              <button type="submit" className="scanner-btn" disabled={loading || !codigoInput}>
+                {loading ? 'Buscando...' : 'Adicionar'}
+              </button>
+            </form>
           )}
         </div>
 
@@ -337,7 +383,7 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
               <div className="cart-empty">
                 <span className="cart-empty-icon">🛒</span>
                 <p>Nenhum item adicionado.</p>
-                <small>Bipe um código de barras para começar a venda.</small>
+                <small>Aponte a câmera do celular para o código de barras para começar a compra.</small>
               </div>
             ) : (
               <div className="cart-items-list">
@@ -553,4 +599,3 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
     </div>
   );
 };
-

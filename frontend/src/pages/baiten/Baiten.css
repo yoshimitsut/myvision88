@@ -1162,3 +1162,349 @@
   }
 }
 
+/* ========================================================
+   Estilos da Câmera do Smartphone (Leitor de Código de Barras)
+   ======================================================== */
+.baiten-page .camera-scanner-wrapper {
+  background: var(--bg-card);
+  border: 2px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.baiten-page .camera-scanner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.baiten-page .camera-scanner-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+  color: var(--secondary);
+}
+
+.baiten-page .camera-icon {
+  font-size: 1.4rem;
+}
+
+.baiten-page .live-indicator {
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+  animation: pulseLive 1.5s infinite;
+}
+
+@keyframes pulseLive {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.baiten-page .camera-scanner-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.baiten-page .btn-camera-ctrl {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: var(--secondary);
+  padding: 0.45rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.baiten-page .btn-camera-ctrl:hover {
+  background: #e2e8f0;
+}
+
+.baiten-page .btn-camera-ctrl.active {
+  background: #fef08a;
+  border-color: #eab308;
+  color: #854d0e;
+}
+
+.baiten-page .btn-toggle-camera {
+  padding: 0.55rem 1.15rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.baiten-page .btn-toggle-camera.btn-start {
+  background-color: var(--primary);
+  color: white;
+  box-shadow: 0 2px 6px rgba(201, 42, 42, 0.3);
+}
+
+.baiten-page .btn-toggle-camera.btn-start:hover {
+  background-color: var(--primary-hover);
+}
+
+.baiten-page .btn-toggle-camera.btn-stop {
+  background-color: #475569;
+  color: white;
+}
+
+.baiten-page .btn-toggle-camera.btn-stop:hover {
+  background-color: #334155;
+}
+
+/* Visor da Câmera */
+.baiten-page .camera-viewport-card {
+  position: relative;
+  width: 100%;
+  min-height: 240px;
+  max-height: 380px;
+  background: #0f172a;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.baiten-page .camera-video-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.baiten-page .camera-video-container video {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 380px;
+  object-fit: cover !important;
+  border-radius: 12px;
+}
+
+/* Placeholder quando câmera está desligada */
+.baiten-page .camera-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  transition: background 0.2s;
+}
+
+.baiten-page .camera-placeholder:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.baiten-page .placeholder-icon-circle {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.baiten-page .placeholder-icon {
+  font-size: 2.2rem;
+}
+
+.baiten-page .camera-placeholder h4 {
+  color: white;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.baiten-page .camera-placeholder p {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  max-width: 320px;
+}
+
+.baiten-page .btn-start-mini {
+  margin-top: 0.5rem;
+  background: var(--primary);
+  color: white;
+  padding: 0.55rem 1.25rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(201, 42, 42, 0.4);
+}
+
+/* Mira do Leitor de Código de Barras */
+.baiten-page .camera-overlay-guide {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.baiten-page .scanner-target-reticle {
+  position: relative;
+  width: 82%;
+  max-width: 320px;
+  height: 140px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+}
+
+.baiten-page .scanner-target-reticle .corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: #22c55e;
+  border-style: solid;
+}
+
+.baiten-page .corner.top-left {
+  top: -2px;
+  left: -2px;
+  border-width: 4px 0 0 4px;
+  border-top-left-radius: 6px;
+}
+
+.baiten-page .corner.top-right {
+  top: -2px;
+  right: -2px;
+  border-width: 4px 4px 0 0;
+  border-top-right-radius: 6px;
+}
+
+.baiten-page .corner.bottom-left {
+  bottom: -2px;
+  left: -2px;
+  border-width: 0 0 4px 4px;
+  border-bottom-left-radius: 6px;
+}
+
+.baiten-page .corner.bottom-right {
+  bottom: -2px;
+  right: -2px;
+  border-width: 0 4px 4px 0;
+  border-bottom-right-radius: 6px;
+}
+
+/* Linha Laser Animada */
+.baiten-page .scanner-laser-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ef4444;
+  box-shadow: 0 0 8px 2px rgba(239, 68, 68, 0.8);
+  animation: laserSweep 2s ease-in-out infinite alternate;
+}
+
+@keyframes laserSweep {
+  0% { transform: translateY(-50px); opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { transform: translateY(50px); opacity: 0.8; }
+}
+
+.baiten-page .scanner-guide-text {
+  margin-top: 1rem;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: rgba(15, 23, 42, 0.75);
+  padding: 4px 12px;
+  border-radius: 12px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Flash de Leitura Concluída */
+.baiten-page .scan-success-flash {
+  position: absolute;
+  inset: 0;
+  background: rgba(34, 197, 94, 0.88);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 800;
+  gap: 0.5rem;
+  animation: flashIn 0.3s ease-out;
+  z-index: 10;
+}
+
+.baiten-page .scan-success-check {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+@keyframes flashIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.baiten-page .last-scanned-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #f8fafc;
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.85rem;
+  color: var(--secondary);
+}
+
+.baiten-page .last-scanned-bar code {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--primary);
+  background: #fee2e2;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.baiten-page .camera-error {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.baiten-page .btn-retry {
+  background: white;
+  border: 1px solid #f87171;
+  color: #b91c1c;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
