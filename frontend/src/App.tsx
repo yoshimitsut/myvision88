@@ -33,6 +33,9 @@ import StoreSettings from './pages/admin/StoreSettings';
 // Componentes
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
+// Seinenkai Baiten (PDV & Estoque)
+import BaitenPage from './pages/baiten/BaitenPage';
+
 function App() {
   useEffect(() => {
     // Carregar configurações da loja e aplicar tema
@@ -132,6 +135,10 @@ function App() {
         <Route path="/store-login" element={<StoreLogin />} />
 
         <Route path="/order/check" element={<Check />} />
+
+        {/* Seinenkai Baiten (PDV & Gestão de Estoque) */}
+        <Route path="/baiten" element={<BaitenPage />} />
+        <Route path="/pdv" element={<BaitenPage />} />
       </Routes>
 
     </Router>

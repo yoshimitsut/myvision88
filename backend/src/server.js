@@ -27,6 +27,10 @@ const stripeRoutes = require('./routes/stripe');
 const authRoutes = require('./routes/authRoutes');
 const candleRoutes = require('./routes/candleRoutes');
 
+// Módulo Seinenkai Baiten (PDV & Estoque)
+const baitenRoutes = require('./baiten/routes/baitenRoutes');
+const { initBaitenTables } = require('./baiten/config/db');
+
 // Middleware de Autenticação
 const authMiddleware = require('./middleware/authMiddleware');
 
@@ -101,7 +105,7 @@ const selectiveAuth = (req, res, next) => {
     req.originalUrl.startsWith('/api/newsletters')
   );
 
-  if (isPublicGet || isPublicPost) {
+  if (isPublicGet || isPublicPost || req.originalUrl.startsWith('/api/baiten')) {
     return next();
   }
 
@@ -129,5 +133,11 @@ app.use('/api/candles', selectiveAuth, candleRoutes);
 app.use('/api', selectiveAuth, orderRoutes);
 app.use('/api/gift-orders', selectiveAuth, giftOrderRoutes);
 
+// 🔹 Módulo Seinenkai Baiten (PDV & Estoque)
+app.use('/api/baiten', baitenRoutes);
 
-app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  initBaitenTables().catch(() => { });
+});

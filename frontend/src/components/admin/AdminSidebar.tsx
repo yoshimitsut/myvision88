@@ -126,6 +126,12 @@ export default function AdminSidebar({
           >
             <span>ギフト</span>
           </div>
+          <div
+            className={`sidebar-menu-item ${location.pathname.startsWith('/baiten') || location.pathname === '/pdv' ? "active" : ""}`}
+            onClick={() => goTo("/baiten")}
+          >
+            <span>🏮 Seinenkai Baiten</span>
+          </div>
         </div>
 
         <div className="sidebar-search-box">
