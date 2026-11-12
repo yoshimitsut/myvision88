@@ -67,7 +67,6 @@ export const HistoricoTab: React.FC = () => {
       <div className="historico-header">
         <div>
           <h2>Histórico de Vendas & Fechamento</h2>
-          <p className="subtitle">Visão consolidada do faturamento e vendas realizadas no evento.</p>
         </div>
         <div className="header-actions">
           <button className="btn-secondary" onClick={carregarHistorico}>
