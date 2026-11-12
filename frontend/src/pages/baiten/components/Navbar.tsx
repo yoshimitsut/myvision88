@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
   abaAtiva: 'pdv' | 'produtos' | 'historico';
@@ -8,7 +7,6 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ abaAtiva, setAbaAtiva, itensCarrinhoQtd }) => {
-  const navigate = useNavigate();
 
   return (
     <header className="navbar-container">
