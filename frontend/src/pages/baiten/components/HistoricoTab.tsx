@@ -66,15 +66,12 @@ export const HistoricoTab: React.FC = () => {
     <div className="historico-container">
       <div className="historico-header">
         <div>
-          <h2>📊 Histórico de Vendas & Fechamento</h2>
+          <h2>Histórico de Vendas & Fechamento</h2>
           <p className="subtitle">Visão consolidada do faturamento e vendas realizadas no evento.</p>
         </div>
         <div className="header-actions">
           <button className="btn-secondary" onClick={carregarHistorico}>
             🔄 Atualizar
-          </button>
-          <button className="btn-primary" onClick={() => window.print()}>
-            🖨️ Imprimir Fechamento
           </button>
         </div>
       </div>
@@ -90,19 +87,19 @@ export const HistoricoTab: React.FC = () => {
         </div>
 
         <div className="metric-card">
-          <span className="metric-title">💵 Dinheiro em Caixa</span>
+          <span className="metric-title">Dinheiro em Caixa</span>
           <strong className="metric-val">R$ {Number(resumo.total_dinheiro).toFixed(2)}</strong>
           <span className="metric-sub">Total recebido em espécie</span>
         </div>
 
         <div className="metric-card">
-          <span className="metric-title">📱 Recebido em PIX</span>
+          <span className="metric-title">Recebido em PIX</span>
           <strong className="metric-val">R$ {Number(resumo.total_pix).toFixed(2)}</strong>
           <span className="metric-sub">Transferências instantâneas</span>
         </div>
 
         <div className="metric-card">
-          <span className="metric-title">💳 Total em Cartão</span>
+          <span className="metric-title">Total em Cartão</span>
           <strong className="metric-val">R$ {Number(resumo.total_cartao).toFixed(2)}</strong>
           <span className="metric-sub">Crédito + Débito</span>
         </div>

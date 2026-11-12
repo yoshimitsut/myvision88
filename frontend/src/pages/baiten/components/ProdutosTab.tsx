@@ -117,11 +117,10 @@ export const ProdutosTab: React.FC = () => {
     <div className="produtos-container">
       <div className="produtos-header">
         <div>
-          <h2>📦 Gestão de Produtos & Estoque</h2>
-          <p className="subtitle">Cadastre novos itens, leia códigos de barras com a câmera e monitore os níveis de estoque.</p>
+          <h2>Produtos & Estoque</h2>
         </div>
         <button className="btn-primary" onClick={abrirModalNovo}>
-          ➕ Cadastrar Novo Produto
+          ➕ Novo Produto
         </button>
       </div>
 
@@ -169,7 +168,6 @@ export const ProdutosTab: React.FC = () => {
               <th>Preço Venda</th>
               <th>Estoque Atual</th>
               <th>Status</th>
-              <th>Ajuste Rápido</th>
               <th className="text-right">Ações</th>
             </tr>
           </thead>
@@ -217,24 +215,6 @@ export const ProdutosTab: React.FC = () => {
                       ) : (
                         <span className="status-label normal">Normal</span>
                       )}
-                    </td>
-                    <td>
-                      <div className="botoes-ajuste-estoque">
-                        <button
-                          className="btn-mini"
-                          title="Adicionar 5 unidades"
-                          onClick={() => handleAjusteRapidoEstoque(prod, 5)}
-                        >
-                          +5
-                        </button>
-                        <button
-                          className="btn-mini"
-                          title="Adicionar 10 unidades"
-                          onClick={() => handleAjusteRapidoEstoque(prod, 10)}
-                        >
-                          +10
-                        </button>
-                      </div>
                     </td>
                     <td className="text-right">
                       <button
