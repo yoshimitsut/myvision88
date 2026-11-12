@@ -465,7 +465,7 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
 
             <button
               onClick={abrirModalPagamento}
-              disabled={carrinho.length !== 0}
+              disabled={carrinho.length === 0}
               className="btn-checkout"
             >
               Finalizar Venda (R$ {totalCarrinho.toFixed(2)})

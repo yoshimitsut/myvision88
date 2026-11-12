@@ -52,6 +52,16 @@
 
 .baiten-page .brand-icon {
   font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.baiten-page .brand-icon img {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+  display: block;
 }
 
 .baiten-page .brand-title {

@@ -1,4 +1,5 @@
 import React from 'react';
+import emblemaSvg from '../../../assets/emblema-seinenkaibrlogo.png';
 
 interface NavbarProps {
   abaAtiva: 'pdv' | 'produtos' | 'historico';
@@ -11,7 +12,9 @@ export const Navbar: React.FC<NavbarProps> = ({ abaAtiva, setAbaAtiva, itensCarr
   return (
     <header className="navbar-container">
       <div className="navbar-brand">
-        <span className="brand-icon">🏮</span>
+        <span className="brand-icon">
+          <img src={emblemaSvg} alt="Emblema Seinenkai" />
+        </span>
         <div>
           <h1 className="brand-title">Seinenkai Baiten</h1>
           <span className="brand-subtitle"></span>
