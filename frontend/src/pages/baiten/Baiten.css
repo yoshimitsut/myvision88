@@ -1111,27 +1111,338 @@
   font-family: monospace;
 }
 
-/* Responsividade */
+/* Responsividade e Adaptação Mobile Avançada */
+.baiten-page .pdv-mobile-nav {
+  display: none;
+}
+
+.baiten-page .pdv-mobile-floating-cart-bar {
+  display: none;
+}
+
 @media (max-width: 900px) {
-  .baiten-page .pdv-container {
-    grid-template-columns: 1fr;
-    height: auto;
+  .baiten-page .navbar-container {
+    padding: 0.75rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
   }
 
-  .baiten-page .navbar-container {
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 1rem;
+  .baiten-page .navbar-brand {
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 0.25rem;
+  }
+
+  .baiten-page .brand-title {
+    font-size: 1.15rem;
+  }
+
+  .baiten-page .brand-subtitle {
+    display: none;
   }
 
   .baiten-page .navbar-tabs {
     width: 100%;
+    display: flex;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.4rem;
     padding-bottom: 0.25rem;
   }
 
+  .baiten-page .navbar-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .baiten-page .tab-btn {
+    flex: 0 0 auto;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .baiten-page .btn-voltar-myvision {
+    margin-left: auto;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
   .baiten-page .main-content {
+    padding: 0.75rem 0.65rem 4.5rem;
+  }
+
+  /* Alternador Mobile PDV: Câmera x Carrinho */
+  .baiten-page .pdv-mobile-nav {
+    display: flex;
+    background: #e2e8f0;
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    gap: 4px;
+  }
+
+  .baiten-page .pdv-mobile-tab-btn {
+    flex: 1;
+    padding: 0.65rem 0.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    background: transparent;
+    color: var(--secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .baiten-page .pdv-mobile-tab-btn.active {
+    background: white;
+    color: var(--primary);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .baiten-page .pdv-container {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    gap: 1rem;
+  }
+
+  /* Exibe ou oculta colunas de acordo com a aba selecionada no mobile */
+  .baiten-page .pdv-container.mobile-view-catalogo .pdv-right {
+    display: none;
+  }
+
+  .baiten-page .pdv-container.mobile-view-carrinho .pdv-left {
+    display: none;
+  }
+
+  .baiten-page .pdv-left {
+    padding-right: 0;
+    overflow-y: visible;
+  }
+
+  /* Grade de produtos no celular: 2 colunas otimizadas para toque */
+  .baiten-page .quick-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .baiten-page .product-card-btn {
+    padding: 0.7rem;
+    min-height: 90px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .baiten-page .product-card-nome {
+    font-size: 0.88rem;
+  }
+
+  .baiten-page .product-card-preco {
+    font-size: 1.05rem;
+  }
+
+  /* Header do scanner de câmera mais compacto no celular */
+  .baiten-page .camera-scanner-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .baiten-page .camera-scanner-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.35rem;
+  }
+
+  .baiten-page .btn-camera-ctrl,
+  .baiten-page .select-camera-device {
+    flex: 1;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.4rem;
+    text-align: center;
+  }
+
+  .baiten-page .btn-toggle-camera {
+    flex: 2;
+    font-size: 0.85rem;
+    padding: 0.55rem 0.6rem;
+    justify-content: center;
+  }
+
+  .baiten-page .camera-viewport-card {
+    min-height: 200px;
+    max-height: 290px;
+  }
+
+  .baiten-page .camera-video-container video {
+    max-height: 290px;
+  }
+
+  /* Barra Flutuante de Carrinho na visualização Catálogo */
+  .baiten-page .pdv-mobile-floating-cart-bar {
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    background: var(--secondary);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    z-index: 90;
+    animation: slideUpFloat 0.25s ease-out;
+  }
+
+  @keyframes slideUpFloat {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .baiten-page .floating-cart-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .baiten-page .floating-cart-count {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+
+  .baiten-page .floating-cart-total {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #4ade80;
+  }
+
+  .baiten-page .btn-floating-cart-action {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.65rem 1.15rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  /* Carrinho no Mobile */
+  .baiten-page .cart-card {
+    height: auto;
+    min-height: calc(100vh - 200px);
+  }
+
+  .baiten-page .cart-item {
+    padding: 0.65rem;
+    gap: 0.5rem;
+  }
+
+  .baiten-page .btn-qty {
+    width: 34px;
+    height: 34px;
+    font-size: 1.1rem;
+  }
+
+  .baiten-page .cart-item-qty {
+    width: 32px;
+    font-size: 1rem;
+  }
+
+  /* Modais no Mobile (FullScreen/Bottom-Sheet amigável) */
+  .baiten-page .modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+
+  .baiten-page .modal-box {
+    max-width: 100%;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .baiten-page .modal-body {
     padding: 1rem;
+    gap: 1rem;
+  }
+
+  .baiten-page .payment-options {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .baiten-page .payment-btn {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  /* Tabela de Produtos no Mobile: rolagem horizontal limpa */
+  .baiten-page .produtos-header,
+  .baiten-page .historico-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .baiten-page .header-actions {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .baiten-page .header-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .baiten-page .filtros-bar {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .baiten-page .busca-form {
+    width: 100%;
+  }
+
+  .baiten-page .categorias-select-wrapper {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .baiten-page .select-categoria {
+    flex: 1;
+  }
+
+  .baiten-page .tabela-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .baiten-page .tabela-produtos th,
+  .baiten-page .tabela-produtos td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  /* Métricas de Histórico no Mobile */
+  .baiten-page .metric-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 }
 

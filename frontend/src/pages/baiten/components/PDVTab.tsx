@@ -28,6 +28,9 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
   const [observacoes, setObservacoes] = useState('');
   const [processandoVenda, setProcessandoVenda] = useState(false);
 
+  // Modo de visualização mobile: 'catalogo' (câmera + produtos) ou 'carrinho' (itens + checkout)
+  const [abaMobile, setAbaMobile] = useState<'catalogo' | 'carrinho'>('catalogo');
+
   // Estado do Modal de Sucesso
   const [vendaConcluida, setVendaConcluida] = useState<VendaFinalizada | null>(null);
 
@@ -262,7 +265,25 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
   );
 
   return (
-    <div className="pdv-container">
+    <div className={`pdv-container mobile-view-${abaMobile}`}>
+      {/* Barra de alternância rápida no Mobile */}
+      <div className="pdv-mobile-nav">
+        <button
+          type="button"
+          className={`pdv-mobile-tab-btn ${abaMobile === 'catalogo' ? 'active' : ''}`}
+          onClick={() => setAbaMobile('catalogo')}
+        >
+          📷 Câmera & Produtos
+        </button>
+        <button
+          type="button"
+          className={`pdv-mobile-tab-btn ${abaMobile === 'carrinho' ? 'active' : ''}`}
+          onClick={() => setAbaMobile('carrinho')}
+        >
+          🛒 Carrinho {totalItensQtd > 0 && `(${totalItensQtd}) • R$ ${totalCarrinho.toFixed(2)}`}
+        </button>
+      </div>
+
       {/* Coluna Esquerda: Câmera do Celular, Leitor e Catálogo Rápido */}
       <div className="pdv-left">
         {/* Leitor de Código de Barras via Câmera do Smartphone */}
@@ -284,7 +305,7 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
         <div className="scanner-card">
           <div className="scanner-label" style={{ justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span className="scanner-icon">⌨️</span>
+              <span className="scanner-icon"></span>
               <strong>Digitar Código ou Leitor USB</strong>
             </div>
             <button
@@ -444,14 +465,31 @@ export const PDVTab: React.FC<PDVTabProps> = ({ carrinho, setCarrinho }) => {
 
             <button
               onClick={abrirModalPagamento}
-              disabled={carrinho.length === 0}
+              disabled={carrinho.length !== 0}
               className="btn-checkout"
             >
-              💵 Finalizar Venda (R$ {totalCarrinho.toFixed(2)})
+              Finalizar Venda (R$ {totalCarrinho.toFixed(2)})
             </button>
           </div>
         </div>
       </div>
+
+      {/* Barra Flutuante Mobile para Ir ao Carrinho se estiver na aba catalogo e tiver itens */}
+      {abaMobile === 'catalogo' && carrinho.length > 0 && (
+        <div className="pdv-mobile-floating-cart-bar">
+          <div className="floating-cart-info">
+            <span className="floating-cart-count">🛒 {totalItensQtd} {totalItensQtd === 1 ? 'item' : 'itens'}</span>
+            <span className="floating-cart-total">R$ {totalCarrinho.toFixed(2)}</span>
+          </div>
+          <button
+            type="button"
+            className="btn-floating-cart-action"
+            onClick={() => setAbaMobile('carrinho')}
+          >
+            Ver Carrinho →
+          </button>
+        </div>
+      )}
 
       {/* Modal de Pagamento */}
       {modalPagamentoAberto && (

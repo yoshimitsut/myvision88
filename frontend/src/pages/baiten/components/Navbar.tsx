@@ -16,7 +16,7 @@ export const Navbar: React.FC<NavbarProps> = ({ abaAtiva, setAbaAtiva, itensCarr
         <span className="brand-icon">🏮</span>
         <div>
           <h1 className="brand-title">Seinenkai Baiten</h1>
-          <span className="brand-subtitle">PDV & Gestão de Estoque • MyVision88</span>
+          <span className="brand-subtitle"></span>
         </div>
       </div>
 
@@ -26,7 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({ abaAtiva, setAbaAtiva, itensCarr
           onClick={() => setAbaAtiva('pdv')}
         >
           <span className="tab-icon">🛒</span>
-          <span>Caixa / PDV</span>
+          <span>Caixa</span>
           {itensCarrinhoQtd > 0 && (
             <span className="badge-cart">{itensCarrinhoQtd}</span>
           )}
@@ -36,7 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({ abaAtiva, setAbaAtiva, itensCarr
           className={`tab-btn ${abaAtiva === 'produtos' ? 'active' : ''}`}
           onClick={() => setAbaAtiva('produtos')}
         >
-          <span className="tab-icon">📦</span>
+          <span className="tab-icon"></span>
           <span>Produtos & Estoque</span>
         </button>
 
@@ -44,17 +44,10 @@ export const Navbar: React.FC<NavbarProps> = ({ abaAtiva, setAbaAtiva, itensCarr
           className={`tab-btn ${abaAtiva === 'historico' ? 'active' : ''}`}
           onClick={() => setAbaAtiva('historico')}
         >
-          <span className="tab-icon">📊</span>
+          <span className="tab-icon"></span>
           <span>Histórico & Fechamento</span>
         </button>
 
-        <button
-          className="tab-btn btn-voltar-myvision"
-          onClick={() => navigate('/list')}
-          title="Retornar ao Painel MyVision88"
-        >
-          <span>🏠 MyVision88</span>
-        </button>
       </nav>
     </header>
   );
