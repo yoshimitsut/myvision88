@@ -6,11 +6,11 @@ const pool = require('../config/db');
 router.get('/', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM store_info WHERE id = 1');
-    
+
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Configurações não encontradas' });
     }
-    
+
     const info = rows[0];
     res.json({
       ...info,
@@ -70,6 +70,5 @@ router.put('/', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-
 
 module.exports = router;

@@ -20,6 +20,7 @@ import { useExcludedDates } from '../../hooks/useExcludedDates';
 import { useHoursOptions } from '../../hooks/useHoursOptions';
 import { useOrderForm } from '../../hooks/useOrderForm';
 import { useDateValidation } from '../../hooks/useDateValidation';
+import { useCandlesData } from '../../hooks/useCandlesData';
 
 // ==================== IMPORTS PARA PAGAMENTO ====================
 import { calculateTotalPrice } from '../../utils/priceCalculator';
@@ -29,7 +30,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 const API_URL = import.meta.env.VITE_API_URL;
 const FOLDER_URL = import.meta.env.VITE_FOLDER_URL;
 
-// ==================== TIPOS ====================
+// ============================== TIPOS ===========================
 interface CustomOptionType extends OptionType {
   isDisabled?: boolean;
 }
@@ -47,19 +48,6 @@ const FRUIT_OPTIONS: readonly FruitOption[] = [
   { value: "無し", label: "通常盛り", price: 0, priceText: "+0円" },
   { value: "有り", label: "フルーツ増し", price: 648, priceText: "+648円" }
 ] as const;
-
-const candleOptions: Option[] = [
-  { id: 1, description: "ノーマル", price: 150 },
-  { id: 2, description: "有料キャンドル", price: 100 },
-  { id: 3, description: "なし", price: 0 },
-];
-
-const plateOptions: Option[] = [
-  { id: 1, description: "お名前＋おたんじょうびおめでとう", price: 110 },
-  { id: 2, description: "お名前＋Happy Birthday", price: 120 },
-  { id: 3, description: "その他", price: 130 },
-  { id: 4, description: "なし", price: 0 },
-];
 
 // ==================== COMPONENTES ====================
 interface CalendarContainerProps {
@@ -101,8 +89,18 @@ const DayCell = ({ day, date, isSelectable }: DayCellProps) => {
   );
 };
 
+const findOptionByDescription = (
+  options: Option[],
+  search: string | undefined
+): Option | undefined => {
+  if (!search) return undefined;
+  return options.find(
+    (opt) => opt.description.trim().toLocaleLowerCase() === search.toLocaleLowerCase()
+  );
+};
+
 // ==================== COMPONENTE PRINCIPAL ====================
-export default function OrderCake() {
+export default function OrderCakeStore() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -115,7 +113,7 @@ export default function OrderCake() {
   const [paymentStep, setPaymentStep] = useState<'form' | 'payment'>('form');
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [totalAmount, setTotalAmount] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'store'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'store'>('store');
   const [paymentKey, setPaymentKey] = useState(0);
   const [stepProgress, setStepProgress] = useState({
     cakeSelected: false,
@@ -131,17 +129,18 @@ export default function OrderCake() {
     emailSelected: false,
     telSelected: false,
   });
+
   const [, setProcessingStorePayment] = useState(false);
+  const [activeCandleCategory, setActiveCandleCategory] = useState<Record<number, string>>({});
 
   // Hooks personalizados
   const cakesData = useCakesData();
+  const { candlesData } = useCandlesData();
   const { timeSlotsData, availableDates } = useTimeSlots();
   const today = useMemo(() => new Date(), []);
   const maxDate = useMemo(() => endOfMonth(addDays(today, 30)), [today]);
   const excludedDates = useExcludedDates(today, DIAS_BLOQUEADOS);
   const hoursOptions = useHoursOptions(selectedDate, timeSlotsData);
-
-  // const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
   const initialCake = {
     cake_id: 0,
@@ -151,7 +150,8 @@ export default function OrderCake() {
     price: 0,
     message_cake: "",
     fruit_option: "" as const,
-    candle_option: ""
+    candle_option: "",
+    plate_type: "" // new plate type field
   };
 
   const {
@@ -165,6 +165,38 @@ export default function OrderCake() {
     handleInputChange,
     resetForm
   } = useOrderForm([initialCake]);
+
+  const candleOptions: Option[] = candlesData.map(candle => ({
+    id: candle.id,
+    description: candle.name,
+    price: candle.price,
+    image: candle.image,
+    candle_type: candle.candle_type,
+    max_limit: candle.max_limit
+  }));
+
+  const plateOptions: Option[] = [
+    {
+      id: 1,
+      description: "お名前＋おたんじょうびおめでとう",
+      price: 110,
+    },
+    {
+      id: 2,
+      description: "お名前＋Happy Birthday",
+      price: 120,
+    },
+    {
+      id: 3,
+      description: "その他",
+      price: 130,
+    },
+    {
+      id: 4,
+      description: "なし",
+      price: 0,
+    },
+  ]
 
   // Rola para o topo ao carregar a página
   useEffect(() => {
@@ -180,46 +212,13 @@ export default function OrderCake() {
   const selectedCakeName = searchParams.get("cake");
   const selectedSizeName = searchParams.get("size");
 
-  // Efeito para inicializar bolo da URL
-  // useEffect(() => {
-  //   if (!cakesData.length || !selectedCakeName) return;
-
-  //   const selectedCake = cakesData.find(c =>
-  //     String(c.id) === selectedCakeName || c.name === selectedCakeName
-  //   );
-
-  //   if (selectedCake) {
-  //     setCakes(prevCakes => {
-  //       const sizeOption = selectedCake.sizes?.find(s => s.size === selectedSizeName);
-  //       const resolvedSize = sizeOption?.size || "";
-
-  //       // Prevent infinite loop by checking if we already set it
-  //       if (prevCakes.length > 0 && prevCakes[0].cake_id === selectedCake.id && prevCakes[0].size === resolvedSize) {
-  //         return prevCakes;
-  //       }
-
-  //       return [{
-  //         cake_id: selectedCake.id,
-  //         name: selectedCake.name,
-  //         amount: 1,
-  //         size: resolvedSize,
-  //         price: sizeOption?.price || 0,
-  //         message_cake: "",
-  //         fruit_option: "無し"
-  //       }];
-  //     });
-  //   }
-  // }, [cakesData, selectedCakeName, selectedSizeName, setCakes]);
-
   // ==================== CORREÇÃO ULTRA-SEGURA PARA IPHONE (NFC) ====================
   useEffect(() => {
     if (!cakesData.length || !selectedCakeName) return;
 
-    // Força decodificação correta e normalização para o padrão NFC usado em bancos de dados/APIs
     const normalizedCakeParam = decodeURIComponent(selectedCakeName).normalize("NFC");
     const normalizedSizeParam = selectedSizeName ? decodeURIComponent(selectedSizeName).normalize("NFC") : "";
 
-    // Busca o bolo aplicando a normalização NFC em ambas as strings
     const selectedCake = cakesData.find(c => {
       const nameNorm = c.name ? c.name.normalize("NFC") : "";
       const idStr = String(c.id);
@@ -227,7 +226,6 @@ export default function OrderCake() {
     });
 
     if (selectedCake) {
-      // Busca o tamanho aplicando rigidamente a normalização NFC
       const sizeOption = selectedCake.sizes?.find(s => {
         const sizeNorm = s.size ? s.size.normalize("NFC") : "";
         return sizeNorm === normalizedSizeParam;
@@ -237,7 +235,6 @@ export default function OrderCake() {
       const resolvedPrice = sizeOption?.price || 0;
 
       setCakes(prevCakes => {
-        // Trava rigorosa anti-loop infinito para o Safari
         if (
           prevCakes.length === 1 &&
           prevCakes[0].cake_id === selectedCake.id &&
@@ -258,8 +255,8 @@ export default function OrderCake() {
         }];
       });
     }
-    // Deixe setCakes fora das dependências para evitar loops causados por mutação de referência
   }, [cakesData, selectedCakeName, selectedSizeName]);
+
   // Resetar horário quando data muda
   useEffect(() => {
     if (selectedDate && pickupHour !== "時間を選択") {
@@ -269,6 +266,68 @@ export default function OrderCake() {
       }
     }
   }, [hoursOptions, pickupHour, selectedDate]);
+
+  useEffect(() => {
+    if (!cakesData.length) return;
+
+    cakes.forEach((item, index) => {
+      if (!item.size) return;
+
+      const selectedCakeData = cakesData.find(c => c.id === item.cake_id);
+      const selectedSizeData = selectedCakeData?.sizes?.find(s => s.size === item.size);
+      if (!selectedSizeData) return;
+
+      if (selectedSizeData.has_fruit_option === 0) {
+        if (item.fruit_option !== "無し") {
+          updateCake(index, "fruit_option", "無し");
+        }
+        updateStepProgress("fruitSelected", true);
+      }
+
+      if (selectedSizeData.has_candle_option === 0) {
+        if (item.candle_option !== "無し") {
+          updateCake(index, "candle_option", "無し");
+        }
+        updateStepProgress("candlesSelected", true);
+      }
+
+      if (selectedSizeData.has_message_plate === 0) {
+        if (item.message_cake !== "") {
+          updateCake(index, "message_cake", "");
+        }
+        if ((item as any).plate_type !== "") {
+          updateCake(index, "plate_type" as any, "");
+        }
+        updateStepProgress("messageSelected", true);
+      }
+    })
+  }, [cakes, cakesData])
+
+  useEffect(() => {
+    if (!cakesData.length) return;
+
+    cakes.forEach((item, index) => {
+      if (!item.size) return;
+
+      const selectedCakeData = cakesData.find(c => c.id === item.cake_id);
+      const selectedSizeData = selectedCakeData?.sizes?.find(s => s.size === item.size);
+      if (!selectedSizeData) return;
+
+      if (selectedSizeData.has_fruit_option === 0 && item.fruit_option !== "無し") {
+        updateCake(index, "fruit_option", "無し");
+      }
+
+      if (selectedSizeData.has_candle_option === 0 && item.candle_option !== "無し") {
+        updateCake(index, "candle_option", "無し");
+      }
+
+      if (selectedSizeData.has_message_plate === 0) {
+        if (item.message_cake !== "") updateCake(index, "message_cake", "");
+        if ((item as any).plate_type !== "") updateCake(index, "plate_type" as any, "");
+        if (item.message_plate !== "") updateCake(index, "message_plate", "");
+      }
+    });
+  }, [cakes, cakesData]);
 
   // ==================== FUNÇÕES DE VALIDAÇÃO ====================
   const { isDateAllowed } = useDateValidation(today, excludedDates, availableDates);
@@ -347,7 +406,9 @@ export default function OrderCake() {
           size: c.size,
           message_cake: c.message_cake || "",
           fruit_option: c.fruit_option,
-          fruit_price: fruitPrice
+          fruit_price: fruitPrice,
+          message_plate: c.message_plate || "",
+          candle_option: c.candle_option,
         };
       })
     };
@@ -368,7 +429,7 @@ export default function OrderCake() {
     try {
       const reservationData: OrderData = {
         ...orderDataToSave,
-        status: 'b',
+        status: 'c',
         payment_status: 'pending'
       };
 
@@ -381,7 +442,7 @@ export default function OrderCake() {
       const result = await res.json();
 
       if (result.success) {
-        navigate("/order/check", {
+        navigate("/list", {
           state: {
             newOrderCreated: true,
             paymentMethod: 'store',
@@ -392,7 +453,7 @@ export default function OrderCake() {
         resetForm();
         setSelectedDate(null);
         setPickupHour("時間を選択");
-        setPaymentMethod('card');
+        setPaymentMethod('store');
         setOrderData(null);
       } else {
         alert("予約の保存に失敗しました。");
@@ -433,7 +494,7 @@ export default function OrderCake() {
       const result = await res.json();
 
       if (result.success) {
-        navigate("/order/check", {
+        navigate("/list", {
           state: {
             newOrderCreated: true,
             paymentSuccess: true,
@@ -479,6 +540,7 @@ export default function OrderCake() {
     <div className="payment-method-selector">
       <h3>お支払い方法を選択</h3>
       <div className="payment-method-options">
+
         <label className={`payment-method-option ${selectedMethod === 'card' ? 'active' : ''}`}>
           <input
             type="radio"
@@ -537,7 +599,6 @@ export default function OrderCake() {
     }),
   });
 
-  // const customStyles = getBaseStyles<OptionType>();
   const customStylesHour = getBaseStyles<TimeOptionType>();
   const customStylesCake = getBaseStyles<CustomOptionType>();
 
@@ -566,6 +627,22 @@ export default function OrderCake() {
     message: formData.message
   };
 
+  // 🔹 Verifica se TODOS os bolos do carrinho já completaram as etapas obrigatórias
+  const allCakesReadyForDate = cakes.every(item => {
+    const cd = cakesData?.find(c => c.id === item.cake_id);
+    const sd = cd?.sizes?.find(s => s.size === item.size);
+
+    const needsFruit = sd?.has_fruit_option !== 0;
+    const needsMessage = sd?.has_message_plate !== 0;
+    const needsCandle = sd?.has_candle_option !== 0;
+
+    const fruitOk = !needsFruit || stepProgress.fruitSelected;
+    const messageOk = !needsMessage || stepProgress.messageSelected;
+    const candleOk = !needsCandle || stepProgress.candlesSelected;
+
+    return fruitOk && messageOk && candleOk;
+  });
+
   // ==================== RENDER ====================
   return (
     <AdminLayout>
@@ -584,6 +661,14 @@ export default function OrderCake() {
               <div className="cake-information">
                 {cakes.map((item, index) => {
                   const selectedCakeData = cakesData?.find(c => c.id === item.cake_id);
+                  const selectedSizeData = selectedCakeData?.sizes?.find(s => s.size === item.size);
+
+                  const showFruitOption = selectedSizeData?.has_fruit_option !== 0;
+                  const showMessagePlate = selectedSizeData?.has_message_plate !== 0;
+                  const showCandleOption = selectedSizeData?.has_candle_option !== 0;
+
+                  const effectiveFruitSelected = !showFruitOption || stepProgress.fruitSelected;
+                  const effectiveMessageSelected = !showMessagePlate || stepProgress.messageSelected;
 
                   return (
                     <div className="box-cake" key={`${item.cake_id}-${index}`}>
@@ -737,140 +822,235 @@ export default function OrderCake() {
                       )}
 
                       {/* 4. フルーツ盛り (Fruit Option Pills Grid) */}
-                      <div className='order-field-group'>
-                        <div className="field-label-row">
-                          <span className="field-label-text">フルーツ盛り</span>
-                          <span className="field-required-badge">必須</span>
-                        </div>
-                        <div className="option-pills-grid">
-                          {FRUIT_OPTIONS.map(option => {
-                            const isSelected = item.fruit_option === option.value;
-                            return (
-                              <div
-                                key={option.value}
-                                className={`option-pill-card ${isSelected ? 'selected' : ''}`}
-                                onClick={() => {
-                                  if (stepProgress.sizeSelected) {
-                                    updateCake(index, "fruit_option", option.value);
-                                    updateStepProgress("fruitSelected", true);
-                                  }
-                                }}
-                                style={{
-                                  pointerEvents: stepProgress.sizeSelected ? 'auto' : 'none',
-                                  opacity: stepProgress.sizeSelected ? 1 : 0.5
-                                }}
-                              >
-                                {isSelected && <span className="option-pill-checkmark">✓</span>}
-                                <span className="option-pill-title">{option.label}</span>
-                                <span className="option-pill-price">{option.priceText}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* 5. メッセージプレート (Message Plate Option Pills Grid) */}
-                      <div className='order-field-group'>
-                        <div className="field-label-row">
-                          <span className="field-label-text">メッセージプレート</span>
-                          <span className="field-required-badge">必須</span>
-                        </div>
-                        <div className="option-pills-grid">
-                          {[
-                            { value: "お名前＋おたんじょうびおめでとう", label: "お名前＋おたんじょうびおめでとう", priceText: "+¥100" },
-                            { value: "お名前＋Happy Birthday", label: "お名前＋Happy Birthday", priceText: "+¥100" },
-                            { value: "その他", label: "その他", priceText: "+¥100" }
-                          ].map(pOpt => {
-                            const currentPlateType = (item as any).plate_type || "";
-                            const isSelected = currentPlateType === pOpt.value;
-                            return (
-                              <div
-                                key={pOpt.value}
-                                className={`option-pill-card ${isSelected ? 'selected' : ''}`}
-                                onClick={() => {
-                                  if (stepProgress.fruitSelected) {
-                                    updateCake(index, "plate_type" as any, pOpt.value);
-                                    if (pOpt.value !== "その他") {
-                                      updateCake(index, "message_cake", pOpt.label);
-                                    } else {
-                                      updateCake(index, "message_cake", "");
+                      {showFruitOption && (
+                        <div className='order-field-group'>
+                          <div className="field-label-row">
+                            <span className="field-label-text">フルーツ盛り</span>
+                            <span className="field-required-badge">必須</span>
+                          </div>
+                          <div className="option-pills-grid">
+                            {FRUIT_OPTIONS.map(option => {
+                              const isSelected = item.fruit_option === option.value;
+                              return (
+                                <div
+                                  key={option.value}
+                                  className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    if (stepProgress.sizeSelected) {
+                                      updateCake(index, "fruit_option", option.value);
+                                      updateStepProgress("fruitSelected", true);
                                     }
-                                    updateStepProgress("messageSelected", true);
-                                  }
-                                }}
-                                style={{
-                                  pointerEvents: stepProgress.fruitSelected ? 'auto' : 'none',
-                                  opacity: stepProgress.fruitSelected ? 1 : 0.5
-                                }}
-                              >
-                                {isSelected && <span className="option-pill-checkmark">✓</span>}
-                                <span className="option-pill-title">{pOpt.label}</span>
-                                <span className="option-pill-price">{pOpt.priceText}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        <div className="plate-message-input-box" style={{ marginTop: '10px' }}>
-                          <input
-                            type="text"
-                            className="order-styled-input"
-                            placeholder="お名前・メッセージをご記入ください (例: たろうくん お誕生日おめでとう)"
-                            value={item.message_cake || ""}
-                            onChange={(e) => updateCake(index, "message_cake", e.target.value)}
-                            disabled={!stepProgress.messageSelected}
-                            style={{
-                              opacity: stepProgress.messageSelected ? 1 : 0.5,
-                              pointerEvents: stepProgress.messageSelected ? 'auto' : 'none'
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* 6. キャンドル (Candles Option Pills Grid) */}
-                      <div className='order-field-group'>
-                        <div className="field-label-row">
-                          <span className="field-label-text">キャンドル</span>
-                          <span className="field-required-badge">必須</span>
-                        </div>
-                        <div className="option-pills-grid">
-                          {[
-                            { value: "ノーマル", label: "ノーマル", priceText: "¥0" },
-                            { value: "ナンバーキャンドル", label: "ナンバーキャンドル", priceText: "¥100" },
-                            { value: "なし", label: "なし", priceText: "¥0" }
-                          ].map(cOpt => {
-                            const isSelected = (item as any).candle_option === cOpt.value && (item as any).candle_option !== "";
-                            return (
-                              <div
-                                key={cOpt.value}
-                                className={`option-pill-card ${isSelected ? 'selected' : ''}`}
-                                onClick={() => {
-                                  if (stepProgress.messageSelected) {
-                                    updateCake(index, "candle_option" as any, cOpt.value)
-                                    updateStepProgress("candlesSelected", true);
-                                  }
-                                }}
-                                style={{
-                                  pointerEvents: stepProgress.messageSelected ? 'auto' : 'none',
-                                  opacity: stepProgress.messageSelected ? 1 : 0.5
-                                }}
-                              >
-                                {isSelected && <span className="option-pill-checkmark">✓</span>}
-                                <span className="option-pill-title">{cOpt.label}</span>
-                                {cOpt.priceText && <span className="option-pill-price">{cOpt.priceText}</span>}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {cakes.length > 1 && (
-                        <div className='btn-div'>
-                          <button type='button' onClick={addCake} className='btn btn-add-cake'>
-                            ➕ 別のケーキを追加
-                          </button>
+                                  }}
+                                  style={{
+                                    pointerEvents: stepProgress.sizeSelected ? 'auto' : 'none',
+                                    opacity: stepProgress.sizeSelected ? 1 : 0.5
+                                  }}
+                                >
+                                  {isSelected && <span className="option-pill-checkmark">✓</span>}
+                                  <span className="option-pill-title">{option.label}</span>
+                                  <span className="option-pill-price">{option.priceText}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
                       )}
+
+                      {/* 5. メッセージプレート (Message Plate Option Pills Grid) */}
+                      {showMessagePlate && (
+                        <div className='order-field-group'>
+                          <div className="field-label-row">
+                            <span className="field-label-text">メッセージプレート</span>
+                            <span className="field-required-badge">必須</span>
+                          </div>
+                          <div className="option-pills-grid">
+                            {[
+                              { value: "お名前＋おたんじょうびおめでとう", label: "お名前＋おたんじょうびおめでとう", priceText: "+¥100" },
+                              { value: "お名前＋Happy Birthday", label: "お名前＋Happy Birthday", priceText: "+¥100" },
+                              { value: "その他", label: "その他", priceText: "+¥100" }
+                            ].map(pOpt => {
+                              const currentPlateType = (item as any).plate_type || "";
+                              const isSelected = currentPlateType === pOpt.value;
+                              return (
+                                <div
+                                  key={pOpt.value}
+                                  className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    if (effectiveFruitSelected) {
+                                      updateCake(index, "plate_type" as any, pOpt.value);
+                                      if (pOpt.value !== "その他") {
+                                        updateCake(index, "message_plate", pOpt.label);
+                                      } else {
+                                        updateCake(index, "message_plate", "");
+                                      }
+                                      updateStepProgress("messageSelected", true);
+                                    }
+                                  }}
+                                  style={{
+                                    pointerEvents: effectiveFruitSelected ? 'auto' : 'none',
+                                    opacity: effectiveFruitSelected ? 1 : 0.5
+                                  }}
+                                >
+                                  {isSelected && <span className="option-pill-checkmark">✓</span>}
+                                  <span className="option-pill-title">{pOpt.label}</span>
+                                  <span className="option-pill-price">{pOpt.priceText}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          <div className="plate-message-input-box" style={{ marginTop: '10px' }}>
+                            <input
+                              type="text"
+                              className="order-styled-input"
+                              placeholder="お名前・メッセージをご記入ください (例: たろうくん お誕生日おめでとう)"
+                              value={item.message_plate || ""}
+                              onChange={(e) => updateCake(index, "message_plate", e.target.value)}
+                              disabled={!stepProgress.messageSelected}
+                              style={{
+                                opacity: stepProgress.messageSelected ? 1 : 0.5,
+                                pointerEvents: stepProgress.messageSelected ? 'auto' : 'none'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 6. キャンドル (Candles Option Pills Grid) */}
+                      {showCandleOption && (
+                        <div className='order-field-group'>
+                          <div className="field-label-row">
+                            <span className="field-label-text">キャンドル</span>
+                            <span className="field-required-badge">必須</span>
+                          </div>
+                          <p className='obs-candle'>記入例：長◯本、短◯本ろうそく（長）・ろうそく（短）合計18本まで無料でお渡ししております。</p>
+
+                          {/* Categories */}
+                          <div className="option-pills-grid" style={{ marginBottom: '15px' }}>
+                            {['ノーマル', '有料キャンドル', 'なし'].map(cat => {
+                              const isSelected = activeCandleCategory[index] === cat ||
+                                (cat === 'なし' && (item as any).candle_option === 'なし');
+                              return (
+                                <div
+                                  key={cat}
+                                  className={`option-pill-card ${isSelected ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    if (effectiveMessageSelected) {
+                                      setActiveCandleCategory(prev => ({ ...prev, [index]: cat }));
+                                      if (cat === 'なし') {
+                                        updateCake(index, "candle_option" as any, "なし");
+                                      } else if ((item as any).candle_option === 'なし') {
+                                        updateCake(index, "candle_option" as any, "");
+                                      }
+                                      updateStepProgress("candlesSelected", true);
+                                    }
+                                  }}
+                                  style={{
+                                    pointerEvents: effectiveMessageSelected ? 'auto' : 'none',
+                                    opacity: effectiveMessageSelected ? 1 : 0.5
+                                  }}
+                                >
+                                  {isSelected && <span className="option-pill-checkmark">✓</span>}
+                                  <span className="option-pill-title">{cat}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Candle list based on category */}
+                          {(activeCandleCategory[index] === 'ノーマル' || activeCandleCategory[index] === '有料キャンドル') && (
+                            <div className="option-pills-grid-candle">
+                              {candleOptions
+                                .filter(c => c.candle_type === activeCandleCategory[index])
+                                .map(cOpt => {
+                                  const currentSelections: Record<string, number> = {};
+                                  ((item as any).candle_option || "").split(",").filter(Boolean).forEach((cStr: string) => {
+                                    if (cStr === 'なし') return;
+                                    const match = cStr.match(/(.*?)\s*x(\d+)$/);
+                                    if (match) {
+                                      currentSelections[match[1].trim()] = parseInt(match[2], 10);
+                                    } else {
+                                      currentSelections[cStr.trim()] = 1;
+                                    }
+                                  });
+
+                                  const currentQty = currentSelections[cOpt.description] || 0;
+                                  const maxLimit = cOpt.max_limit || 1;
+
+                                  return (
+                                    <div
+                                      key={cOpt.id}
+                                      className={`option-pill-card-candle ${currentQty > 0 ? 'selected' : ''}`}
+                                      style={{ position: 'relative' }}
+                                    >
+                                      {cOpt.image && (
+                                        <img src={`${API_URL}/image/${FOLDER_URL}/${cOpt.image}`.replace(/([^:]\/)\/+/g, "$1")}
+                                          alt={cOpt.description}
+                                          style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }}
+                                        />
+                                      )}
+
+                                      <span className="option-pill-title" style={{ fontSize: '12px' }}>{cOpt.description}</span>
+                                      {cOpt.price > 0 ? (
+                                        <span className="option-pill-price">+¥{cOpt.price.toLocaleString()}</span>
+                                      ) : (
+                                        <span className="option-pill-price">¥0</span>
+                                      )}
+
+                                      {/* Number Input for Quantity */}
+                                      <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            if (currentQty > 0) {
+                                              const newQty = currentQty - 1;
+                                              const newSelections = { ...currentSelections };
+                                              if (newQty === 0) {
+                                                delete newSelections[cOpt.description];
+                                              } else {
+                                                newSelections[cOpt.description] = newQty;
+                                              }
+
+                                              const newString = Object.entries(newSelections)
+                                                .map(([name, q]) => `${name} x${q}`)
+                                                .join(",");
+                                              updateCake(index, "candle_option" as any, newString);
+                                            }
+                                          }}
+                                          style={{ padding: '2px 8px', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}
+                                        >-</button>
+                                        <span style={{ minWidth: '20px', textAlign: 'center' }}>{currentQty}</span>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            if (currentQty < maxLimit) {
+                                              const newSelections = { ...currentSelections, [cOpt.description]: currentQty + 1 };
+                                              const newString = Object.entries(newSelections)
+                                                .map(([name, q]) => `${name} x${q}`)
+                                                .join(",");
+                                              updateCake(index, "candle_option" as any, newString);
+                                            }
+                                          }}
+                                          style={{ padding: '2px 8px', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: currentQty < maxLimit ? 'pointer' : 'not-allowed', opacity: currentQty < maxLimit ? 1 : 0.5 }}
+                                        >+</button>
+                                      </div>
+                                    </div>
+                                  )
+                                })}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <div className='btn-div'>
+                        <button type='button' onClick={addCake} className='btn btn-add-cake'>
+                          ➕ 別のケーキを追加
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -893,7 +1073,7 @@ export default function OrderCake() {
                         setSelectedDate(date);
                         updateStepProgress("dateSelected", true);
                       }}
-                      disabled={!stepProgress.candlesSelected}
+                      disabled={!allCakesReadyForDate}
                       minDate={today}
                       maxDate={maxDate}
                       excludeDates={excludedDates}
@@ -1054,19 +1234,83 @@ export default function OrderCake() {
                     required
                   />
                 </div>
+
+                <div className='order-field-group'>
+                  <div className="plate-message-input-box" style={{ marginTop: '10px' }}>
+                    <div className='order-field-group'>
+                      <div className="field-label-row">
+                        <span className="field-label-text">その他のご要望</span>
+                      </div>
+
+                      <textarea
+                        className="order-styled-input"
+                        placeholder="ご要望やお店に伝えたいことがございましたらご入力ください（250文字以内）"
+                        value={formData.message || ""}
+                        onChange={(e) => setFormData((prev: any) => ({ ...prev, message: e.target.value }))}
+                        maxLength={250}
+                        aria-rowspan={3}
+                        disabled={!stepProgress.messageSelected}
+                        style={{
+                          opacity: stepProgress.messageSelected ? 1 : 0.5,
+                          pointerEvents: stepProgress.messageSelected ? 'auto' : 'none'
+                        }}
+                      /></div>
+                  </div>
+                </div>
               </div>
 
               <div className="order-summary">
                 <h3>ご注文内容</h3>
                 {cakes.filter(cake => cake.cake_id !== 0 && cake.size !== "").map((cake, index) => {
                   const cakeData = cakesData?.find(c => c.id === cake.cake_id);
-                  const fruitPrice = FRUIT_OPTIONS.find(f => f.value === cake.fruit_option)?.price || 0;
-                  const itemTotal = (cake.price + fruitPrice) * cake.amount;
+
+                  const currentCandles = (cake.candle_option || "").split(",").filter(Boolean);
+                  const candlePrice = currentCandles.reduce((sum, candleDesc) => {
+                    if (candleDesc === 'なし') return sum;
+                    const match = candleDesc.match(/(.*?)\s*x(\d+)$/);
+                    let desc = candleDesc.trim();
+                    let qty = 1;
+                    if (match) {
+                      desc = match[1].trim();
+                      qty = parseInt(match[2], 10);
+                    }
+                    const cOpt = candleOptions.find(c => c.description === desc);
+                    return sum + (cOpt?.price ?? 0) * qty;
+                  }, 0);
+
+                  const plateOpt = findOptionByDescription(plateOptions, cake.plate_type);
+                  const platePrice = plateOpt?.price ?? 0;
 
                   return (
-                    <div key={index} className="order-item">
-                      <span>{cakeData?.name} ({cake.size}) x{cake.amount}</span>
-                      <span>￥{itemTotal.toLocaleString()}</span>
+                    <div key={index} className="order-item-summary">
+                      <div className='order-item-name'>
+                        <span>{cakeData?.name} x{cake.amount}</span>
+                      </div>
+                      <div className='order-item-sub'>
+
+                        <div>
+                          <span>・サイズ: {cake.size}</span>
+                          <span>￥{cake.price.toLocaleString()}</span>
+                        </div>
+
+                        <div>
+                          <span>・フルーツ盛り: {cake.fruit_option || '無し'}</span>
+                          <span>{cake.fruit_option === '有り' ? '+￥648' : '+￥0'}</span>
+                        </div>
+
+                        {cake.message_cake && (
+                          <div>
+                            <span>・メッセージプレート: {cake.message_cake}</span><br />
+                            {platePrice > 0 && <span>+￥{platePrice.toLocaleString()}</span>}
+                          </div>
+                        )}
+                        {cake.candle_option && (
+                          <div>
+                            <span>・キャンドル: {cake.candle_option}</span>
+                            <span>+￥{candlePrice.toLocaleString()} </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
