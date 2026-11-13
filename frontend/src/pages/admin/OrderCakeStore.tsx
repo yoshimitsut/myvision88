@@ -6,7 +6,7 @@ import { ja } from 'date-fns/locale';
 
 import Select from 'react-select';
 import type { StylesConfig, CSSObjectWithLabel, OptionProps, ControlProps } from 'react-select';
-import type { OrderCake, OptionType, TimeOptionType, Option } from "../../types/types";
+import type { OptionType, TimeOptionType, Option } from "../../types/types";
 
 import { PaymentFormStripe } from '../../components/order/PaymentFormStripe';
 
